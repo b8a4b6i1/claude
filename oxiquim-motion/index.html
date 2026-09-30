@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Oxiquim · Plan de trabajo Gerencia de Personas</title>
+<style>
+@font-face{font-family:'InterV';src:url(fonts/inter-latin-opsz-normal.woff2) format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'ArchivoV';src:url(fonts/archivo-latin-wdth-normal.woff2) format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;font-family:'InterV',sans-serif;color:#f5f5f7;-webkit-font-smoothing:antialiased;font-feature-settings:'ss01','cv11'}
+.scene{position:absolute;inset:0;visibility:hidden;overflow:hidden}
+.abs{position:absolute}
+.fill{position:absolute;inset:0}
+.center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+.h{font-weight:700;letter-spacing:-0.04em;line-height:1.02}
+.w{display:inline-block;will-change:transform}
+.mask{display:inline-block;overflow:hidden;padding:0.08em 0.04em 0.14em;margin:-0.08em -0.04em -0.14em;vertical-align:top}
+.grad{background:linear-gradient(100deg,#2f8cff 0%,#1fc8ff 35%,#8a7dff 70%,#2f8cff 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.gray{color:#86868b}
+.pill{display:inline-flex;align-items:center;gap:14px;padding:12px 26px;border-radius:999px;font-size:26px;font-weight:600;letter-spacing:-0.01em;background:rgba(255,255,255,0.08);color:#f5f5f7;border:1px solid rgba(255,255,255,0.12)}
+.pill b{color:#3b95ff;font-weight:700}
+.pill.light{background:#f0f0f3;color:#1d1d1f;border-color:#e3e3e8}
+.pill.light b{color:#005ec2}
+.tile{position:absolute;background:#141416;border-radius:40px;padding:46px 48px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.tile .num{font-size:22px;font-weight:700;color:#3b95ff;letter-spacing:0.04em;margin-bottom:18px}
+.tile .tt{font-size:42px;font-weight:700;letter-spacing:-0.03em;line-height:1.08}
+.tile .dd{font-size:24px;line-height:1.35;color:#8e8e93;margin-top:14px;font-weight:500}
+.tile canvas{position:absolute}
+.chip{display:inline-block;padding:12px 24px;border-radius:999px;font-size:26px;font-weight:600;border:1.5px solid rgba(59,149,255,0.55);color:#cfe3ff;margin:0 12px 14px 0;background:rgba(0,94,194,0.12)}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ═════════ 1 · INTRO: marca ═════════ -->
+  <div class="scene" id="s1">
+    <div class="abs" id="s1glow" style="left:460px;top:40px;width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(20,112,224,0.55) 0%,rgba(20,112,224,0.12) 35%,transparent 65%)"></div>
+    <div class="fill" id="s1group">
+      <div class="abs" id="s1lock" style="left:0;top:0;width:1920px;height:1080px">
+        <svg id="s1mark" class="abs" viewBox="-10 -10 220 144" style="width:330px;height:216px;left:795px;top:432px;overflow:visible"></svg>
+        <div class="abs" id="s1word" style="top:452px;height:176px;overflow:hidden;font-family:ArchivoV;font-weight:900;font-stretch:125%;font-size:150px;line-height:176px;color:#1470e0;letter-spacing:0.01em;white-space:nowrap"></div>
+      </div>
+      <div class="abs" id="s1sub" style="left:0;width:1920px;top:706px;text-align:center;font-size:46px;font-weight:600;letter-spacing:-0.01em;color:#f5f5f7">Gerencia de Personas</div>
+      <div class="abs gray" id="s1sub2" style="left:0;width:1920px;top:772px;text-align:center;font-size:28px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase">Plan de trabajo · 2026 — 2028</div>
+    </div>
+    <div class="abs" id="s1dot" style="left:950px;top:530px;width:20px;height:20px;border-radius:50%;background:#bfe0ff;box-shadow:0 0 30px 10px rgba(40,140,255,0.9),0 0 120px 40px rgba(20,112,224,0.6)"></div>
+  </div>
+
+  <!-- ═════════ 2 · TIPOGRAFÍA CINÉTICA ═════════ -->
+  <div class="scene" id="s2">
+    <div class="center" id="s2lines"></div>
+    <div class="center" id="s2r35wrap">
+      <div class="gray" id="s2kicker" style="font-size:40px;font-weight:600;letter-spacing:-0.01em;margin-bottom:10px">Habilitar la estrategia</div>
+      <div class="h" id="s2r35" style="font-size:330px;white-space:nowrap"></div>
+    </div>
+  </div>
+
+  <!-- ═════════ 3 · LÍNEA DE TIEMPO ═════════ -->
+  <div class="scene" id="s3">
+    <div class="abs" id="s3orbA" style="left:-200px;top:300px;width:1100px;height:1100px;border-radius:50%;background:radial-gradient(circle,rgba(47,140,255,0.22),transparent 62%)"></div>
+    <div class="abs" id="s3orbB" style="left:1000px;top:-300px;width:1200px;height:1200px;border-radius:50%;background:radial-gradient(circle,rgba(138,125,255,0.16),transparent 62%)"></div>
+    <div class="fill" id="s3cam">
+      <div class="abs" id="s3head" style="left:160px;top:150px">
+        <div class="gray" style="font-size:34px;font-weight:600">Plan de trabajo · 3 olas de ejecución</div>
+        <div class="h" id="s3years" style="font-size:150px;margin-top:6px;white-space:nowrap"></div>
+      </div>
+      <svg class="abs" id="s3svg" width="1920" height="1080" style="left:0;top:0;overflow:visible"></svg>
+      <div id="s3labels"></div>
+    </div>
+  </div>
+
+  <!-- ═════════ 4 · OLA 1 ═════════ -->
+  <div class="scene" id="s4">
+    <div class="center" id="s4title">
+      <div class="pill" id="s4pill"><b>Ola 1</b> 0 a 6 meses · 2026</div>
+      <div class="h" id="s4h" style="font-size:170px;margin-top:34px;white-space:nowrap"></div>
+      <div class="gray" id="s4sub" style="font-size:38px;font-weight:500;margin-top:30px;letter-spacing:-0.01em">Activar palancas estratégicas y capturar valor desde los primeros seis meses.</div>
+    </div>
+    <div class="abs" id="s4hdr" style="left:120px;top:92px;display:flex;align-items:center;gap:22px">
+      <div class="pill"><b>Ola 1</b> 0–6 meses</div>
+      <div style="font-size:44px;font-weight:700;letter-spacing:-0.03em">Primeras victorias</div>
+    </div>
+    <div class="fill" id="s4grid">
+      <div class="tile" id="t1" style="left:120px;top:190px;width:640px;height:770px">
+        <div class="num">01</div><div class="tt">Gobierno de decisiones de personas</div>
+        <div class="dd">Personas en las decisiones del negocio desde su formulación.</div>
+        <canvas id="c1" width="640" height="440" style="left:0;bottom:0;width:640px;height:440px"></canvas>
+      </div>
+      <div class="tile" id="t2" style="left:790px;top:190px;width:1010px;height:370px">
+        <div style="width:470px">
+          <div class="num">02</div><div class="tt">Rediseño de la gestión del desempeño</div>
+          <div class="dd">Cascada de KPI del negocio integrada con la dimensión conductual.</div>
+        </div>
+        <canvas id="c2" width="470" height="330" style="right:30px;top:20px;width:470px;height:330px"></canvas>
+      </div>
+      <div class="tile" id="t3" style="left:790px;top:590px;width:490px;height:370px">
+        <div class="num">03</div><div class="tt">Pulso de clima</div>
+        <div class="dd">Termómetro continuo de compromiso durante la transformación.</div>
+        <canvas id="c3" width="490" height="150" style="left:0;bottom:10px;width:490px;height:150px"></canvas>
+      </div>
+      <div class="tile" id="t4" style="left:1310px;top:590px;width:490px;height:370px">
+        <div class="num">04</div><div class="tt">Gestión del cambio</div>
+        <div class="dd">Acompañamiento transversal, continuo en todas las olas.</div>
+        <canvas id="c4" width="490" height="150" style="left:0;bottom:10px;width:490px;height:150px"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ 5 · OLA 2 (fondo claro) ═════════ -->
+  <div class="scene" id="s5" style="background:#fbfbfd;color:#1d1d1f">
+    <div class="center" id="s5title">
+      <div class="pill light" id="s5pill"><b>Ola 2</b> 6 a 18 meses · 2026–2027</div>
+      <div class="h" id="s5h" style="font-size:190px;margin-top:34px;white-space:nowrap"></div>
+      <div id="s5sub" style="font-size:38px;font-weight:500;margin-top:30px;color:#6e6e73;letter-spacing:-0.01em">Capacidades estructurales de talento y cultura para la expansión.</div>
+    </div>
+    <div class="abs" id="s5hdr" style="left:140px;top:92px;display:flex;align-items:center;gap:22px">
+      <div class="pill light"><b>Ola 2</b> 6–18 meses</div>
+      <div style="font-size:44px;font-weight:700;letter-spacing:-0.03em">Construcción</div>
+    </div>
+    <div class="abs" id="s5left" style="left:140px;top:300px;width:820px;height:560px">
+      <div id="s5count" style="font-size:28px;font-weight:700;color:#005ec2;letter-spacing:0.06em"></div>
+      <div id="s5items" style="position:relative;margin-top:22px;height:500px"></div>
+    </div>
+    <canvas class="abs" id="c5" width="820" height="760" style="left:1000px;top:190px;width:820px;height:760px"></canvas>
+  </div>
+
+  <!-- ═════════ 6 · OLA 3 ═════════ -->
+  <div class="scene" id="s6">
+    <div class="fill" style="background:radial-gradient(ellipse 70% 55% at 50% 115%,rgba(0,94,194,0.45),rgba(0,40,110,0.15) 55%,transparent 80%)"></div>
+    <div class="center" id="s6title">
+      <div class="pill" id="s6pill"><b>Ola 3</b> 18 a 36 meses · 2027–2028</div>
+      <div class="h" id="s6h" style="font-size:180px;margin-top:34px;white-space:nowrap">Consolidación.</div>
+      <div class="gray" id="s6sub" style="font-size:38px;font-weight:500;margin-top:30px;letter-spacing:-0.01em">Alinear incentivos y formalizar el aprendizaje para sostener el crecimiento.</div>
+    </div>
+    <div class="abs" id="s6hdr" style="left:140px;top:92px;display:flex;align-items:center;gap:22px">
+      <div class="pill"><b>Ola 3</b> 18–36 meses</div>
+      <div style="font-size:44px;font-weight:700;letter-spacing:-0.03em">Consolidación</div>
+    </div>
+    <div class="abs" id="s6a" style="left:140px;top:330px;width:820px">
+      <div style="font-size:28px;font-weight:700;color:#3b95ff;letter-spacing:0.06em">01 / 02</div>
+      <div class="h" style="font-size:88px;margin-top:22px">Compensaciones e incentivos</div>
+      <div class="gray" style="font-size:32px;line-height:1.4;margin-top:30px;font-weight:500">El componente variable de la dotación crítica, atado directamente a las metas estratégicas de Rumbo 35.</div>
+    </div>
+    <div class="abs" id="s6b" style="left:140px;top:300px;width:820px">
+      <div style="font-size:28px;font-weight:700;color:#3b95ff;letter-spacing:0.06em">02 / 02</div>
+      <div class="h" style="font-size:88px;margin-top:22px">Formación y desarrollo</div>
+      <div class="gray" style="font-size:32px;line-height:1.4;margin-top:30px;font-weight:500">Conocimientos críticos para habilitar el crecimiento fuera de Chile.</div>
+      <div id="s6chips" style="margin-top:36px"><span class="chip">Regulaciones tributarias</span><span class="chip">Permisología</span><span class="chip">Normativas internacionales</span></div>
+    </div>
+    <canvas class="abs" id="c6" width="900" height="900" style="left:920px;top:110px;width:900px;height:900px"></canvas>
+  </div>
+
+  <!-- ═════════ 7 · 2,5x ═════════ -->
+  <div class="scene" id="s7">
+    <div class="abs" id="s7glow" style="left:360px;top:-60px;width:1200px;height:1200px;border-radius:50%;background:radial-gradient(circle,rgba(40,120,255,0.35) 0%,rgba(120,90,255,0.10) 40%,transparent 66%)"></div>
+    <div class="center">
+      <div class="gray" id="s7k" style="font-size:40px;font-weight:600">Objetivo de los plazos</div>
+      <div id="s7a" style="font-size:66px;font-weight:700;letter-spacing:-0.03em;margin-top:14px">Reconvertir la función hacia 2028</div>
+      <div class="h grad" id="s7n" style="font-size:400px;line-height:1;margin-top:10px;font-variant-numeric:tabular-nums;letter-spacing:-0.05em">2,5x</div>
+      <div id="s7b" style="font-size:54px;font-weight:600;letter-spacing:-0.02em;margin-top:6px">el EBITDA proyectado al año 2035</div>
+      <div class="gray" id="s7c" style="font-size:34px;font-weight:500;margin-top:40px">Una función que sostiene el crecimiento de forma autónoma.</div>
+    </div>
+  </div>
+
+  <!-- ═════════ 8 · CIERRE ═════════ -->
+  <div class="scene" id="s8">
+    <div class="center" id="s8words">
+      <div class="h" id="s8a" style="font-size:230px;white-space:nowrap"></div>
+      <div class="h" id="s8b" style="font-size:96px;margin-top:10px;white-space:nowrap"></div>
+    </div>
+    <div class="fill" id="s8logo">
+      <div class="abs" id="s8glow" style="left:460px;top:40px;width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(20,112,224,0.45) 0%,rgba(20,112,224,0.10) 35%,transparent 65%)"></div>
+      <svg id="s8mark" class="abs" viewBox="-10 -10 220 144" style="overflow:visible"></svg>
+      <div class="abs" id="s8word" style="overflow:hidden;font-family:ArchivoV;font-weight:900;font-stretch:125%;color:#1470e0;letter-spacing:0.01em;white-space:nowrap"></div>
+      <div class="abs" id="s8sub" style="left:0;width:1920px;top:690px;text-align:center;font-size:44px;font-weight:600;letter-spacing:-0.01em">Gerencia de Personas</div>
+      <div class="abs gray" id="s8sub2" style="left:0;width:1920px;top:754px;text-align:center;font-size:26px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase">Plan de trabajo 2026 — 2028 · Rumbo 35</div>
+    </div>
+  </div>
+
+  <!-- ═════════ HUD: progreso de olas ═════════ -->
+  <div class="abs" id="hud" style="left:0;width:1920px;top:1004px;display:flex;justify-content:center;gap:18px;visibility:hidden"></div>
+
+  <!-- velo global para fundidos -->
+  <div class="fill" id="veil" style="background:#000;opacity:0;pointer-events:none"></div>
+</div>
+
+<script src="assets/globe-dots.js"></script>
+<script>
+'use strict';
+/* ───────────── utilidades de tiempo y easing ───────────── */
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,k)=>a+(b-a)*k;
+const E={
+  lin:t=>t,
+  outCubic:t=>1-Math.pow(1-t,3),
+  inCubic:t=>t*t*t,
+  inOutCubic:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+  outQuint:t=>1-Math.pow(1-t,5),
+  outExpo:t=>t>=1?1:1-Math.pow(2,-10*t),
+  inExpo:t=>t<=0?0:Math.pow(2,10*t-10),
+  inOutExpo:t=>t<=0?0:t>=1?1:t<.5?Math.pow(2,20*t-10)/2:(2-Math.pow(2,-20*t+10))/2,
+  outBack:t=>{const c1=1.55,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)},
+  inOutSine:t=>-(Math.cos(Math.PI*t)-1)/2,
+};
+// progreso 0..1 del intervalo [a,b] con easing
+const P=(t,a,b,e=E.outExpo)=>e(clamp((t-a)/(b-a)));
+const $=id=>document.getElementById(id);
+function S(el,o={}){
+  const {op=1,x=0,y=0,s=1,sx,sy,r=0,b=0}=o;
+  el.style.opacity=op<0.001?0:op;
+  el.style.transform=`translate(${x}px,${y}px) scale(${sx??s},${sy??s})${r?` rotate(${r}deg)`:''}`;
+  el.style.filter=b>0.05?`blur(${b}px)`:'none';
+}
+function vis(el,on){el.style.visibility=on?'visible':'hidden'}
+// entrada/salida estándar estilo Apple: sube, desenfoque → nitidez
+function inOut(t,a,dIn,c,dOut,dist=60,blur=18){
+  const i=P(t,a,a+dIn,E.outExpo), o=P(t,c,c+dOut,E.inCubic);
+  return {op:i*(1-o), y:(1-i)*dist - o*dist*0.8, b:(1-i)*blur + o*blur};
+}
+function splitWords(el,text,cls=''){
+  el.innerHTML='';
+  return text.split(' ').map((w,i,arr)=>{
+    const m=document.createElement('span');m.className='mask';
+    const s=document.createElement('span');s.className='w '+cls;s.textContent=w;
+    m.appendChild(s);el.appendChild(m);
+    if(i<arr.length-1) el.appendChild(document.createTextNode(' '));
+    return s;
+  });
+}
+function splitChars(el,text,cls=''){
+  el.innerHTML='';
+  return [...text].map(ch=>{
+    const s=document.createElement('span');s.className='w '+cls;s.textContent=ch===' '?' ':ch;el.appendChild(s);return s;
+  });
+}
+// PRNG determinista
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ───────────── marca Oxiquim (vector) ───────────── */
+// hexágono alargado: semiancho hw, semialto hh, pendiente lateral k
+function hexPts(cx,cy,hw,hh){const k=hh*0.58;return[[cx-hw,cy],[cx-hw+k,cy-hh],[cx+hw-k,cy-hh],[cx+hw,cy],[cx+hw-k,cy+hh],[cx-hw+k,cy+hh]]}
+const hexD=(p)=>'M'+p.map(q=>q.join(',')).join('L')+'Z';
+function buildMark(svg,id){
+  const outer=hexD(hexPts(100,62,100,62)), inner=hexD(hexPts(100,62,68,36));
+  svg.innerHTML=`
+  <defs>
+    <linearGradient id="${id}g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3aa0ff"/><stop offset="1" stop-color="#0a5fd6"/></linearGradient>
+    <linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#8fd3ff"/><stop offset="1" stop-color="#2f8cff"/></linearGradient>
+    <mask id="${id}m" maskUnits="userSpaceOnUse" x="-20" y="-20" width="240" height="164"><rect x="-20" y="-20" width="240" height="164" fill="#fff"/><path d="${inner}" fill="none" stroke="#000" stroke-width="7.5" stroke-linejoin="miter"/></mask>
+    <filter id="${id}f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+  <g class="fillg"><path d="${outer}" fill="url(#${id}g)" mask="url(#${id}m)"/></g>
+  <g class="strokeg">
+    <path class="so glowp" d="${outer}" fill="none" stroke="url(#${id}s)" stroke-width="7" filter="url(#${id}f)"/>
+    <path class="so" d="${outer}" fill="none" stroke="url(#${id}s)" stroke-width="3"/>
+    <path class="si" d="${inner}" fill="none" stroke="url(#${id}s)" stroke-width="3"/>
+  </g>`;
+  const L=(el)=>el.getTotalLength();
+  const so=[...svg.querySelectorAll('.so')], si=svg.querySelector('.si');
+  const lo=L(so[0]), li=L(si);
+  so.forEach(p=>{p.style.strokeDasharray=lo;});si.style.strokeDasharray=li;
+  return{
+    draw(ko,ki,fill,strokeOp){
+      so.forEach(p=>p.style.strokeDashoffset=lo*(1-ko));
+      si.style.strokeDashoffset=-li*(1-ki);
+      svg.querySelector('.fillg').style.opacity=fill;
+      svg.querySelector('.strokeg').style.opacity=strokeOp;
+    }
+  };
+}
+
+/* ───────────── construcción del DOM ───────────── */
+const M1=buildMark($('s1mark'),'m1');
+const M8=buildMark($('s8mark'),'m8');
+const W1=splitChars($('s1word'),'XIQUIM');
+const W8=splitChars($('s8word'),'XIQUIM');
+
+// escena 2
+const S2L=['Una estrategia.','Tres olas.','Diez iniciativas.','Un rumbo.'];
+const s2Words=S2L.map((txt,i)=>{
+  const d=document.createElement('div');d.className='h abs';d.style.cssText='font-size:160px;white-space:nowrap';
+  $('s2lines').appendChild(d);
+  const ws=splitWords(d,txt);
+  if(i===3){ws[1].classList.add('grad');}
+  return{el:d,ws};
+});
+const R35=splitChars($('s2r35'),'Rumbo 35','grad');
+R35.forEach(c=>{c.style.backgroundAttachment='scroll'});
+
+// escena 3: timeline
+const TL={x0:160,x1:1760,y:620};
+const mX=m=>TL.x0+(TL.x1-TL.x0)*m/36;
+(function buildTimeline(){
+  const svg=$('s3svg');
+  const nodes=[0,6,18,36];
+  let h=`<defs><linearGradient id="tlg" x1="0" x2="1"><stop offset="0" stop-color="#2f8cff"/><stop offset=".6" stop-color="#1fc8ff"/><stop offset="1" stop-color="#8a7dff"/></linearGradient>
+  <filter id="tlf" x="-10%" y="-400%" width="120%" height="900%"><feGaussianBlur stdDeviation="5"/></filter></defs>
+  <line id="tlTrack" x1="${TL.x0}" y1="${TL.y}" x2="${TL.x1}" y2="${TL.y}" stroke="#2c2c30" stroke-width="4" stroke-linecap="round"/>
+  <line id="tlGlow" x1="${TL.x0}" y1="${TL.y}" x2="${TL.x0}" y2="${TL.y}" stroke="url(#tlg)" stroke-width="10" stroke-linecap="round" filter="url(#tlf)" opacity=".8"/>
+  <line id="tlProg" x1="${TL.x0}" y1="${TL.y}" x2="${TL.x0}" y2="${TL.y}" stroke="url(#tlg)" stroke-width="5" stroke-linecap="round"/>
+  <g id="tlChange" opacity="0">
+    <line id="tlDash" x1="${TL.x0}" y1="820" x2="${TL.x1}" y2="820" stroke="#3b95ff" stroke-width="3" stroke-dasharray="4 14" stroke-linecap="round"/>
+    <circle id="tlComet" cx="${TL.x0}" cy="820" r="7" fill="#bfe0ff"/>
+  </g>`;
+  nodes.forEach((m,i)=>{h+=`<g class="tln" transform="translate(${mX(m)},${TL.y})"><circle r="16" fill="#000" stroke="#2c2c30" stroke-width="4"/><circle class="tlnc" r="9" fill="#fff"/></g>`});
+  h+=`<circle id="tlHead" cx="${TL.x0}" cy="${TL.y}" r="12" fill="#fff"/>`;
+  svg.innerHTML=h;
+  const lab=$('s3labels');
+  const segs=[[0,6,'Ola 1','Primeras victorias'],[6,18,'Ola 2','Construcción'],[18,36,'Ola 3','Consolidación']];
+  segs.forEach(([a,b,o,n],i)=>{
+    const d=document.createElement('div');d.className='abs tlseg';
+    d.style.cssText=`left:${mX((a+b)/2)-300}px;width:600px;top:${TL.y-150}px;text-align:center`;
+    d.innerHTML=`<div style="font-size:24px;font-weight:700;color:#3b95ff;letter-spacing:0.08em;text-transform:uppercase">${o}</div><div style="font-size:40px;font-weight:700;letter-spacing:-0.03em;margin-top:8px">${n}</div>`;
+    lab.appendChild(d);
+  });
+  nodes.forEach((m,i)=>{
+    const d=document.createElement('div');d.className='abs tlmo gray';
+    d.style.cssText=`left:${mX(m)-150}px;width:300px;top:${TL.y+36}px;text-align:center;font-size:26px;font-weight:600`;
+    d.textContent=m===36?'36 meses':m===0?'Mes 0':`Mes ${m}`;lab.appendChild(d);
+  });
+  const c=document.createElement('div');c.className='abs';c.id='tlChangeLbl';
+  c.style.cssText=`left:${TL.x0}px;top:848px;font-size:28px;font-weight:600;color:#cfe3ff`;
+  c.innerHTML='Gestión del cambio <span class="gray" style="font-weight:500">· acompañamiento transversal, continuo en todas las olas</span>';
+  lab.appendChild(c);
+})();
+const S3Y=splitChars($('s3years'),'2026 — 2028');
+
+// escena 4
+const S4H=splitWords($('s4h'),'Primeras victorias.');
+// escena 5
+const S5H=splitChars($('s5h'),'Construcción.');
+const S5ITEMS=[
+  ['Cultura y valores','Refrescar y alinear los valores corporativos hacia la internacionalización y los nuevos negocios de Rumbo 35.'],
+  ['Planificación estratégica de personas','Proyectar la dotación por unidad y construir el mapa de roles críticos.'],
+  ['Modelo de talento y liderazgo','Formar a los líderes que conducirán los negocios futuros.'],
+  ['Atracción, selección y movilidad','Velocidad de incorporación, sucesión y planes de carrera para roles clave.'],
+];
+const s5Els=S5ITEMS.map(([a,b])=>{
+  const d=document.createElement('div');d.className='abs';d.style.cssText='left:0;top:0;width:820px';
+  d.innerHTML=`<div class="h" style="font-size:92px">${a}</div><div style="font-size:32px;line-height:1.4;margin-top:30px;color:#6e6e73;font-weight:500">${b}</div>`;
+  $('s5items').appendChild(d);return d;
+});
+const S8A=splitWords($('s8a'),'Personas.');
+const S8B=splitWords($('s8b'),'El motor de Rumbo 35.','grad');
+
+// HUD
+const HUD=['Ola 1','Ola 2','Ola 3'].map(n=>{
+  const d=document.createElement('div');d.style.cssText='width:150px;font-size:18px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase';
+  d.innerHTML=`<div class="hb" style="height:4px;border-radius:2px;background:rgba(128,128,128,0.3);overflow:hidden"><div class="hf" style="height:100%;width:0;background:#2f8cff"></div></div><div class="hl" style="margin-top:10px;text-align:center">${n}</div>`;
+  $('hud').appendChild(d);return d;
+});
+
+/* ───────────── canvas helpers ───────────── */
+const ctxOf=id=>$(id).getContext('2d');
+function glowDot(c,x,y,r,col,glow){c.save();c.shadowColor=col;c.shadowBlur=glow;c.fillStyle=col;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.restore();}
+
+/* tile 1: Venn Negocio + Personas → Decisión */
+function drawC1(t){
+  const c=ctxOf('c1');c.clearRect(0,0,640,440);
+  const k=P(t,0.3,1.9,E.inOutCubic);
+  const cy=220,r=150,sep=lerp(260,150,k);
+  const ax=320-sep/2, bx=320+sep/2+lerp(260,0,P(t,0,1.4,E.outExpo));
+  c.lineWidth=3;
+  c.strokeStyle='rgba(255,255,255,0.35)';c.fillStyle='rgba(255,255,255,0.04)';
+  c.beginPath();c.arc(ax,cy,r,0,7);c.fill();c.stroke();
+  c.globalAlpha=P(t,0,0.8);
+  const g=c.createRadialGradient(bx,cy,10,bx,cy,r);g.addColorStop(0,'rgba(47,140,255,0.45)');g.addColorStop(1,'rgba(47,140,255,0.12)');
+  c.fillStyle=g;c.strokeStyle='#2f8cff';c.beginPath();c.arc(bx,cy,r,0,7);c.fill();c.stroke();
+  c.globalAlpha=1;
+  // intersección iluminada
+  const ik=P(t,1.5,2.3);
+  if(ik>0){c.save();c.beginPath();c.arc(ax,cy,r,0,7);c.clip();c.fillStyle=`rgba(143,211,255,${0.55*ik})`;c.shadowColor='#8fd3ff';c.shadowBlur=40;c.beginPath();c.arc(bx,cy,r,0,7);c.fill();c.restore();}
+  c.font='600 26px InterV';c.textAlign='center';c.textBaseline='middle';
+  c.fillStyle='rgba(255,255,255,0.7)';c.fillText('Negocio',ax-r*0.45,cy);
+  c.fillStyle='#cfe3ff';c.globalAlpha=P(t,0.3,1);c.fillText('Personas',bx+r*0.45,cy);
+  c.globalAlpha=ik;c.fillStyle='#fff';c.font='700 24px InterV';c.fillText('Decisión',(ax+bx)/2,cy);
+  c.globalAlpha=1;
+}
+/* tile 2: cascada de KPI + conducta */
+function drawC2(t){
+  const c=ctxOf('c2');c.clearRect(0,0,470,330);
+  const lv=[[1,235,40,300],[3,235,150,110],[6,235,260,52]];
+  let prev=[[235,40]];
+  lv.forEach(([n,cx,y,w],li)=>{
+    const k=P(t,0.2+li*0.45,0.9+li*0.45,E.outExpo);
+    const gap=(470-40)/n, pos=[];
+    for(let i=0;i<n;i++){
+      const x=n===1?cx:20+gap*(i+0.5);pos.push([x,y]);
+      const kk=P(t,0.2+li*0.45+i*0.05,1.0+li*0.45+i*0.05,E.outExpo);
+      // conectores
+      if(li>0){const p=prev[Math.floor(i*prev.length/n)];c.strokeStyle=`rgba(255,255,255,${0.22*kk})`;c.lineWidth=2;c.beginPath();c.moveTo(p[0],p[1]+14);c.bezierCurveTo(p[0],(p[1]+y)/2,x,(p[1]+y)/2,x,y-14);c.stroke();}
+      const bw=w*kk, h=26;
+      c.fillStyle='#2f8cff';roundRect(c,x-w/2,y-h/2,bw*0.62,h,13);
+      c.fillStyle='#34d1bf';const bk=P(t,1.2+li*0.3,2.0+li*0.3,E.outExpo);roundRect(c,x-w/2+w*0.62+4,y-h/2,Math.max(0,(w*0.38-4)*bk*kk),h,13);
+    }
+    prev=pos;
+  });
+  c.globalAlpha=P(t,1.8,2.6);c.font='600 22px InterV';c.textBaseline='middle';
+  c.fillStyle='#2f8cff';c.beginPath();c.arc(250,318,7,0,7);c.fill();c.fillStyle='#aaa';c.fillText('KPI',264,318);
+  c.fillStyle='#34d1bf';c.beginPath();c.arc(320,318,7,0,7);c.fill();c.fillStyle='#aaa';c.fillText('Conducta',334,318);
+  c.globalAlpha=1;
+}
+function roundRect(c,x,y,w,h,r){if(w<=0)return;r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.fill();}
+/* tile 3: pulso */
+function pulseY(u){ // u en "latidos"
+  const f=u-Math.floor(u);let v=0;
+  v+= -Math.exp(-Math.pow((f-0.30)/0.018,2))*0.25;
+  v+= Math.exp(-Math.pow((f-0.36)/0.014,2))*1.0;
+  v+= -Math.exp(-Math.pow((f-0.41)/0.018,2))*0.45;
+  v+= Math.exp(-Math.pow((f-0.62)/0.05,2))*0.18;
+  return v;
+}
+function drawC3(t){
+  const c=ctxOf('c3');c.clearRect(0,0,490,150);
+  const reveal=P(t,0,1.2,E.inOutCubic)*490;
+  const speed=0.9;
+  c.lineWidth=4;c.lineJoin='round';
+  const grd=c.createLinearGradient(0,0,490,0);grd.addColorStop(0,'rgba(47,140,255,0)');grd.addColorStop(0.5,'rgba(47,140,255,0.8)');grd.addColorStop(1,'#8fd3ff');
+  c.strokeStyle=grd;c.beginPath();
+  for(let x=0;x<=reveal;x+=2){const u=(x/190)+t*speed;const y=85-pulseY(u)*60;x?c.lineTo(x,y):c.moveTo(x,y);}
+  c.stroke();
+  if(reveal>2){const x=reveal-2,u=x/190+t*speed;glowDot(c,x,85-pulseY(u)*60,7,'#bfe0ff',24);}
+}
+/* tile 4: bucle infinito */
+function drawC4(t){
+  const c=ctxOf('c4');c.clearRect(0,0,490,150);
+  const cx=245,cy=75,A=150,B=52;
+  const pt=a=>[cx+A*Math.sin(a),cy+B*Math.sin(2*a)];
+  const k=P(t,0,1.4,E.inOutCubic);
+  c.lineWidth=3;c.strokeStyle='rgba(255,255,255,0.18)';c.beginPath();
+  for(let i=0;i<=200*k;i++){const[x,y]=pt(i/200*Math.PI*2);i?c.lineTo(x,y):c.moveTo(x,y);}c.stroke();
+  if(k>=1){
+    const head=t*2.2;
+    for(let j=0;j<40;j++){const a=head-j*0.03;const[x,y]=pt(a);c.fillStyle=`rgba(47,160,255,${(1-j/40)*0.9})`;c.beginPath();c.arc(x,y,6*(1-j/40)+1,0,7);c.fill();}
+    const[x,y]=pt(head);glowDot(c,x,y,7,'#bfe0ff',26);
+  }
+}
+
+/* escena 5: formaciones de puntos */
+const N5=60, R5=rng(7);
+const f5start=[...Array(N5)].map(()=>[R5()*820,R5()*760]);
+function f5(k,t){ // formación k en tiempo local t (px en canvas 820x760), devuelve [x,y,blue,alpha,size]
+  const cx=410,cy=380,out=[];
+  if(k===0){ // cultura: anillos que se alinean
+    const rings=[[10,120,0.9],[20,210,-0.55],[30,300,0.35]];
+    let idx=0;const tA=1.3;
+    rings.forEach(([n,r,sp],ri)=>{
+      const base=-Math.PI/4 + sp*(t-tA)*(1-P(t,tA-0.6,tA+0.2,E.outCubic)*0.0);
+      const ang=-Math.PI/4 + sp*Math.min(0,t-tA)*1.0 + 0; // se detiene en la alineación
+      for(let j=0;j<n;j++){const a=ang+j*2*Math.PI/n;out.push([cx+r*Math.cos(a),cy+r*Math.sin(a),j===0?1:0,1,j===0?13:8]);idx++;}
+    });
+  } else if(k===1){ // planificación: columnas = dotación por unidad
+    const hs=[8,11,9,13,10,9], rr=rng(11);
+    hs.forEach((h,ci)=>{for(let j=0;j<h;j++){const x=cx+(ci-2.5)*112, y=640-j*42;out.push([x,y,(j===h-1||rr()<0.12)?1:0,1,j===h-1?12:9]);}});
+  } else if(k===2){ // liderazgo: pirámide
+    let rows=10;for(let rI=0;rI<rows;rI++){for(let j=0;j<=rI;j++){const x=cx+(j-rI/2)*62, y=120+rI*56;out.push([x,y,rI<3?1:0,1,rI<3?13:9]);}}
+    while(out.length<N5){out.push([cx,cy+400,0,0,0]);}
+  } else { // movilidad: grilla con incorporación y rotación
+    for(let r=0;r<6;r++)for(let q=0;q<10;q++){out.push([cx+(q-4.5)*68,cy+(r-2.5)*80,0,1,9]);}
+  }
+  return out;
+}
+const f5times=[30.0,31.9,33.8,35.7];
+function drawC5(T){
+  const c=ctxOf('c5');c.clearRect(0,0,820,760);
+  // índice de formación actual y previa
+  let k=-1;for(let i=0;i<4;i++)if(T>=f5times[i]-0.2)k=i;
+  if(k<0)return;
+  const lt=T-(f5times[k]-0.2);
+  const cur=f5(k,lt+0.2);
+  const prev=k===0?f5start.map(p=>[p[0],p[1],0,0,6]):f5(k-1,f5times[k]-f5times[k-1]);
+  const collapse=P(T,37.25,37.75,E.inCubic);
+  // conectores de la formación de liderazgo / alineación
+  const pts=[];
+  for(let i=0;i<N5;i++){
+    const kk=P(lt,i*0.006,0.85+i*0.006,E.inOutCubic);
+    let [x,y,bl,al,sz]=cur[i];const p=prev[i];
+    x=lerp(p[0],x,kk);y=lerp(p[1],y,kk);al=lerp(p[3],al,kk);sz=lerp(p[4],sz,kk);bl=kk>0.5?bl:p[2];
+    // incorporación en la grilla (k=3): la última columna entra desde la derecha
+    if(k===3){const q=i%10, r=Math.floor(i/10);
+      if(q===9){const e=P(lt,0.3+r*0.12,1.1+r*0.12,E.outExpo);x+= (1-e)*260;al*=e;}
+      // movilidad: pares que intercambian lugar en arco
+      const sw=[[12,47,0.9],[25,38,1.3],[4,53,1.0]];
+      sw.forEach(([a,b,ts])=>{if(i===a||i===b){const e=P(lt,ts,ts+0.8,E.inOutCubic);const A=cur[a],B=cur[b];const [s,d]=i===a?[A,B]:[B,A];x=lerp(s[0],d[0],e);y=lerp(s[1],d[1],e)-Math.sin(e*Math.PI)*90;bl=1;sz=12;}});
+    }
+    if(k===1||k===2){ /* leve respiración */ y+=Math.sin(T*2+i)*1.5; }
+    x=lerp(x,410,collapse);y=lerp(y,380,collapse);
+    pts.push([x,y,bl,al,sz]);
+  }
+  // línea de alineación (cultura)
+  if(k===0){const a=P(lt,1.45,2.0,E.outExpo)*(1-P(T,31.7,31.9));if(a>0){c.strokeStyle=`rgba(0,94,194,${0.9*a})`;c.lineWidth=3;c.beginPath();c.moveTo(410,380);const L=330*a;c.lineTo(410+L*Math.cos(-Math.PI/4),380+L*Math.sin(-Math.PI/4));c.stroke();}}
+  if(k===2&&lt>0.9){const a=P(lt,0.9,1.6);c.strokeStyle=`rgba(0,94,194,${0.35*a})`;c.lineWidth=2;for(let i=0;i<6;i++){const p=pts[i];const ch=[pts[i+ (i<1?1:i<3?2:3)],pts[i+(i<1?2:i<3?3:4)]];ch.forEach(q=>{if(q){c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1]);c.stroke();}});}}
+  pts.forEach(([x,y,bl,al,sz],i)=>{
+    if(al<=0.01)return;c.globalAlpha=al;
+    if(bl){glowDot(c,x,y,sz,'#005ec2',k===2?22:10);if(k===2){const pr=((T*0.8+i*0.17)%1);c.strokeStyle=`rgba(0,94,194,${(1-pr)*0.5})`;c.lineWidth=2;c.beginPath();c.arc(x,y,sz+pr*26,0,7);c.stroke();}}
+    else{c.fillStyle='#1d1d1f';c.beginPath();c.arc(x,y,sz,0,7);c.fill();}
+  });
+  c.globalAlpha=1;
+  // leyendas
+  c.font='600 24px InterV';c.textAlign='center';c.textBaseline='middle';
+  const lg=(txt,a)=>{if(a<=0)return;c.globalAlpha=a;c.fillStyle='#6e6e73';c.fillText(txt,410,730);c.globalAlpha=1;};
+  const la=(i)=>P(T,f5times[i]+0.6,f5times[i]+1.1)*(1-P(T,(f5times[i+1]||37.2)-0.3,(f5times[i+1]||37.2)));
+  lg('Valores alineados hacia Rumbo 35',la(0));
+  lg('Dotación por unidad  ·  ● roles críticos',la(1));
+  lg('Líderes para los negocios futuros',la(2));
+  lg('Incorporación  ·  sucesión  ·  carrera',la(3));
+}
+
+/* escena 6: anillos y globo */
+function drawRings(c,t,alpha,scale){
+  const cx=450,cy=450;
+  c.save();c.globalAlpha=alpha;c.translate(cx,cy);c.scale(scale,scale);c.translate(-cx,-cy);
+  const rings=[[300,46,['#1fc8ff','#2f8cff'],0],[236,46,['#34d1bf','#1fc8ff'],0.18]];
+  rings.forEach(([r,w,[a,b],lag])=>{
+    c.lineWidth=w;c.lineCap='round';c.strokeStyle='rgba(255,255,255,0.07)';c.beginPath();c.arc(cx,cy,r,0,7);c.stroke();
+    const k=P(t,0.2+lag,2.0+lag,E.inOutCubic);
+    if(k>0.001){const g=c.createConicGradient(-Math.PI/2,cx,cy);g.addColorStop(0,a);g.addColorStop(1,b);c.strokeStyle=g;c.shadowColor=b;c.shadowBlur=30;c.beginPath();c.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*k*0.999);c.stroke();c.shadowBlur=0;}
+  });
+  c.textAlign='center';c.textBaseline='middle';
+  const ta=P(t,0.8,1.6);c.globalAlpha=alpha*ta;
+  c.fillStyle='#fff';c.font='700 64px InterV';c.fillText('Rumbo 35',cx,cy-18);
+  c.fillStyle='#8e8e93';c.font='600 26px InterV';c.fillText('metas estratégicas',cx,cy+36);
+  c.globalAlpha=alpha*P(t,1.6,2.4);c.font='600 24px InterV';
+  c.fillStyle='#1fc8ff';c.fillText('● Metas estratégicas',cx-150,cy+400);c.fillStyle='#34d1bf';c.fillText('● Variable dotación crítica',cx+150,cy+400);
+  c.restore();
+}
+const D2R=Math.PI/180;
+const DEST=[[-12.05,-77.04],[4.71,-74.07],[19.43,-99.13],[-23.55,-46.63],[40.42,-3.70],[29.76,-95.37],[-34.6,-58.38]];
+const SCL=[-33.45,-70.66];
+function toV(lat,lon){lat*=D2R;lon*=D2R;return[Math.cos(lat)*Math.sin(lon),Math.sin(lat),Math.cos(lat)*Math.cos(lon)]}
+function drawGlobe(c,t,alpha,scale){
+  const cx=450,cy=450,R=330*scale;
+  const lon0=lerp(-35,-72,E.outCubic(clamp(t/3.6))), lat0=-18;
+  const cl=Math.cos(lat0*D2R), sl=Math.sin(lat0*D2R);
+  const proj=(v)=>{ // rotación: primero lon0, luego inclinación lat0
+    const co=Math.cos(-lon0*D2R), si=Math.sin(-lon0*D2R);
+    let x=v[0]*co+v[2]*si, z=-v[0]*si+v[2]*co, y=v[1];
+    const y2=y*cl-z*sl, z2=y*sl+z*cl;
+    return[cx+x*R, cy-y2*R, z2];
+  };
+  c.save();c.globalAlpha=alpha;
+  // esfera
+  const g=c.createRadialGradient(cx-R*0.35,cy-R*0.4,R*0.1,cx,cy,R);g.addColorStop(0,'rgba(40,110,220,0.35)');g.addColorStop(0.7,'rgba(10,40,100,0.25)');g.addColorStop(1,'rgba(0,20,60,0.1)');
+  c.fillStyle=g;c.beginPath();c.arc(cx,cy,R,0,7);c.fill();
+  c.strokeStyle='rgba(100,170,255,0.35)';c.lineWidth=1.5;c.beginPath();c.arc(cx,cy,R,0,7);c.stroke();
+  const atm=c.createRadialGradient(cx,cy,R*0.95,cx,cy,R*1.18);atm.addColorStop(0,'rgba(47,140,255,0.35)');atm.addColorStop(1,'rgba(47,140,255,0)');c.fillStyle=atm;c.beginPath();c.arc(cx,cy,R*1.18,0,7);c.fill();
+  // puntos
+  const dots=window.GLOBE_DOTS;const rev=P(t,0,1.4,E.outCubic);
+  for(let i=0;i<dots.length;i++){
+    const [lat,lon]=dots[i];const v=toV(lat,lon);const[px,py,z]=proj(v);
+    if(z<0)continue;
+    const near=Math.hypot(lat-SCL[0],(lon-SCL[1])*Math.cos(lat*D2R));
+    const hi=near<14?1-near/14:0;
+    const a=(0.25+0.75*z)*rev;
+    c.fillStyle=hi>0?`rgba(${lerp(160,90,hi)|0},${lerp(200,200,hi)|0},255,${a})`:`rgba(160,200,255,${a*0.8})`;
+    const s=(1.3+z*1.2)*scale*(1+hi*0.5);c.fillRect(px-s/2,py-s/2,s,s);
+  }
+  // arcos desde Santiago
+  const O=toV(...SCL);
+  DEST.forEach((d,j)=>{
+    const D=toV(...d);const k=P(t,1.0+j*0.18,2.0+j*0.18,E.inOutCubic);if(k<=0)return;
+    const dot=O[0]*D[0]+O[1]*D[1]+O[2]*D[2];const om=Math.acos(clamp(dot,-1,1));
+    c.lineWidth=2.4;c.strokeStyle='rgba(143,211,255,0.9)';c.shadowColor='#2f8cff';c.shadowBlur=12;c.beginPath();
+    let last=null,started=false;
+    for(let s=0;s<=60*k;s++){const u=s/60;const a=Math.sin((1-u)*om)/Math.sin(om),b=Math.sin(u*om)/Math.sin(om);
+      const h=1+0.18*Math.sin(Math.PI*u)*om;const v=[(a*O[0]+b*D[0])*h,(a*O[1]+b*D[1])*h,(a*O[2]+b*D[2])*h];
+      const[px,py,z]=proj(v);const visible=z>-0.15||Math.hypot(v[0],v[1],v[2])>1.02&&z>-0.4;
+      if(visible){started?c.lineTo(px,py):(c.moveTo(px,py),started=true);last=[px,py];}else started=false;}
+    c.stroke();c.shadowBlur=0;
+    if(last&&k<1)glowDot(c,last[0],last[1],4,'#fff',14);
+    if(k>=1){const[px,py,z]=proj(D);if(z>0){c.fillStyle='rgba(191,224,255,0.9)';c.beginPath();c.arc(px,py,4.5,0,7);c.fill();}}
+  });
+  const[sx,sy]=proj(O);glowDot(c,sx,sy,8,'#fff',30);
+  const pr=(t*0.9)%1;c.strokeStyle=`rgba(143,211,255,${1-pr})`;c.lineWidth=2.5;c.beginPath();c.arc(sx,sy,8+pr*40,0,7);c.stroke();
+  c.globalAlpha=alpha*P(t,0.8,1.4);c.font='700 24px InterV';c.fillStyle='#fff';c.textAlign='left';c.textBaseline='middle';c.fillText('Chile',sx+18,sy+2);
+  c.restore();
+}
+
+/* ───────────── medición para el zoom a través de la "o" ───────────── */
+let OZ=null;
+function measure(){
+  const o=R35[4];const r=o.getBoundingClientRect(),st=$('stage').getBoundingClientRect();
+  const probe=document.createElement('span');probe.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
+  $('s2r35').appendChild(probe);const bl=probe.getBoundingClientRect().top-st.top;probe.remove();
+  const cv=document.createElement('canvas').getContext('2d');cv.font='700 330px InterV';const m=cv.measureText('o');
+  // centro de la contraforma: límites de tinta del glifo (el tracking negativo desplaza la caja del span)
+  OZ={x:r.left-st.left+(m.actualBoundingBoxRight-m.actualBoundingBoxLeft)/2,y:bl-(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2};
+}
+
+/* ───────────── render principal ───────────── */
+function renderFrame(T){
+  // ── escena 1 (0 – 6)
+  vis($('s1'),T<6.05);
+  if(T<6.05){
+    const t=T;
+    const dotIn=P(t,0.1,0.6,E.outCubic),dotOut=P(t,0.55,1.0,E.inCubic);
+    S($('s1dot'),{op:dotIn*(1-dotOut),s:lerp(0.2,1,dotIn)+dotOut*0.6});
+    const ko=P(t,0.5,1.95,E.inOutCubic),ki=P(t,0.85,2.05,E.inOutCubic),fill=P(t,1.9,2.5,E.outCubic),sop=1-P(t,2.2,2.8);
+    M1.draw(ko,ki,fill,sop);
+    const flash=Math.exp(-Math.pow((t-2.05)/0.35,2));
+    S($('s1glow'),{op:0.35*P(t,0.4,2)+0.9*flash-0.6*P(t,3,4.5),s:1+flash*0.15});
+    // posiciones de la marca y la palabra
+    const wordW=$('s1word').scrollWidth, markW=330, gap=-6, total=markW+gap+wordW;
+    const slide=P(t,2.55,3.55,E.inOutExpo);
+    const markX=lerp(0,-(total/2-markW/2),slide);
+    const push=lerp(1.28,1,P(t,0,2.5,E.outCubic));
+    S($('s1mark'),{x:markX,s:push*(1-slide*0)});
+    const wl=960-total/2+markW+gap; $('s1word').style.left=wl+'px';
+    W1.forEach((ch,i)=>{const k=P(t,2.9+i*0.06,3.7+i*0.06,E.outExpo);S(ch,{op:k,x:(1-k)*-120,b:(1-k)*10});});
+    $('s1word').style.clipPath=`inset(-20px -40px -20px ${lerp(0,0,1)}px)`;
+    const sub=P(t,3.7,4.7,E.outExpo);$('s1sub').style.letterSpacing=lerp(0.45,-0.01,sub)+'em';S($('s1sub'),{op:sub,b:(1-sub)*12});
+    const sub2=P(t,4.2,5.0,E.outExpo);S($('s1sub2'),{op:sub2,y:(1-sub2)*20});
+    const ex=P(t,5.35,6.0,E.inCubic);S($('s1group'),{op:1-ex,s:1+ex*0.22,b:ex*22});
+  }
+  // ── escena 2 (6 – 12.2)
+  vis($('s2'),T>=5.95&&T<12.3);
+  if(T>=5.95&&T<12.3){
+    const starts=[6.0,7.0,8.0,9.0],ends=[7.0,8.0,9.0,9.95];
+    s2Words.forEach(({el,ws},i)=>{
+      const a=starts[i],e=ends[i];const on=T>=a-0.05&&T<e+0.5;el.style.visibility=on?'inherit':'hidden';if(!on)return;
+      ws.forEach((w,j)=>{const k=P(T,a+j*0.07,a+0.75+j*0.07,E.outExpo);S(w,{y:(1-k)*190,b:(1-k)*8});});
+      const o=P(T,e-0.05,e+0.35,E.inCubic);S(el,{op:1-o,y:-o*70,b:o*16,s:1-o*0.04});
+    });
+    const rIn=T>=9.95;$('s2r35wrap').style.visibility=rIn?'inherit':'hidden';
+    if(rIn){
+      const kk=P(T,10.2,10.9,E.outExpo);S($('s2kicker'),{op:kk*(1-P(T,11.25,11.5)),y:(1-kk)*20});
+      R35.forEach((ch,i)=>{const k=P(T,10.0+i*0.04,10.7+i*0.04,E.outExpo);S(ch,{op:k,s:lerp(1.6,1,k),b:(1-k)*24,y:(1-k)*20});ch.style.backgroundPosition=`${(T*40)%220}% 0`;});
+      if(!OZ)measure();
+      const z=P(T,11.35,12.15,E.inExpo);
+      const w=$('s2r35wrap');w.style.transformOrigin=`${OZ.x}px ${OZ.y}px`;
+      w.style.transform=`scale(${Math.pow(80,z)})`;w.style.opacity=1-P(T,12.08,12.2);
+    }
+  }
+  // ── escena 3 (11.9 – 18.1)
+  vis($('s3'),T>=11.9&&T<18.1);
+  if(T>=11.9&&T<18.1){
+    const t=T-12;
+    $('s3').style.opacity=P(T,11.9,12.2,E.lin);
+    S3Y.forEach((ch,i)=>{const k=P(t,0.15+i*0.035,0.95+i*0.035,E.outExpo);S(ch,{op:k,y:(1-k)*120,b:(1-k)*10});});
+    S($('s3head').children[0],inOut(t,0.0,0.8,99,1));
+    S($('s3orbA'),{x:Math.sin(t*0.6)*80+t*30,y:Math.cos(t*0.5)*40,op:P(t,0,1.5)});S($('s3orbB'),{x:-t*40,y:Math.sin(t*0.4)*60,op:P(t,0.3,2)});
+    const trk=P(t,0.3,1.1,E.inOutCubic);$('tlTrack').setAttribute('x2',lerp(TL.x0,TL.x1,trk));
+    const m=36*P(t,1.0,4.3,E.inOutCubic);const hx=mX(m);
+    ['tlProg','tlGlow'].forEach(id=>$(id).setAttribute('x2',hx));
+    $('tlHead').setAttribute('cx',hx);$('tlHead').style.opacity=P(t,0.9,1.1)*(1-P(t,4.3,4.6));
+    [...document.querySelectorAll('.tln')].forEach((g,i)=>{const nm=[0,6,18,36][i];const k=P(t,0.3+i*0.12,0.9+i*0.12,E.outBack);const hit=m>=nm-0.01;
+      g.setAttribute('transform',`translate(${mX(nm)},${TL.y}) scale(${k*(hit?1.15:1)})`);g.querySelector('.tlnc').setAttribute('fill',hit?'#8fd3ff':'#444');});
+    [...document.querySelectorAll('.tlmo')].forEach((d,i)=>{const nm=[0,6,18,36][i];const k=P(t,0.5+i*0.1,1.2+i*0.1);S(d,{op:k*(m>=nm?1:0.45),y:(1-k)*16});});
+    [...document.querySelectorAll('.tlseg')].forEach((d,i)=>{const mid=[3,12,27][i];const tt=1.0+3.3*(mid/36);const k=P(t,tt-0.2,tt+0.6,E.outExpo);S(d,{op:k,y:(1-k)*40,b:(1-k)*12});});
+    const ch=P(t,4.0,4.8,E.outExpo);$('tlChange').setAttribute('opacity',ch);$('tlDash').setAttribute('stroke-dashoffset',-t*60);
+    $('tlComet').setAttribute('cx',mX((t*14)%36));
+    S($('tlChangeLbl'),{op:ch,y:(1-ch)*20});
+    // salida: cámara entra a la Ola 1
+    const z=P(t,5.25,6.05,E.inExpo);const cam=$('s3cam');cam.style.transformOrigin=`${mX(3)}px ${TL.y-80}px`;
+    cam.style.transform=`scale(${1+z*5})`;cam.style.filter=z>0.02?`blur(${z*14}px)`:'none';cam.style.opacity=1-P(t,5.6,6.05);
+  }
+  // ── escena 4 (17.8 – 28.1)
+  vis($('s4'),T>=17.8&&T<28.1);
+  if(T>=17.8&&T<28.1){
+    const t=T-18;
+    S($('s4pill'),inOut(t,-0.1,0.8,1.85,0.4,30,10));
+    S4H.forEach((w,j)=>{const k=P(t,0+j*0.08,0.9+j*0.08,E.outExpo);S(w,{y:(1-k)*220});});
+    const tt=P(t,1.85,2.3,E.inCubic);S($('s4h'),{op:(1-tt)*P(t,-0.2,0.1),y:-tt*80,b:tt*16,s:lerp(1.08,1,P(t,-0.2,1.6,E.outCubic))});
+    S($('s4sub'),inOut(t,0.45,0.9,1.9,0.4,30,10));
+    S($('s4hdr'),inOut(t,2.2,0.8,99,1,-20,8));
+    const push=1+P(t,2,10,E.lin)*0.025;
+    $('s4grid').style.transform=`scale(${push})`;$('s4grid').style.transformOrigin='960px 575px';
+    ['t1','t2','t3','t4'].forEach((id,i)=>{const a=2.3+i*0.16;const k=P(t,a,a+1.0,E.outExpo);S($(id),{op:k,y:(1-k)*90,s:lerp(0.93,1,k),b:(1-k)*14});});
+    drawC1(t-2.9);drawC2(t-3.2);drawC3(t-3.4);drawC4(t-3.6);
+    // salida: revelado circular blanco (escena 5 se dibuja encima)
+    const ex=P(t,9.3,10.0,E.inCubic);S($('s4grid'),{op:1-ex*0.6,s:push*(1-ex*0.06)});
+  }
+  // ── escena 5 (27.2 – 38.1)
+  vis($('s5'),T>=27.2&&T<38.1);
+  if(T>=27.2&&T<38.1){
+    const t=T-28;
+    const rv=P(T,27.2,28.05,E.inOutCubic);
+    $('s5').style.clipPath=rv<1?`circle(${rv*1150}px at 960px 540px)`:'none';
+    S($('s5pill'),inOut(t,-0.1,0.8,1.55,0.4,30,10));
+    S5H.forEach((ch,i)=>{const k=P(t,0.05+i*0.045,0.75+i*0.045,E.outBack);const a=P(t,0.05+i*0.045,0.3+i*0.045,E.lin);S(ch,{op:a,y:(1-k)*-260,r:(1-k)*(i%2?8:-8)});});
+    const tx=P(t,1.6,2.0,E.inCubic);S($('s5h'),{op:1-tx,y:-tx*80,b:tx*16});
+    S($('s5sub'),inOut(t,0.6,0.9,1.6,0.4,30,10));
+    S($('s5hdr'),inOut(t,1.9,0.8,9.2,0.4,-20,8));
+    const it=f5times;
+    $('s5count').style.opacity=P(t,1.9,2.4)*(1-P(T,37.1,37.5));
+    let cur=0;for(let i=0;i<4;i++)if(T>=it[i]-0.3)cur=i;
+    $('s5count').textContent=`0${cur+1} / 04`;
+    s5Els.forEach((el,i)=>{const a=it[i],e=i<3?it[i+1]-0.3:37.1;S(el,inOut(T,a,0.9,e,0.35,70,14));});
+    drawC5(T);
+  }
+  // ── escena 6 (37.5 – 48.2)
+  vis($('s6'),T>=37.45&&T<48.2);
+  if(T>=37.45&&T<48.2){
+    const t=T-38;
+    const rv=P(T,37.55,38.25,E.inOutCubic);
+    $('s6').style.clipPath=rv<1?`circle(${rv*1150}px at 1410px 570px)`:'none';
+    $('s6').style.background='#000';
+    S($('s6pill'),inOut(t,0.1,0.8,1.75,0.4,30,10));
+    const hk=P(t,0.15,1.4,E.outExpo);$('s6h').style.letterSpacing=lerp(0.35,-0.04,hk)+'em';
+    const hx=P(t,1.8,2.2,E.inCubic);S($('s6h'),{op:P(t,0.15,0.7)*(1-hx),b:(1-hk)*20+hx*16,y:-hx*80});
+    S($('s6sub'),inOut(t,0.7,0.9,1.8,0.4,30,10));
+    S($('s6hdr'),inOut(t,2.1,0.8,9.2,0.4,-20,8));
+    S($('s6a'),inOut(t,2.2,0.9,5.6,0.4,70,14));
+    S($('s6b'),inOut(t,6.0,0.9,9.25,0.45,70,14));
+    [...$('s6chips').children].forEach((c,i)=>S(c,inOut(t,6.8+i*0.15,0.8,99,1,30,10)));
+    const c=ctxOf('c6');c.clearRect(0,0,900,900);
+    const ra=P(t,2.2,2.8)*(1-P(t,5.5,5.95,E.inCubic));
+    if(ra>0)drawRings(c,t-2.3,ra,lerp(0.85,1,P(t,2.2,3.2,E.outExpo))*(1+P(t,5.5,5.95,E.inCubic)*0.1));
+    const ga=P(t,5.8,6.6)*(1-P(t,9.4,9.95,E.inCubic));
+    if(ga>0)drawGlobe(c,t-5.8,ga,lerp(0.82,1,P(t,5.8,7.2,E.outExpo))*(1+P(t,9.3,10,E.inExpo)*0.6));
+  }
+  // ── escena 7 (47.9 – 54.1)
+  vis($('s7'),T>=47.9&&T<54.1);
+  if(T>=47.9&&T<54.1){
+    const t=T-48;
+    S($('s7k'),inOut(t,0.1,0.8,5.3,0.5,20,10));
+    S($('s7a'),inOut(t,0.4,0.9,5.3,0.5,40,12));
+    const nk=P(t,0.9,1.4,E.outExpo);const cnt=P(t,1.0,3.2,E.outCubic);
+    const v=1+1.5*cnt;$('s7n').textContent=v.toFixed(1).replace('.',',')+'x';
+    $('s7n').style.backgroundPosition=`${(t*30)%220}% 0`;
+    const hit=Math.exp(-Math.pow((t-3.2)/0.25,2));
+    S($('s7n'),{op:nk*(1-P(t,5.3,5.9)),s:lerp(0.8,1,nk)+hit*0.03,b:(1-nk)*20+P(t,5.3,5.9)*20});
+    S($('s7b'),inOut(t,1.6,0.9,5.3,0.5,30,10));
+    S($('s7c'),inOut(t,3.6,0.9,5.3,0.5,30,10));
+    S($('s7glow'),{op:P(t,0.5,3.2,E.inOutCubic)*0.9+hit*0.6-P(t,5.2,6),s:0.8+0.2*cnt+hit*0.08});
+  }
+  // ── escena 8 (53.9 – 60)
+  vis($('s8'),T>=53.9);
+  if(T>=53.9){
+    const t=T-54;
+    S8A.forEach((w,j)=>{const k=P(t,0.05+j*0.08,0.9+j*0.08,E.outExpo);S(w,{y:(1-k)*260});});
+    S8B.forEach((w,j)=>{const k=P(t,0.8+j*0.07,1.6+j*0.07,E.outExpo);S(w,{y:(1-k)*120});w.style.backgroundPosition=`${(t*40)%220}% 0`;});
+    const wx=P(t,2.1,2.5,E.inCubic);S($('s8words'),{op:1-wx,s:1-wx*0.05,b:wx*16});
+    const lt=t-2.4;
+    const markW=280, markH=markW*144/220;
+    const sv=$('s8mark');sv.style.width=markW+'px';sv.style.height=markH+'px';
+    const ws=$('s8word');ws.style.fontSize='128px';ws.style.lineHeight='150px';
+    const wordW=ws.scrollWidth,gap=-6,total=markW+gap+wordW;
+    const y0=520-markH/2-40;
+    sv.style.left=(960-total/2)+'px';sv.style.top=y0+'px';
+    ws.style.left=(960-total/2+markW+gap)+'px';ws.style.top=(y0+markH/2-75)+'px';
+    M8.draw(P(lt,0,0.9,E.inOutCubic),P(lt,0.15,1.0,E.inOutCubic),P(lt,0.85,1.3,E.outCubic),1-P(lt,1.1,1.5));
+    S(sv,{op:P(lt,0,0.2),s:lerp(1.12,1,P(lt,0,1.6,E.outCubic))});
+    W8.forEach((ch,i)=>{const k=P(lt,1.0+i*0.06,1.8+i*0.06,E.outExpo);S(ch,{op:k,x:(1-k)*-110,b:(1-k)*10});});
+    const flash=Math.exp(-Math.pow((lt-0.95)/0.35,2));
+    S($('s8glow'),{op:P(lt,0,1)*0.6+flash*0.7,s:1+flash*0.1});
+    $('s8glow').style.top=(y0+markH/2-500)+'px';
+    const sb=P(lt,1.6,2.5,E.outExpo);$('s8sub').style.letterSpacing=lerp(0.35,-0.01,sb)+'em';S($('s8sub'),{op:sb,b:(1-sb)*12});
+    S($('s8sub2'),inOut(lt,2.0,0.9,99,1,20,8));
+    $('s8logo').style.visibility=lt>=0?'inherit':'hidden';
+  }
+  // ── HUD olas (18 – 48)
+  const hudOn=T>=19.8&&T<47.9;vis($('hud'),hudOn);
+  if(hudOn){
+    const a=P(T,20.0,20.8)*(1-P(T,47.2,47.8));const light=T>=27.7&&T<37.9;
+    $('hud').style.opacity=a;$('hud').style.color=light?'#1d1d1f':'#f5f5f7';
+    const rng3=[[18,28],[28,38],[38,48]];
+    HUD.forEach((d,i)=>{const [s,e]=rng3[i];const k=clamp((T-s)/(e-s));d.querySelector('.hf').style.width=(k*100)+'%';
+      d.querySelector('.hf').style.background=light?'#005ec2':'#2f8cff';d.querySelector('.hl').style.opacity=T>=s&&T<e?1:0.4;});
+  }
+  // velo final
+  $('veil').style.opacity=P(T,59.0,60.0,E.inOutSine);
+}
+window.renderFrame=renderFrame;
+Promise.all(['700 330px InterV','600 26px InterV','900 150px ArchivoV'].map(f=>document.fonts.load(f))).then(()=>document.fonts.ready).then(()=>{measure();window.READY=true;});
+// vista previa en navegador: ?t=12.5 o reproducción en vivo
+(function(){const q=new URLSearchParams(location.search);if(q.has('t')){document.fonts.load('700 330px InterV').then(()=>renderFrame(+q.get('t')));}
+ else if(q.has('play')){document.fonts.ready.then(()=>{const t0=performance.now();const loop=()=>{const T=(performance.now()-t0)/1000;renderFrame(T%60);requestAnimationFrame(loop)};loop();});}})();
+</script>
+</body>
+</html>
