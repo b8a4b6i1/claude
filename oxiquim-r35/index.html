@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Rumbo 35 · Plan de trabajo Gerencia de Personas</title>
+<style>
+@font-face{font-family:'InterV';src:url(fonts/inter-latin-opsz-normal.woff2) format('woff2');font-weight:100 900;font-display:block}
+:root{--ink:#1D1D1F;--ink2:#424245;--gray:#6E6E73;--gray2:#A1A1A6;--navy:#0A2A66;--deep:#0B3D91;--brand:#005EC2;--blue:#1A7CF0;--sky:#4DA8FF;--ice:#BFE0FF;--mist:#EAF3FF;--card:#F3F6FB}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#fff}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#fff;font-family:'InterV',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss03'}
+.scene{position:absolute;inset:0;overflow:hidden;display:none}
+.abs{position:absolute}
+.fill{position:absolute;inset:0}
+.h{font-weight:700;letter-spacing:-0.035em;line-height:1.04}
+.w{display:inline-block;will-change:transform}
+.mask{display:inline-block;overflow:hidden;padding:0.1em 0.05em 0.16em;margin:-0.1em -0.05em -0.16em;vertical-align:top}
+.grad{background:linear-gradient(100deg,#0A2A66 0%,#005EC2 42%,#3FA0FF 78%,#7CC4FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gradw .w{background:linear-gradient(100deg,#0A2A66 0%,#005EC2 42%,#3FA0FF 78%,#7CC4FF 100%);background-size:var(--gw,1000px) 100%;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent}
+.gray{color:var(--gray)}
+.pill{display:inline-flex;align-items:center;height:60px;padding:0 28px;border-radius:999px;font-size:28px;font-weight:700;letter-spacing:0.01em;background:var(--brand);color:#fff;white-space:nowrap}
+.kick{font-size:24px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--brand)}
+.card{position:absolute;background:var(--card);border-radius:44px;overflow:hidden}
+.num{font-size:22px;font-weight:700;color:var(--brand);letter-spacing:0.08em;font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;height:52px;padding:0 24px;border-radius:999px;font-size:24px;font-weight:600;color:var(--deep);background:#fff;border:1.5px solid #CFE3FA;white-space:nowrap}
+.kw{color:var(--brand);font-weight:650}
+img.logo{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+canvas{position:absolute}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg" width="1920" height="1080" style="left:0;top:0"></canvas>
+  <div id="roadwrap" class="abs" style="left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;display:none">
+    <svg id="road" width="1920" height="1080" style="position:absolute;left:0;top:0;overflow:visible"></svg>
+  </div>
+  <div id="scenes"></div>
+  <div id="hud" class="abs" style="left:0;top:0;width:1920px;height:1080px;display:none;pointer-events:none"></div>
+  <div id="veil" class="fill" style="background:#fff;opacity:0;pointer-events:none"></div>
+</div>
+<script src="assets/globe-dots.js"></script>
+<script src="js/content.js"></script>
+<script src="js/core.js"></script>
+<script src="js/viz.js"></script>
+<script src="js/scenes.js"></script>
+</body>
+</html>
