@@ -33,7 +33,7 @@ if (stills) {
   const fps = +arg('fps', 60), from = +arg('from', 0), to = +arg('to', DUR);
   const out = path.join(root, arg('out', 'out/video.mp4'));
   const ff = spawn(FFMPEG, ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'png', '-i', '-',
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '15', '-tune', 'animation', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out],
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', arg('crf', '15'), '-tune', 'animation', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out],
     { stdio: ['pipe', 'inherit', 'inherit'] });
   const cdp = await page.context().newCDPSession(page);
   const n = Math.round((to - from) * fps), t0 = Date.now();
