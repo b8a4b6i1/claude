@@ -33,6 +33,22 @@ cuya superposición reproduce el original sin diferencias.
 "conocimientos críticos de conocimiento" se mostró como "conocimientos críticos" (redundancia del original).
 Los destinos de los arcos del globo son ilustrativos y no llevan rótulo.
 
+## Versión móvil 9:16 (`mobile.html`)
+
+Pieza vertical de 2:58 (178,4 s · 1080×1920 · 60 fps) para ver en el teléfono: `oxiquim_r35_plan_personas_9x16.mp4`.
+Misma información y misma banda sonora (re-sincronizada); composición rediseñada para móvil:
+
+- **Zonas seguras:** el contenido clave queda entre y = 200 y y = 1600, con márgenes laterales de 72 px. Las franjas
+  superior e inferior quedan libres para las interfaces de WhatsApp, Instagram y la barra de estado.
+- **Tamaños mínimos** (sobre 1080 px de ancho): cuerpo ≥ 42 px, títulos ≥ 58 px, rótulos de gráficos ≥ 26 px.
+- **Contraste (WCAG 2.x):** cuerpo de texto de 4,7:1 a 16,8:1. El degradado de títulos termina en #1A7CF0 (4,05:1;
+  en 16:9 llegaba a #7CC4FF, 1,88:1). El celeste informativo de los gráficos pasa a #2F8BEF (3,2–3,5:1).
+- **Una idea por pantalla:** cada iniciativa ocupa una tarjeta completa (visualización, título y descripción),
+  con barras de avance tipo historias y transición lateral. La introducción de cada ola tiene pantalla propia (7 s).
+- **Hoja de ruta vertical:** las olas del párrafo giran 90° para formar la ruta de 36 meses de arriba hacia abajo.
+- **Primer cuadro con marca:** el isotipo ya está en pantalla en t = 0, porque las apps lo usan como miniatura.
+- Las visualizaciones están redibujadas para un lienzo de 920×760 (`js/viz-m.js`), con trazos y rótulos más gruesos.
+
 ## Reproducir
 
 ```bash
@@ -43,6 +59,15 @@ python3 scripts/audio.py                        # out/audio.wav
 ffmpeg -i out/video.mp4 -i out/audio.wav -c:v copy -c:a aac -b:a 256k -shortest oxiquim_r35_plan_personas.mp4
 ```
 
-Vista previa: servir la carpeta por HTTP (p. ej. `npx serve`) y abrir `index.html?play` o `index.html?t=24`.
+Versión móvil:
+
+```bash
+node scripts/render.mjs --page mobile.html --w 1080 --h 1920 --tag -m --fps 60 --workers 3   # out/video-m.mp4 + out/cues-m.json
+python3 scripts/audio.py -m                                                                   # out/audio-m.wav
+ffmpeg -i out/video-m.mp4 -i out/audio-m.wav -c:v libx264 -profile:v high -crf 20 -preset slow -pix_fmt yuv420p \
+  -c:a aac -b:a 160k -ar 48000 -shortest -movflags +faststart oxiquim_r35_plan_personas_9x16.mp4
+```
+
+Vista previa: servir la carpeta por HTTP (p. ej. `npx serve`) y abrir `index.html?play` o `index.html?t=24` (`mobile.html` para la versión vertical).
 Cuadros sueltos: `node scripts/render.mjs --stills 2,12,24`.
 Fuente tipográfica: Inter (SIL Open Font License).

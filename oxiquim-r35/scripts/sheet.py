@@ -2,8 +2,10 @@
 import sys
 from PIL import Image, ImageDraw
 out, files = sys.argv[1], sys.argv[2:]
-cols = 2 if len(files) > 1 else 1
-w, h = 960, 540
+from PIL import Image as _I
+_w, _h = _I.open(files[0]).size
+if _h > _w: cols, w, h = min(5, len(files)), 360, 640       # vertical 9:16
+else: cols, w, h = (2 if len(files) > 1 else 1), 960, 540
 rows = (len(files) + cols - 1) // cols
 S = Image.new('RGB', (cols * w + (cols + 1) * 8, rows * h + (rows + 1) * 8), (120, 120, 120))
 for i, f in enumerate(files):

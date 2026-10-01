@@ -1,11 +1,14 @@
 """Banda sonora sintetizada (120 BPM, Re mayor), sincronizada con la línea de tiempo de la animación.
-Lee out/cues.json (lo escribe scripts/render.mjs) y genera out/audio.wav (44,1 kHz, estéreo)."""
+Lee out/cues{TAG}.json (lo escribe scripts/render.mjs) y genera out/audio{TAG}.wav (44,1 kHz, estéreo).
+Uso: python3 scripts/audio.py [-m]"""
 import json, os, wave
 import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
 
 ROOT_DIR = os.path.join(os.path.dirname(__file__), '..')
-CU = json.load(open(os.path.join(ROOT_DIR, 'out', 'cues.json')))
+import sys
+TAG = sys.argv[1] if len(sys.argv) > 1 else ''   # '' = 16:9 · '-m' = móvil 9:16
+CU = json.load(open(os.path.join(ROOT_DIR, 'out', f'cues{TAG}.json')))
 SR = 44100
 DUR = CU['end']
 N = int(SR * DUR)
@@ -194,7 +197,7 @@ L, R = np.tanh(1.6 * L / peak) / np.tanh(1.6), np.tanh(1.6 * R / peak) / np.tanh
 fade = np.ones(N); fs = int((DUR - 2.5) * SR); fade[fs:] = np.linspace(1, 0, N - fs) ** 1.5
 fade[:int(0.02 * SR)] = np.linspace(0, 1, int(0.02 * SR))
 out = np.stack([L * fade, R * fade], axis=1) * 0.89
-with wave.open(os.path.join(ROOT_DIR, 'out', 'audio.wav'), 'wb') as w:
+with wave.open(os.path.join(ROOT_DIR, 'out', f'audio{TAG}.wav'), 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
     w.writeframes((np.clip(out, -1, 1) * 32767).astype('<i2').tobytes())
 print('audio ok', DUR, 'rms', float(np.sqrt(np.mean(out ** 2))))
