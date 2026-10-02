@@ -1,7 +1,7 @@
 # Oxiquim · Jornada GPER «Del diagnóstico a la acción» — invitación en video
 
 Pieza vertical 9:16 (1080×1920, 60 fps, 78,7 s) basada en el libreto *Invitación Olmué v3* y en los
-*Lineamientos de marca 2025* (versiones anteriores: `oxiquim_jornada_gper_olmue.mp4` = v1, `_v2.mp4` = v2, `_v3.mp4` = v3).
+*Lineamientos de marca 2025* (versiones anteriores: `oxiquim_jornada_gper_olmue.mp4` = v1, `_v2.mp4` = v2, `_v3.mp4` = v3, `_v4.mp4` = v4).
 Todo es código: la animación es una función determinista del tiempo (`renderFrame(t)` en `index.html`),
 capturada cuadro a cuadro con Playwright y codificada con ffmpeg. La música (120 BPM, Re mayor) y los efectos se sintetizan en `scripts/audio.py`.
 
@@ -24,8 +24,8 @@ capturada cuadro a cuadro con Playwright y codificada con ffmpeg. La música (12
 
 - **Logo:** vector oficial extraído de la página 1 de los lineamientos (`scripts/extract_logo_pdf.py`), color azul principal #0055B8.
   El PNG entregado al inicio (`assets/oxiquim-logo-original.png`) y su trazado (`scripts/trace_logo.py`) quedan como referencia.
-- **Colores:** azul principal #0055B8, azul oscuro #162851, gris claro #C6CAD3, verde oscuro #225F58, verde claro #819E49,
-  morado #410C5C y amarillo #F9AB3A, más tintes del azul principal.
+- **Colores:** azul principal #0055B8, azul oscuro #162851 y tintes del azul en toda la pieza. Los colores secundarios
+  (amarillo #F9AB3A, verde claro #819E49, verde oscuro #225F58) solo aparecen en el sol y el paisaje de Olmué.
 - **Tipografías:** Trebuchet MS para textos (se descarga del paquete oficial de Microsoft con `scripts/get_fonts.sh`; no se
   redistribuye en el repositorio). Para títulos la oficial es Goli (MagicType); si existe `fonts/goli.woff2` se usa
   automáticamente, si no se usa Figtree (OFL) como sustituto geométrico.
@@ -38,7 +38,7 @@ pip install numpy scipy pillow potracer
 python3 scripts/extract_logo_pdf.py <lineamientos.pdf>   # logo oficial → assets/logo-paths.json/.js
 python3 scripts/audio.py             # out/audio.wav
 node scripts/render.mjs --fps 60     # out/video.mp4 (sin audio)
-ffmpeg -i out/video.mp4 -i out/audio.wav -c:v copy -c:a aac -b:a 256k -shortest oxiquim_jornada_gper_olmue_v4.mp4
+ffmpeg -i out/video.mp4 -i out/audio.wav -c:v copy -c:a aac -b:a 256k -shortest oxiquim_jornada_gper_olmue_v5.mp4
 ```
 
 Vista previa: `index.html?play` (en vivo) o `index.html?t=33` (cuadro fijo). Cuadros sueltos: `node scripts/render.mjs --stills 2,12,24`.
