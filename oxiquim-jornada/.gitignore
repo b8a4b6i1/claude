@@ -1,1 +1,3 @@
 out/
+# Trebuchet MS (Microsoft core fonts): se obtiene con scripts/get_fonts.sh, no se redistribuye
+fonts/trebuc*.ttf

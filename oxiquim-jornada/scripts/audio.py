@@ -1,4 +1,4 @@
-"""Banda sonora sintetizada (100 BPM, Re mayor) sincronizada con index.html (Jornada GPER).
+"""Banda sonora sintetizada (120 BPM, Re mayor, pop optimista) sincronizada con index.html (Jornada GPER).
 Salida: out/audio.wav (44.1 kHz, estéreo)."""
 import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
@@ -7,7 +7,7 @@ import wave, os
 SR = 44100
 DUR = 78.7
 N = int(SR * DUR)
-BEAT = 0.6
+BEAT = 0.5
 rng = np.random.default_rng(35)
 L = np.zeros(N); R = np.zeros(N)          # bus seco
 RL = np.zeros(N); RR = np.zeros(N)        # envío a reverb
@@ -30,13 +30,11 @@ def add(sig, t0, gain=1.0, pan=0.0, rev=0.0):
     if rev: RL[i:i + len(sig)] += sig * gl * rev; RR[i:i + len(sig)] += sig * gr * rev
 
 
-# ── progresión amable: Dmaj9 | Bm9 | Gmaj7 | A6sus — un compás (2,4 s) por acorde
+# ── progresión optimista I–V–vi–IV en Re mayor: D | A | Bm | G — un compás (2 s) por acorde
 BAR = 4 * BEAT
-CH = [[50, 54, 57, 61, 64], [47, 50, 54, 57, 61], [43, 47, 50, 54, 57], [45, 50, 52, 54, 57]]
-ROOT = [38, 35, 31, 33]
+CH = [[50, 54, 57, 62], [49, 52, 57, 61], [47, 50, 54, 59], [47, 50, 55, 59]]
+ROOT = [38, 33, 35, 31]
 def chord_at(t): return int(t // BAR) % 4
-
-
 def saw(f, n, harm=10, det=0.0):
     t = tt(n); ph = rng.uniform(0, 2 * np.pi)
     out = np.zeros(n)
@@ -102,76 +100,106 @@ def tick(f=2200, g=1.0):
 
 
 
-# ── pad cálido con intensidad por sección
-def pad_level(t):
-    pts = [(0, 0.2), (2, 0.5), (4.5, 0.55), (11, 0.6), (29, 0.75), (37.5, 0.6), (45, 0.75), (47.5, 0.9), (52, 0.7), (53.4, 0.7), (61.4, 0.85), (65.4, 0.6), (71.9, 0.8), (73.4, 0.9), (78.7, 0.0)]
-    return np.interp(t, [p[0] for p in pts], [p[1] for p in pts])
 
-for bar in range(int(DUR / BAR) + 1):
-    t0 = bar * BAR; seg = int((BAR + 0.6) * SR)
-    s = np.zeros(seg)
-    for m in CH[bar % 4]:
-        for d in (-0.004, 0.0, 0.0045):
-            s += saw(midi(m + 12), seg, harm=7, det=d)
-    env = np.minimum(1, tt(seg) / 0.4) * np.minimum(1, (BAR + 0.6 - tt(seg)) / 0.7)
-    s = lp(s, 800 + 1600 * pad_level(t0), 2) * env * 0.03 * pad_level(t0 + 1)
-    add(s, t0 - 0.1, 1.0, pan=-0.25, rev=0.6)
-    add(np.roll(s, 331), t0 - 0.1, 1.0, pan=0.25, rev=0.6)
-
-GROOVE = [(11.0, 61.3), (65.7, 73.0)]          # secciones con pulso completo
-HALF = [(4.45, 11.0), (61.3, 65.7)]            # medio tiempo
 def inside(t, spans): return any(a <= t < b for a, b in spans)
+INTRO_END, END_GROOVE = 4.45, 73.3
+FULL = [(11.0, 37.2), (38.2, 61.2), (61.6, 71.6)]          # pulso completo (con respiros de un compás)
+LEAD = [(29.3, 37.2), (45.6, 53.4), (61.6, 71.6)]          # melodía principal: Olmué, equipo, cierre
 
+# ── pad brillante (acordes abiertos) con intensidad por sección
+def pad_level(t):
+    pts = [(0, 0.25), (2, 0.55), (4.45, 0.45), (11, 0.5), (29.3, 0.65), (37.2, 0.8), (38.2, 0.55), (61.6, 0.8), (71.6, 0.95), (73.3, 0.9), (78.7, 0.0)]
+    return np.interp(t, [q[0] for q in pts], [q[1] for q in pts])
+for bar in range(int(DUR / BAR) + 1):
+    t0 = bar * BAR; seg = int((BAR + 0.5) * SR); s = np.zeros(seg)
+    for m in CH[bar % 4]:
+        for dd in (-0.005, 0.0, 0.005): s += saw(midi(m + 12), seg, harm=7, det=dd)
+    env = np.minimum(1, tt(seg) / 0.25) * np.minimum(1, (BAR + 0.5 - tt(seg)) / 0.5)
+    s = lp(s, 1100 + 2200 * pad_level(t0), 2) * env * 0.022 * pad_level(t0 + 1)
+    add(s, t0 - 0.05, 1.0, pan=-0.3, rev=0.5); add(np.roll(s, 331), t0 - 0.05, 1.0, pan=0.3, rev=0.5)
+
+# ── batería: bombo en negras, palmas en 2 y 4, hi-hat abierto a contratiempo y cerrado en semicorcheas
 kicks = []
 for b in range(int(DUR / BEAT)):
     t = b * BEAT
-    if inside(t, GROOVE): kicks.append((t, 0.75 if b % 4 else 0.85))
-    elif inside(t, HALF) and b % 2 == 0: kicks.append((t, 0.5))
-for t, g in kicks: add(kick(g), t, 0.85)
-
+    if inside(t, FULL): kicks.append((t, 0.9))
+    elif INTRO_END <= t < 11.0: kicks.append((t, 0.6))
+    elif END_GROOVE <= t < 76.3 and b % 2 == 0: kicks.append((t, 0.45))
+for t, g in kicks: add(kick(g), t, 0.9)
 duck = np.ones(N)
 for t, g in kicks:
-    i = int(t * SR); n = int(0.4 * SR)
-    seg = 1 - 0.5 * g * np.exp(-tt(n) * 9)
+    i = int(t * SR); n = int(0.35 * SR)
+    seg = 1 - 0.55 * g * np.exp(-tt(n) * 11)
     duck[i:i + n] = np.minimum(duck[i:i + n], seg[: len(duck[i:i + n])])
-
-# bajo: corcheas con salto de octava
-BASS = np.zeros(N)
-for b8 in range(int(DUR / (BEAT / 2))):
-    t = b8 * BEAT / 2
-    if not inside(t, GROOVE): continue
-    n = int(0.26 * SR); tn = tt(n)
-    f = midi(ROOT[chord_at(t)] + 12 + (12 if b8 % 4 == 3 else 0))
-    s = (np.sin(2 * np.pi * f * tn) + 0.35 * np.sin(2 * np.pi * 2 * f * tn)) * np.minimum(1, tn / 0.005) * np.exp(-tn * 8)
-    i = int(t * SR); BASS[i:i + n] += s[: N - i] * (0.2 if b8 % 2 else 0.27)
-BASS = lp(BASS, 700) * duck
-L += BASS; R += BASS
-
-# arpegio pluck (semicorcheas), luminoso
-ARP = np.zeros(N); ARPR = np.zeros(N)
-pattern = [0, 2, 4, 1, 3, 2, 4, 3]
+def ohat(g):
+    n = int(0.16 * SR); t = tt(n)
+    return hp(rng.standard_normal(n), 6500, 4) * np.exp(-t * 22) * g
 for s16 in range(int(DUR / (BEAT / 4))):
     t = s16 * BEAT / 4
-    if not (inside(t, GROOVE) or (inside(t, HALF) and s16 % 2 == 0) or (71.9 <= t < 76.4 and s16 % 2 == 0)): continue
-    m = CH[chord_at(t)][pattern[s16 % 8]] + 24
-    n = int(0.32 * SR); tn = tt(n); f = midi(m)
-    tone = np.sin(2 * np.pi * f * tn) + 0.3 * np.sin(2 * np.pi * 2 * f * tn) + 0.1 * np.sin(2 * np.pi * 3 * f * tn)
-    vel = 0.55 + 0.45 * ((s16 % 4) == 0)
-    s = tone * np.exp(-tn * 15) * vel * 0.045
-    i = int(t * SR); tgt = ARP if s16 % 2 == 0 else ARPR
-    tgt[i:i + n] += s[: N - i]
-ARP *= duck; ARPR *= duck
-L += ARP * 0.9 + ARPR * 0.4; R += ARP * 0.4 + ARPR * 0.9
-RL += (ARP + ARPR) * 0.35; RR += (ARP + ARPR) * 0.35
-
-for s16 in range(int(DUR / (BEAT / 4))):
-    t = s16 * BEAT / 4
-    if inside(t, [(17.0, 61.3), (65.7, 73.0)]):
-        add(hat(0.045 if s16 % 4 == 2 else 0.018), t, 1.0, pan=0.3 if s16 % 2 else -0.2)
+    on = inside(t, FULL) or INTRO_END <= t < 11.0
+    if not on: continue
+    if s16 % 4 == 2: add(ohat(0.05 if inside(t, FULL) else 0.03), t, 1.0, pan=0.25)
+    elif inside(t, FULL): add(hat(0.022 if s16 % 2 else 0.012), t, 1.0, pan=-0.25)
 for b in range(int(DUR / BEAT)):
     t = b * BEAT
-    if inside(t, [(22.8, 61.3), (67.4, 73.0)]) and b % 2 == 1:
-        add(clap(0.13), t, 1.0, rev=0.5)
+    if inside(t, FULL) and b % 2 == 1: add(clap(0.2), t, 1.0, rev=0.45)
+    # redoble de palmas antes de cada respiro
+for t_end in (37.2, 61.2, 71.6):
+    for k in range(8): add(clap(0.05 + 0.02 * k), t_end - 1.0 + k * BEAT / 4, 1.0, rev=0.3)
+
+# ── bajo saltarín: contratiempos con octava, raíz del acorde
+BASS = np.zeros(N)
+for s16 in range(int(DUR / (BEAT / 4))):
+    t = s16 * BEAT / 4
+    if not (inside(t, FULL) or INTRO_END <= t < 11.0): continue
+    pos = s16 % 8
+    if pos not in (2, 5, 6) and not (inside(t, FULL) and pos == 0): continue
+    n = int(0.2 * SR); tn = tt(n)
+    f = midi(ROOT[chord_at(t)] + 12 + (12 if pos == 5 else 0))
+    s = (np.sin(2 * np.pi * f * tn) + 0.45 * np.sin(2 * np.pi * 2 * f * tn) + 0.15 * np.sin(2 * np.pi * 3 * f * tn)) * np.minimum(1, tn / 0.004) * np.exp(-tn * 10)
+    i = int(t * SR); BASS[i:i + n] += s[: N - i] * 0.24
+BASS = lp(BASS, 900) * duck
+L += BASS; R += BASS
+
+# ── acordes staccato sincopados (tipo piano house) + arpegio pluck
+STAB = np.zeros(N)
+for s16 in range(int(DUR / (BEAT / 4))):
+    t = s16 * BEAT / 4
+    if not inside(t, FULL) or (s16 % 16) not in (2, 6, 9, 12, 14): continue
+    n = int(0.22 * SR); tn = tt(n); s = np.zeros(n)
+    for m in CH[chord_at(t)]:
+        f = midi(m + 12); s += np.sin(2 * np.pi * f * tn) + 0.35 * np.sin(2 * np.pi * 2 * f * tn) + 0.12 * np.sin(2 * np.pi * 3 * f * tn)
+    s *= np.minimum(1, tn / 0.003) * np.exp(-tn * 14) * 0.03
+    i = int(t * SR); STAB[i:i + n] += s[: N - i]
+STAB *= duck
+add(STAB, 0, 1.0, pan=-0.15, rev=0.35); add(np.roll(STAB, 220), 0, 0.8, pan=0.2, rev=0.35)
+ARP = np.zeros(N); ARPR = np.zeros(N)
+pattern = [0, 1, 2, 3, 2, 1, 3, 2]
+for s16 in range(int(DUR / (BEAT / 4))):
+    t = s16 * BEAT / 4
+    if not (inside(t, FULL) or (INTRO_END <= t < 11 ) or (73.3 <= t < 77.5 and s16 % 2 == 0)): continue
+    m = CH[chord_at(t)][pattern[s16 % 8]] + 24
+    n = int(0.25 * SR); tn = tt(n); f = midi(m)
+    tone = np.sin(2 * np.pi * f * tn) + 0.3 * np.sin(2 * np.pi * 2 * f * tn) + 0.1 * np.sin(2 * np.pi * 3 * f * tn)
+    s = tone * np.exp(-tn * 18) * (0.55 + 0.45 * ((s16 % 4) == 0)) * 0.034
+    i = int(t * SR); (ARP if s16 % 2 == 0 else ARPR)[i:i + n] += s[: N - i]
+ARP *= duck; ARPR *= duck
+L += ARP * 0.9 + ARPR * 0.4; R += ARP * 0.4 + ARPR * 0.9
+RL += (ARP + ARPR) * 0.3; RR += (ARP + ARPR) * 0.3
+
+# ── melodía principal (marimba), pentatónica de Re mayor, frase de 2 compases
+def marimba(f, g=1.0):
+    n = int(0.6 * SR); t = tt(n)
+    s = np.sin(2 * np.pi * f * t) + 0.25 * np.sin(2 * np.pi * 4 * f * t) * np.exp(-t * 30) + 0.1 * np.sin(2 * np.pi * 10 * f * t) * np.exp(-t * 60)
+    return s * np.minimum(1, t / 0.002) * np.exp(-t * 7) * g
+PHRASE = [(0, 74), (1, 78), (2, 81), (3, 83), (5, 81), (6, 78), (8, 76), (9, 78), (10, 81), (12, 86), (14, 83), (15, 81)]   # en corcheas
+for a0, b0 in LEAD:
+    t = a0 - (a0 % BAR)
+    while t < b0:
+        for k, m in PHRASE:
+            tk = t + k * BEAT / 2
+            if a0 <= tk < b0: add(marimba(midi(m), 0.07), tk, 1.0, pan=0.15 * ((k % 3) - 1), rev=0.45)
+        t += 2 * BAR
 
 def chime(notes, t0, step=0.09, g=0.05):
     for j, m in enumerate(notes): add(bell(midi(m), 1.4), t0 + j * step, g, pan=-0.5 + j / max(1, len(notes) - 1), rev=0.8)
