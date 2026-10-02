@@ -5,7 +5,7 @@ from scipy.signal import butter, sosfilt, fftconvolve
 import wave, os
 
 SR = 44100
-DUR = 70.3
+DUR = 78.7
 N = int(SR * DUR)
 BEAT = 0.6
 rng = np.random.default_rng(35)
@@ -104,7 +104,7 @@ def tick(f=2200, g=1.0):
 
 # ── pad cálido con intensidad por sección
 def pad_level(t):
-    pts = [(0, 0.2), (2, 0.5), (4.5, 0.55), (11, 0.6), (29, 0.75), (37.5, 0.6), (45, 0.7), (53, 0.85), (57, 0.6), (63.5, 0.8), (65, 0.9), (70.3, 0.0)]
+    pts = [(0, 0.2), (2, 0.5), (4.5, 0.55), (11, 0.6), (29, 0.75), (37.5, 0.6), (45, 0.75), (47.5, 0.9), (52, 0.7), (53.4, 0.7), (61.4, 0.85), (65.4, 0.6), (71.9, 0.8), (73.4, 0.9), (78.7, 0.0)]
     return np.interp(t, [p[0] for p in pts], [p[1] for p in pts])
 
 for bar in range(int(DUR / BAR) + 1):
@@ -118,8 +118,8 @@ for bar in range(int(DUR / BAR) + 1):
     add(s, t0 - 0.1, 1.0, pan=-0.25, rev=0.6)
     add(np.roll(s, 331), t0 - 0.1, 1.0, pan=0.25, rev=0.6)
 
-GROOVE = [(11.0, 52.9), (57.3, 64.6)]          # secciones con pulso completo
-HALF = [(4.45, 11.0), (52.9, 57.3)]            # medio tiempo
+GROOVE = [(11.0, 61.3), (65.7, 73.0)]          # secciones con pulso completo
+HALF = [(4.45, 11.0), (61.3, 65.7)]            # medio tiempo
 def inside(t, spans): return any(a <= t < b for a, b in spans)
 
 kicks = []
@@ -152,7 +152,7 @@ ARP = np.zeros(N); ARPR = np.zeros(N)
 pattern = [0, 2, 4, 1, 3, 2, 4, 3]
 for s16 in range(int(DUR / (BEAT / 4))):
     t = s16 * BEAT / 4
-    if not (inside(t, GROOVE) or (inside(t, HALF) and s16 % 2 == 0) or (63.5 <= t < 68 and s16 % 2 == 0)): continue
+    if not (inside(t, GROOVE) or (inside(t, HALF) and s16 % 2 == 0) or (71.9 <= t < 76.4 and s16 % 2 == 0)): continue
     m = CH[chord_at(t)][pattern[s16 % 8]] + 24
     n = int(0.32 * SR); tn = tt(n); f = midi(m)
     tone = np.sin(2 * np.pi * f * tn) + 0.3 * np.sin(2 * np.pi * 2 * f * tn) + 0.1 * np.sin(2 * np.pi * 3 * f * tn)
@@ -166,17 +166,17 @@ RL += (ARP + ARPR) * 0.35; RR += (ARP + ARPR) * 0.35
 
 for s16 in range(int(DUR / (BEAT / 4))):
     t = s16 * BEAT / 4
-    if inside(t, [(17.0, 52.9), (57.3, 64.6)]):
+    if inside(t, [(17.0, 61.3), (65.7, 73.0)]):
         add(hat(0.045 if s16 % 4 == 2 else 0.018), t, 1.0, pan=0.3 if s16 % 2 else -0.2)
 for b in range(int(DUR / BEAT)):
     t = b * BEAT
-    if inside(t, [(22.8, 52.9), (59.0, 64.6)]) and b % 2 == 1:
+    if inside(t, [(22.8, 61.3), (67.4, 73.0)]) and b % 2 == 1:
         add(clap(0.13), t, 1.0, rev=0.5)
 
 def chime(notes, t0, step=0.09, g=0.05):
     for j, m in enumerate(notes): add(bell(midi(m), 1.4), t0 + j * step, g, pan=-0.5 + j / max(1, len(notes) - 1), rev=0.8)
 
-D5, D6 = 0.8, 1.8   # desfases de escenas (como en index.html)
+D5, D6, D8 = 0.8, 1.8, 10.2   # relojes u, v, w de index.html respecto del tiempo absoluto
 # intro de marca
 add(tick(1700, 0.18), 0.05, rev=0.6)
 for i, (t0, m) in enumerate([(0.1, 74), (0.5, 78), (0.9, 81), (1.3, 85)]): add(bell(midi(m + 12)), t0, 0.05, pan=(-0.5 if i % 2 else 0.5), rev=0.9)
@@ -202,7 +202,7 @@ for i in range(6): add(tick(1800 + i * 200, 0.08), 19.3 + i * 0.14, pan=-0.6 + i
 add(whoosh(0.9, 0.18, True), 22.2, rev=0.4)
 add(tick(1500, 0.14), 25.2, rev=0.4); add(impact(0.35, 1.4), 25.5, rev=0.5)
 add(whoosh(1.1, 0.2, False), 26.45, pan=0.2, rev=0.5)
-for i in range(3): add(tick(2600, 0.07), 26.95 + i * 0.21, rev=0.5)
+add(tick(2400, 0.1), 26.35, rev=0.5); chime([86, 90], 26.7, 0.12, 0.03)
 # Olmué
 add(whoosh(1.0, 0.22, True), 28.6 + D5 - 0.5, rev=0.5)
 add(impact(0.6, 2.4), 29.3 + D5, rev=0.6)
@@ -211,30 +211,37 @@ add(tick(900, 0.25), 31.25 + D5, rev=0.5); chime([81, 85, 88], 31.3 + D5, 0.1, 0
 add(tick(1600, 0.14), 31.85 + D5, rev=0.4)
 for i in range(7): add(tick(2200 + i * 90, 0.06), 32.05 + D5 + 1.05 * (i / 7) ** 0.6, rev=0.3)
 add(impact(0.35, 1.2), 33.1 + D5, rev=0.4)
-# objetivo
+# ¿para qué nos reunimos?
 add(whoosh(1.1, 0.18, True), 35.9 + D5, rev=0.5)
-add(whoosh(0.8, 0.1, False), 36.6 + D6, rev=0.6); chime([78, 85], 37.2 + D6, 0.15, 0.04)
-add(riser(1.0, 0.22), 37.95 + D6, rev=0.4)
-add(impact(0.8, 2.6), 38.95 + D6, rev=0.6); chime([86, 90, 93, 98], 38.98 + D6, 0.07, 0.045)
+add(whoosh(0.8, 0.1, False), 36.5 + D6, rev=0.6); chime([78, 85], 37.0 + D6, 0.15, 0.04)
+for t0 in (37.25, 38.1, 38.75, 39.4): add(tick(2000, 0.07), t0 + D6, rev=0.5)
+add(riser(1.0, 0.22), 39.15 + D6, rev=0.4)
+add(impact(0.8, 2.6), 40.15 + D6, rev=0.6); chime([86, 90, 93, 98], 40.18 + D6, 0.07, 0.045)
+# equipo
+add(whoosh(1.2, 0.14, True), 44.3 + D6, rev=0.5)
+for i in range(12): add(tick(1700 + (i % 6) * 170, 0.06), 44.95 + D6 + i * 0.03 + 0.55, pan=-0.7 + (i % 12) * 0.12, rev=0.4)
+chime([81, 85, 88, 93], 45.95 + D6, 0.2, 0.04)
+add(impact(0.4, 1.6), 46.4 + D6, rev=0.6)
+add(whoosh(0.8, 0.14, False), 50.35 + D6, rev=0.5)
 # tarjetas
-add(whoosh(0.8, 0.14, True), 42.2 + D6, rev=0.4)
+add(whoosh(0.8, 0.14, True), 42.2 + D8, rev=0.4)
 for k, t0 in enumerate((43.85, 45.05, 46.25)):
-    add(whoosh(0.5, 0.15, True), t0 + D6 - 0.35, pan=-0.3 + 0.3 * k, rev=0.3)
-    add(tick(1900 + 250 * k, 0.12), t0 + D6 + 0.05, rev=0.5)
-    chime([81 + [0, 4, 7][k], 88 + [0, 4, 7][k]], t0 + D6 + 1.1, 0.1, 0.03)
+    add(whoosh(0.5, 0.15, True), t0 + D8 - 0.35, pan=-0.3 + 0.3 * k, rev=0.3)
+    add(tick(1900 + 250 * k, 0.12), t0 + D8 + 0.05, rev=0.5)
+    chime([81 + [0, 4, 7][k], 88 + [0, 4, 7][k]], t0 + D8 + 1.1, 0.1, 0.03)
 # nos vemos
-add(whoosh(0.8, 0.2, False), 51.15 + D6, rev=0.5)
-for i in range(9): add(tick(1500 + i * 120, 0.06), 51.75 + D6 + i * 0.055, rev=0.4)
-add(impact(0.55, 2.4), 52.35 + D6, rev=0.6); chime([86, 90, 93, 97, 98], 52.4 + D6, 0.08, 0.04)
+add(whoosh(0.8, 0.2, False), 51.15 + D8, rev=0.5)
+for i in range(16): add(tick(1500 + (i % 9) * 120, 0.05), 51.75 + D8 + i * 0.05, rev=0.4)
+add(impact(0.55, 2.4), 52.35 + D8, rev=0.6); chime([86, 90, 93, 97, 98], 52.4 + D8, 0.08, 0.04)
 # Rumbo 35
-add(whoosh(1.6, 0.1, True), 55.4 + D6, rev=0.5)
-for i in range(40): add(tick(2500 + (i % 7) * 140, 0.025), 55.6 + D6 + i * 0.045, pan=-0.8 + (i % 9) * 0.2)
-add(impact(0.75, 2.4), 57.35 + D6, rev=0.6)
+add(whoosh(1.6, 0.1, True), 55.4 + D8, rev=0.5)
+for i in range(40): add(tick(2500 + (i % 7) * 140, 0.025), 55.6 + D8 + i * 0.045, pan=-0.8 + (i % 9) * 0.2)
+add(whoosh(0.7, 0.18, True), 55.75 + D8, rev=0.4); add(impact(0.75, 2.4), 56.45 + D8, rev=0.6)
 # cierre
-add(riser(1.6, 0.35), 61.6 + D6, rev=0.5)
-add(impact(1.0, 3.6), 63.15 + D6, rev=0.7)
-for i in range(6): add(tick(2100 + i * 160, 0.06), 63.45 + D6 + i * 0.07, rev=0.4)
-chime([86, 90, 93, 98], 64.8 + D6, 0.12, 0.05)
+add(riser(1.6, 0.35), 61.6 + D8, rev=0.5)
+add(impact(1.0, 3.6), 63.15 + D8, rev=0.7)
+for i in range(6): add(tick(2100 + i * 160, 0.06), 63.45 + D8 + i * 0.07, rev=0.4)
+chime([86, 90, 93, 98], 64.8 + D8, 0.12, 0.05)
 
 # ── reverb por convolución
 n_ir = int(2.6 * SR); t_ir = tt(n_ir)
