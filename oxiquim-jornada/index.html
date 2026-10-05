@@ -26,6 +26,8 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
 .card .ic{width:170px;height:170px;border-radius:40px;background:linear-gradient(160deg,#f1f7ff,#e2eefd);flex:none;position:relative;overflow:hidden}
 .card .ic canvas{position:absolute;inset:0;width:170px;height:170px}
 .card .tx{font-size:60px;font-weight:800;letter-spacing:-0.035em;line-height:1.06}
+.tag{display:inline-flex;align-items:center;gap:20px;padding:14px 38px 16px 30px;border-radius:999px;background:#e3ecf8;border:2px dashed #7aa9e3;color:#0055b8;font-size:64px;font-weight:800;letter-spacing:-0.02em}
+.tag i{display:inline-block;width:22px;height:22px;border-radius:50%;background:#0055b8;box-shadow:0 0 0 0 rgba(0,85,184,0.45)}
 .cal{position:absolute;width:400px;height:450px;border-radius:64px;background:#fff;overflow:hidden;box-shadow:0 30px 60px -18px rgba(0,20,60,0.55)}
 .cal .hd{height:100px;background:linear-gradient(90deg,#162851,#0055b8);color:#fff;font-size:44px;font-weight:800;letter-spacing:0.16em;display:flex;align-items:center;justify-content:center;padding-left:0.16em}
 .cal .wd{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:40px;font-weight:800;letter-spacing:0.12em;padding-left:0.12em;color:#0055b8}
@@ -60,10 +62,11 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="blk ctr" id="s4b" style="top:1440px;font-size:96px;font-weight:800;letter-spacing:-0.04em;line-height:1.06;color:var(--brand)"></div>
   </div>
 
-  <!-- 5 · Olmué, 8 de octubre -->
+  <!-- 5 · Lugar por confirmar, miércoles 7 de octubre -->
   <div class="scene" id="s5">
     <div class="abs ctr" id="s5x" style="left:0;width:1080px;top:236px;font-size:68px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
-    <div class="abs ctr" id="s5a" style="left:0;width:1080px;top:318px;font-size:216px;font-weight:800;letter-spacing:-0.045em;line-height:1.05;white-space:nowrap"></div>
+    <div class="abs ctr" id="s5p" style="left:0;width:1080px;top:536px;white-space:nowrap"><span class="tag"><i id="s5dot"></i>por confirmar</span></div>
+    <div class="abs ctr" id="s5a" style="left:0;width:1080px;top:318px;font-size:184px;font-weight:800;letter-spacing:-0.045em;line-height:1.05;white-space:nowrap"></div>
     <div class="cal" id="s5cal" style="left:340px;top:1420px">
       <div class="hd">OCTUBRE</div>
       <div class="wd">MIÉRCOLES</div>
@@ -544,7 +547,7 @@ function s4(t){
   S($('s4a'),{...out,y:out.y-P(t,26.3,27.1,E.outExpo)*30});S($('s4b'),out);
 }
 
-/* ───────── escena 5: Olmué ───────── */
+/* ───────── escena 5: un lugar por confirmar ───────── */
 const MT=[ // capas de cerros: base, amplitudes, color, retardo
   {base:1120,amp:[70,40,22],f:[0.0042,0.011,0.023],ph:[0.4,1.9,2.7],c:'#d3dded',d:0.0,peak:[780,170,240]},
   {base:1235,amp:[60,34,18],f:[0.0051,0.013,0.029],ph:[2.2,0.3,1.1],c:'#9fb7dc',d:0.08,peak:[230,120,210]},
@@ -557,7 +560,7 @@ const ridge=(L,x)=>L.soft
   : L.base+40-L.amp[0]*2*rdg(x*L.f[0]+L.ph[0])-L.amp[1]*1.6*rdg(x*L.f[1]+L.ph[1])-L.amp[2]*1.3*rdg(x*L.f[2]+L.ph[2])-L.peak[1]*Math.exp(-(((x-L.peak[0])/L.peak[2])**2));
 const PIN={x:330,layer:2};
 const S5X=words($('s5x'),'Nos encontraremos en');
-const S5A=chars($('s5a'),'Olmué');
+const S5A=chars($('s5a'),'un lugar');
 (()=>{const r=$('s5roll');for(let i=1;i<=7;i++){const d=document.createElement('div');d.textContent=i;r.appendChild(d)}})();
 function sky(t){
   const a=P(t,27.0,28.6,E.inOutSine)*(1-P(t,36.7,37.6,E.inOutSine));
@@ -605,35 +608,49 @@ function mountains(t){
     if(li===PIN.layer)pin(t,dy,par);
   });
 }
+const PIN_STOPS=[330,590,810], PIN_HOPS=[[32.25,32.8],[33.05,33.6]];
+function pinPos(t,par,dy){
+  const L=MT[PIN.layer], gy=x=>ridge(L,x+par)+dy+6;
+  let x=PIN_STOPS[0], lift=0;
+  PIN_HOPS.forEach(([a,b],k)=>{const p=E.inOutCubic(clamp((t-a)/(b-a)));if(t>=a){x=lerp(PIN_STOPS[k],PIN_STOPS[k+1],p);lift=t<b?Math.sin(Math.PI*p)*170:0;}});
+  const hover=t>33.75?P(t,33.75,34.2,E.outCubic)*34+Math.sin((t-33.75)*3.2)*7:0;  // queda flotando: aún no aterriza
+  return {x,g:gy(x),lift:lift+hover};
+}
 function pin(t,dy,par){
-  const L=MT[PIN.layer];const gx=PIN.x, gy=ridge(L,gx+par)+dy+6;
-  // ruta punteada desde el título
+  const pp=pinPos(t,par,dy), gx=pp.x, gy=pp.g;
+  // ruta punteada desde la etiqueta; su final sigue al pin (se «recalcula»)
   const rp=P(t,30.35,31.3,E.inOutCubic)*(1-P(t,36.4,36.8));
   if(rp>0){
     bg.save();bg.setLineDash([3,16]);bg.lineCap='round';bg.lineWidth=6;bg.strokeStyle=rgba(C.brand,0.9);
-    const p0=[660,600],c1=[920,780],c2=[180,990],p1=[gx,gy-150];
+    const p0=[540,660],c1=[880,820],c2=[gx<500?160:gx-300,1000],p1=[gx,gy-150-pp.lift];
     bg.beginPath();bg.moveTo(p0[0],p0[1]);
     for(let i=1;i<=60*rp;i++){const u=i/60,a=1-u;bg.lineTo(a*a*a*p0[0]+3*a*a*u*c1[0]+3*a*u*u*c2[0]+u*u*u*p1[0],a*a*a*p0[1]+3*a*a*u*c1[1]+3*a*u*u*c2[1]+u*u*u*p1[1]);}
     bg.stroke();bg.restore();
   }
   const drop=P(t,31.0,31.75,E.spring);if(drop<=0)return;
-  // ondas en el suelo
-  for(let i=0;i<3;i++){const q=P(t,31.35+i*0.28,32.6+i*0.28,E.outCubic);if(q<=0||q>=1)continue;
-    bg.strokeStyle=`rgba(255,255,255,${0.7*(1-q)})`;bg.lineWidth=3;bg.beginPath();bg.ellipse(gx,gy,20+q*110,(20+q*110)*0.28,0,0,Math.PI*2);bg.stroke();}
-  const y=gy-lerp(520,0,drop);
-  bg.fillStyle='rgba(0,20,60,0.25)';bg.beginPath();bg.ellipse(gx,gy,16*drop,5*drop,0,0,Math.PI*2);bg.fill();
-  // pin
+  // ondas en cada punto donde toca el suelo
+  const LANDS=[[31.12,0],[32.8,1],[33.6,2]];
+  LANDS.forEach(([tl,k])=>{const q=P(t,tl,tl+1.1,E.outCubic);if(q<=0||q>=1)return;const lx=PIN_STOPS[k],ly=ridge(MT[PIN.layer],lx+par)+dy+6;
+    bg.strokeStyle=`rgba(255,255,255,${0.7*(1-q)})`;bg.lineWidth=3;bg.beginPath();bg.ellipse(lx,ly,20+q*110,(20+q*110)*0.28,0,0,Math.PI*2);bg.stroke();});
+  const y=gy-lerp(520,0,drop)-pp.lift;
+  const sh=drop*(1-Math.min(1,pp.lift/200)*0.6);
+  bg.fillStyle='rgba(0,20,60,0.22)';bg.beginPath();bg.ellipse(gx,gy,16*sh,5*sh,0,0,Math.PI*2);bg.fill();
+  // pin con «?»
   bg.save();bg.translate(gx,y);const s=1.6;bg.scale(s,s);
   bg.shadowColor='rgba(0,30,90,0.35)';bg.shadowBlur=18;bg.shadowOffsetY=8;
   const gr=bg.createLinearGradient(-30,-100,30,0);gr.addColorStop(0,'#2a6fc4');gr.addColorStop(1,'#0055b8');bg.fillStyle=gr;
   bg.beginPath();bg.moveTo(0,0);bg.bezierCurveTo(-8,-22,-34,-42,-34,-68);bg.arc(0,-68,34,Math.PI,0);bg.bezierCurveTo(34,-42,8,-22,0,0);bg.fill();
-  bg.shadowColor='transparent';bg.fillStyle='#fff';bg.beginPath();hexPath(bg,0,-68,12,1.86);bg.fill();
+  bg.shadowColor='transparent';bg.fillStyle='#fff';bg.beginPath();bg.arc(0,-68,21,0,Math.PI*2);bg.fill();
+  bg.fillStyle='#0055b8';bg.font='800 30px Head';bg.textAlign='center';bg.textBaseline='middle';bg.fillText('?',0,-66);
   bg.restore();
 }
 function s5(t){
   const on=t>29.3&&t<37.4;vis($('s5'),on);if(!on)return;
   reveal(S5X,t,29.6,0.08,0.8);
-  S5A.forEach((c,i)=>{const p=P(t,29.95+i*0.06,30.85+i*0.06,E.outExpo);S(c,{y:(1-p)*160,op:Math.min(1,p*2),b:(1-p)*10});});
+  S5A.forEach((c,i)=>{const p=P(t,29.95+i*0.05,30.85+i*0.05,E.outExpo);S(c,{y:(1-p)*160,op:Math.min(1,p*2),b:(1-p)*10});});
+  // etiqueta «por confirmar» con un punto que late (como una ubicación que se está buscando)
+  const tp=P(t,30.6,31.4,E.outBack);S($('s5p'),{s:lerp(0.6,1,tp),op:clamp(tp*2)*(1-P(t,36.4,36.9,E.inCubic)),y:-P(t,36.4,36.9,E.inCubic)*60});
+  const ph=((t-30.6)%1.1)/1.1;$('s5dot').style.boxShadow=`0 0 0 ${ph*22}px rgba(0,85,184,${0.45*(1-ph)})`;
   const outA=P(t,36.4,36.9,E.inCubic);S($('s5a'),{op:1-outA,y:-outA*60,b:outA*14});S($('s5x'),{op:1-outA,y:-outA*60,b:outA*14});
   const cp=P(t,31.85,32.6,E.spring), co=P(t,36.35,36.85,E.inCubic);
   S($('s5cal'),{s:lerp(0.4,1,cp),op:Math.min(1,cp*3)*(1-co),y:(1-cp)*80+co*200,r:(1-cp)*-8});
@@ -766,7 +783,7 @@ function s7(t){
 }
 
 /* ───────── escena 8: nos vemos ───────── */
-const S8A=[...chars($('s8l1'),'NOS VEMOS'),...chars($('s8l2'),'EN OLMUÉ','g')];
+const S8A=[...chars($('s8l1'),'NOS VEMOS'),...chars($('s8l2'),'ALLÁ','g')];
 const CONF=(()=>{const r=rng(88),a=[];for(let i=0;i<46;i++){const ang=r()*Math.PI*2,sp=280+r()*520;a.push({ang,sp,h:5+r()*10,rot:r()*6,vr:(r()-.5)*4,c:[C.light,C.brand,C.soft,C.mid][i%4],d:r()*0.25})}return a})();
 function s8(t){
   const on=t>51.6&&t<56.0;vis($('s8'),on);if(!on)return;

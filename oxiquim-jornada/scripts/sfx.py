@@ -230,19 +230,26 @@ def build(N, SR):
     for k, tk in enumerate((26.45, 26.53, 26.6, 26.7)):                         # caen las demás
         add(swipe(0.7, 2200 - k * 200, 300, a=0.15), tk, 0.08, pan=rng.uniform(-0.7, 0.7))
     add(morph(1.6, 440, 660), 26.7, 0.12, rev=0.5)                              # se vuelve sol
-    n = int(10.2 * SR); x = np.arange(n) / n                                   # aire libre (Olmué)
+    n = int(10.2 * SR); x = np.arange(n) / n                                   # aire libre (paisaje)
     wind = lp(rng.standard_normal(n), 700) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.23 * np.arange(n) / SR)) * np.minimum(1, x * 6) * np.minimum(1, (1 - x) * 4)
     add(wind, 27.4, 0.05, rev=0.4)
-    # ═════════ 5 · Olmué (u)
+    # ═════════ 5 · Un lugar por confirmar (u)
     for li in range(4): add(rumble(1.3), 28.5 + li * 0.08 * 2.2 + D5, 0.22, pan=-0.3 + li * 0.2)
     add(air(1.0, True), 28.4 + D5, 0.1)
     text_in(29.6 + D5)
-    add(hit(1.2, 65), 29.95 + D5 + 0.25, 0.22); add(shimmer(0.8, 2, 5), 30.0 + D5, 0.08, rev=0.5)   # «Olmué»
+    add(hit(1.2, 65), 29.95 + D5 + 0.25, 0.22); add(shimmer(0.8, 2, 5), 30.0 + D5, 0.08, rev=0.5)   # «un lugar»
+    add(pop(980, 0.16), 30.6 + D5 + 0.2, 0.16); add(ping(midi(90), 0.5), 30.6 + D5 + 0.25, 0.05, rev=0.5)   # «por confirmar»
+    for k in range(5): add(bloop(1200, 0.12), 30.6 + D5 + 1.1 * (k + 1), 0.025, rev=0.3)                   # el punto late
     for k in range(12): add(click(2800, 0.01), 30.4 + D5 + k * 0.08, 0.035, pan=0.3 - k * 0.05)   # ruta
     add(whistle_down(0.13), 31.0 + D5, 0.07)
     t_land = 31.0 + D5 + 0.165 * 0.75
     add(thud(), t_land, 0.3, pan=-0.35); add(pop(520, 0.16), t_land, 0.12, pan=-0.35)
-    for i in range(3): add(bloop(560 + i * 120), 31.35 + D5 + i * 0.28, 0.1, pan=-0.35, rev=0.4)   # ondas
+    add(bloop(560), t_land + 0.05, 0.1, pan=-0.35, rev=0.4)                      # onda
+    for k, ((a, b), x) in enumerate(zip(((32.25, 32.8), (33.05, 33.6)), (0.1, 0.5))):   # el pin salta buscando
+        add(swipe(0.4, 700, 2600, a=0.5), a + D5, 0.09, pan=x - 0.4, pan_to=x)
+        add(pop(560 + 140 * k, 0.16), b + D5, 0.13, pan=x); add(bloop(620 + 140 * k), b + D5 + 0.05, 0.08, pan=x, rev=0.4)
+        for j in range(3): add(click(2600 + 200 * j, 0.01), a + D5 + 0.1 + j * 0.12, 0.03, pan=x)   # la ruta se recalcula
+    add(shimmer(0.9, 6, 3), 33.75 + D5, 0.05, pan=0.5, rev=0.5)                 # queda flotando
     add(pop(420, 0.2), 31.85 + D5 + 0.12, 0.25); add(swipe(0.35, 600, 3000), 31.8 + D5, 0.08)     # calendario
     for k in range(1, 7):                                                       # número 1 → 7
         tk = 32.05 + D5 + inv_ease(inOutQuint, k / 6) * 1.05
@@ -282,9 +289,9 @@ def build(N, SR):
     for k in range(8): add(click(3000, 0.01), 46.25 + 0.3 + k * 0.12 + D8, 0.03)
     add(pop(990), 46.25 + 0.3 + 0.8 * 1.5 + D8, 0.16)                          # nodo de la ruta
     for i in range(3): add(swipe(0.4, 800, 4000, a=0.3), 51.15 + i * 0.07 + D8, 0.08, pan=-0.3 + 0.3 * i)
-    # ═════════ 9 · Nos vemos en Olmué (w)
-    for i in range(17):
-        if i in (3, 11): continue                                              # espacios
+    # ═════════ 9 · Nos vemos allá (w)
+    for i in range(13):
+        if i == 3: continue                                              # espacios
         add(pop(midi(PENTA[i % len(PENTA)]), 0.12), 51.75 + i * 0.05 + 0.165 + D8, 0.1, pan=-0.6 + i * 0.075)
     add(hit(1.2, 62), 52.35 + D8, 0.22)
     for k in range(26):                                                         # confeti

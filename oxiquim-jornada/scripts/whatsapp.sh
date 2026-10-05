@@ -4,7 +4,7 @@
 #   requiere out/video_master.mp4 (render --crf 8), out/audio.wav y out/cover_r35.png (render --stills 70.5)
 set -euo pipefail
 cd "$(dirname "$0")/.."
-OUT=${1:-oxiquim_jornada_gper_olmue_whatsapp.mp4}
+OUT=${1:-Invitacion_Jornada_Gerencia_de_Personas.mp4}
 TARGET_MB=${TARGET_MB:-29.0}                    # MB decimales, con margen bajo 30
 PRE=1.0
 DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 out/video_master.mp4)

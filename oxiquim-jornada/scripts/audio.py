@@ -104,7 +104,7 @@ def tick(f=2200, g=1.0):
 def inside(t, spans): return any(a <= t < b for a, b in spans)
 INTRO_END, END_GROOVE = 4.45, 73.3
 FULL = [(11.0, 37.2), (38.2, 61.2), (61.6, 71.6)]          # pulso completo (con respiros de un compás)
-LEAD = [(29.3, 37.2), (45.6, 53.4), (61.6, 71.6)]          # melodía principal: Olmué, equipo, cierre
+LEAD = [(29.3, 37.2), (45.6, 53.4), (61.6, 71.6)]          # melodía principal: paisaje, equipo, cierre
 
 # ── pad brillante (acordes abiertos) con intensidad por sección
 def pad_level(t):
