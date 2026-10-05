@@ -52,5 +52,14 @@ node scripts/render.mjs --fps 60     # out/video.mp4 (sin audio)
 ffmpeg -i out/video.mp4 -i out/audio.wav -c:v copy -c:a aac -b:a 256k -shortest oxiquim_jornada_gper_olmue_v6.mp4
 ```
 
+**Versión WhatsApp** (`oxiquim_jornada_gper_olmue_whatsapp.mp4`, < 30 MB): el primer cuadro es la pantalla final
+«R35 necesita a personas» (WhatsApp usa el primer cuadro como miniatura), seguida de un fundido a blanco de 0,4 s y el video.
+
+```bash
+node scripts/render.mjs --fps 60 --crf 8 --out out/video_master.mp4   # máster casi sin pérdida
+node scripts/render.mjs --stills 70.5 && cp out/stills/t70.50.png out/cover_r35.png
+./scripts/whatsapp.sh                                                  # dos pasadas, objetivo 29 MB
+```
+
 Vista previa: `index.html?play` (en vivo) o `index.html?t=33` (cuadro fijo). Cuadros sueltos: `node scripts/render.mjs --stills 2,12,24`.
 
