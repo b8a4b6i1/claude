@@ -803,10 +803,10 @@ function confetti(t){
 }
 function s9i(t){
   const on=t>58.6&&t<62.7;vis($('s9i'),on);if(!on)return;
-  reveal(S9D,t,58.8,0.08,0.8);
-  const tp=P(t,59.45,60.2,E.outBack), o=inOut(t,58.6,0.01,62.0,0.5,40,14);
+  reveal(S9D,t,59.0,0.08,0.8);
+  const tp=P(t,59.6,60.35,E.outBack), o=inOut(t,58.6,0.01,62.0,0.5,40,14);
   S($('s9d'),o);S($('s9l'),{...o,s:lerp(0.7,1,tp),op:o.op*clamp(tp*2)});
-  const ph=((t-59.45)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
+  const ph=((t-59.6)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
 }
 
 
@@ -837,22 +837,22 @@ function person(g,x,y,s,col,a,morph){
   g.beginPath();g.moveTo(x-k*0.38,y+k*0.42);g.quadraticCurveTo(x-k*0.38,y-k*0.06,x,y-k*0.06);g.quadraticCurveTo(x+k*0.38,y-k*0.06,x+k*0.38,y+k*0.42);g.closePath();g.fill();
 }
 function s9(t){
-  const on=t>51.6&&t<58.8;vis($('s9'),on);
-  if(t>51.6&&t<59.3){
+  const on=t>51.6&&t<58.2;vis($('s9'),on);
+  if(t>51.6&&t<58.8){
     PEOPLE.forEach((q,i)=>{
       const p=E.outQuint(clamp((t-51.75-q.d)/1.25));
       const walk=Math.sin((t*9+q.ph))*(1-p)*10;
       let x=lerp(q.sx,q.x,p), y=lerp(q.sy,q.y,p)+walk-Math.abs(walk)*0.5;
       const idle=p>=1?Math.sin(t*2.2+q.ph)*1.6:0;y+=idle;
       // salida: cada persona vuelve por donde llegó
-      const m=E.inQuint(clamp((t-58.0-q.dm)/0.9));
+      const m=E.inQuint(clamp((t-57.6-q.dm)/0.8));
       x=lerp(x,q.sx,m);y=lerp(y,q.sy,m);
       person(bg,x,y,24,q.c,Math.min(1,p*3),0);
     });
   }
   if(!on)return;
   reveal(S9B,t,53.8,0.1,0.9);
-  S($('s9b'),inOut(t,51,0.01,57.9,0.5,40,14));
+  S($('s9b'),inOut(t,51,0.01,57.5,0.45,40,14));
 }
 
 function outro(t){

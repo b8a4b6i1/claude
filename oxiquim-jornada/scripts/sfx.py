@@ -278,12 +278,12 @@ def build(N, SR):
     add(air(1.6, True), 51.6 + D8, 0.08)
     text_in(53.8 + D8)
     add(hit(1.0, 60), 53.8 + D8 + 0.4, 0.16)
-    add(air(1.0, False), 58.0 + D8, 0.1)                                        # vuelven por donde llegaron
-    swarm(58.0 + D8, 1.0, lambda x: 90 * (1 - x) + 10, g=0.03)
+    add(air(0.9, False), 57.6 + D8, 0.1)                                        # vuelven por donde llegaron
+    swarm(57.6 + D8, 1.0, lambda x: 90 * (1 - x) + 10, g=0.03)
     # ═════════ 10 · Fecha y lugar por confirmar (w)
-    text_in(58.8 + D8, 0.06)
-    add(pop(980, 0.16), 59.45 + 0.2 + D8, 0.12)
-    for k in range(1, 3): add(bloop(1200, 0.12), 59.45 + 1.1 * k + D8, 0.02, rev=0.3)   # el punto late
+    text_in(59.0 + D8, 0.06)
+    add(pop(980, 0.16), 59.6 + 0.2 + D8, 0.12)
+    for k in range(1, 3): add(bloop(1200, 0.12), 59.6 + 1.1 * k + D8, 0.02, rev=0.3)   # el punto late
     add(air(0.5, False), 62.0 + D8, 0.07)
     # ═════════ 11 · Nos vemos (w)
     for i in range(9):
