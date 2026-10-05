@@ -56,21 +56,6 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="blk" id="s3t" style="top:1170px;font-size:74px;font-weight:600;letter-spacing:-0.03em;line-height:1.13;color:var(--slate)"></div>
   </div>
 
-  <!-- 4 · Una manera distinta -->
-  <div class="scene" id="s4">
-    <div class="blk ctr" id="s4a" style="top:1150px;font-size:86px;font-weight:800;letter-spacing:-0.04em;line-height:1.06"></div>
-  </div>
-
-  <!-- 5 · Fecha: miércoles 7 de octubre -->
-  <div class="scene" id="s5">
-    <div class="abs ctr" id="s5x" style="left:0;width:1080px;top:600px;font-size:72px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
-    <div class="cal" id="s5cal" style="left:340px;top:740px">
-      <div class="hd">OCTUBRE</div>
-      <div class="wd">MIÉRCOLES</div>
-      <div class="dg"><div class="roll" id="s5roll"></div></div>
-    </div>
-  </div>
-
   <!-- 6 · Objetivo -->
   <div class="scene" id="s6">
     <div class="blk ctr" id="s6a" style="top:1010px;font-size:52px;font-weight:800;letter-spacing:0.02em;line-height:1.1;color:var(--brand)"></div>
@@ -95,10 +80,15 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="abs ctr" id="s8a" style="left:0;width:1080px;top:850px;font-size:170px;font-weight:800;letter-spacing:-0.035em;line-height:1.08;white-space:nowrap"><div id="s8l1"></div></div>
   </div>
 
-  <!-- 10 · Fecha y lugar por confirmar (discreto, casi al final) -->
+  <!-- 10 · Fecha (calendario) y lugar por confirmar, casi al final -->
   <div class="scene" id="s9i">
-    <div class="abs ctr" id="s9d" style="left:0;width:1080px;top:840px;font-size:76px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
-    <div class="abs ctr" id="s9l" style="left:0;width:1080px;top:966px;white-space:nowrap"><span class="tag" style="font-size:46px;gap:16px;padding:10px 30px 12px 24px"><i id="s9dot" style="width:16px;height:16px"></i>Lugar por confirmar</span></div>
+    <div class="abs ctr" id="s9h" style="left:0;width:1080px;top:520px;font-size:72px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    <div class="cal" id="s9cal" style="left:340px;top:650px">
+      <div class="hd">OCTUBRE</div>
+      <div class="wd">MIÉRCOLES</div>
+      <div class="dg"><div class="roll" id="s9roll"></div></div>
+    </div>
+    <div class="abs ctr" id="s9l" style="left:0;width:1080px;top:1160px;white-space:nowrap"><span class="tag" style="font-size:46px;gap:16px;padding:10px 30px 12px 24px"><i id="s9dot" style="width:16px;height:16px"></i>Lugar por confirmar</span></div>
   </div>
 
   <!-- 9 · R35 necesita a personas -->
@@ -112,7 +102,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
 <script src="assets/logo-paths.js"></script>
 <script>
 'use strict';
-const W=1080,H=1920,D5=0.8,D6=-1.5,D7=8.4,DUR=71.0+D5+D6+D7;
+const W=1080,H=1920,D5=0.8,D6=-13.8,D7=8.4,D9=1.0,DUR=72.0+D5+D6+D7;
 window.DUR=DUR;
 /* ───────── utilidades ───────── */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -478,12 +468,14 @@ const NT=TILE.cols*TILE.rows;
 const segOf=k=>{const b=k%6, nseg=Math.ceil((NT-b)/6), s=(k/6)|0;const [x0,x1]=BARS[b];const w=(x1-x0)/nseg;return[x0+s*w+(s?3:0),BAR_Y0+b*BAR_DY-BAR_H/2,w-(s<nseg-1?3:0)-(s?3:0),BAR_H,b];};
 const CAL={x:340,y:740,w:400,h:450,r:64};
 function plan(t){
-  if(t<18.4||t>29.4)return;
+  if(t<18.4||t>23.4)return;
   const solid=P(t,18.5,19.1,E.inOutSine);
-  const morph=P(t,22.75,23.9,E.inOutQuint);
-  if(morph<=0){
+  // salida: las barras se contraen hacia el núcleo del objetivo (escena 6)
+  const col=P(t,22.55,23.25,E.inOutCubic);
+  bg.save();bg.translate(TGT.x,TGT.y);bg.scale(1-col*0.96,1-col*0.96);bg.translate(-TGT.x,-TGT.y);
+  {
     BARS.forEach(([x0,x1],bi)=>{
-      const yc=BAR_Y0+bi*BAR_DY;bg.globalAlpha=solid;
+      const yc=BAR_Y0+bi*BAR_DY;bg.globalAlpha=solid*(1-P(t,23.0,23.3));
       bg.fillStyle='#e3ebf6';bg.beginPath();rrect(bg,x0,yc-BAR_H/2,x1-x0,BAR_H,BAR_H/2);bg.fill();
       const pr=P(t,19.2+bi*0.12,20.6+bi*0.12,E.inOutCubic)*BAR_PROG[bi];
       if(pr>0){const gr=bg.createLinearGradient(x0,0,x1,0);gr.addColorStop(0,rgba(mixRGB(BAR_C[bi],C.white,0.45)));gr.addColorStop(1,rgba(BAR_C[bi]));
@@ -501,49 +493,8 @@ function plan(t){
     BARS.forEach(([x0,x1],bi)=>{const p=P(t,19.3+bi*0.14,19.9+bi*0.14,E.outBack);if(p<=0)return;
       const x=x1+34,y=BAR_Y0+bi*BAR_DY;bg.fillStyle='#fff';bg.beginPath();hexPath(bg,x,y,15*p,1.86);bg.fill();
       bg.fillStyle=rgba(BAR_C[bi]);bg.beginPath();hexPath(bg,x,y,10*p,1.86);bg.fill();});
-    return;
   }
-  // morph de barras → baldosas (oficina)
-  const fall0=26.45, flip=P(t,24.95,25.55,E.inOutCubic), lift=P(t,25.45,26.1,E.outBack);
-  const toSun=P(t,26.7,28.3,E.inOutCubic);
-  for(let k=0;k<NT;k++){
-    const [sx,sy,sw,sh,b]=segOf(k), [tx,ty,tw,th]=tileRect(k);
-    const d=k*0.018;const m=E.inOutQuint(clamp((t-22.75-d)/1.15));
-    let x=lerp(sx,tx,m),y=lerp(sy,ty,m),w=lerp(sw,tw,m),h=lerp(sh,th,m),rad=lerp(BAR_H/2,26,m);
-    let col=mixRGB(BAR_C[k%6],hexRGB('#e6eef9'),m), stroke=m;
-    let rot=0,sc=1,al=1,sx2=1;
-    if(k===SPECIAL){
-      sx2=Math.abs(Math.cos(Math.PI*flip));
-      if(flip>0.5){col=null}
-      sc=1+0.14*lift;rot=-7*lift*(1-toSun);
-      if(toSun>0){
-        const cx0=x+w/2,cy0=y+h/2;const cx=lerp(cx0,CAL.x+CAL.w/2,toSun),cy=lerp(cy0,CAL.y+CAL.h/2,toSun)-Math.sin(Math.PI*toSun)*90;
-        w=lerp(w*sc,CAL.w,toSun);h=lerp(h*sc,CAL.h,toSun);rad=lerp(26,CAL.r,E.inOutCubic(toSun));
-        x=cx-w/2;y=cy-h/2;sc=1;
-      }
-      if(t>28.4)continue; // a partir de aquí lo dibuja el calendario (DOM)
-    } else {
-      const ft=t-fall0-((Math.abs(k%4-1.5)+((k/4)|0)*0.6)*0.07);
-      if(ft>0){y+=-260*ft+0.5*4200*ft*ft;rot=(k%2?1:-1)*(30+k*7)*ft;al=clamp(1-ft/1.0)}
-      if(y>H+200||al<=0)continue;
-    }
-    bg.save();bg.globalAlpha=al;bg.translate(x+w/2,y+h/2);bg.rotate(rot*Math.PI/180);bg.scale(sx2*sc,sc);
-    if(k===SPECIAL&&flip>0){bg.shadowColor=`rgba(0,50,130,${0.35*lift*(1-toSun)+0.3*toSun})`;bg.shadowBlur=50*lift+30*toSun;bg.shadowOffsetY=24*lift;}
-    bg.beginPath();rrect(bg,-w/2,-h/2,w,h,rad);
-    if(col){bg.fillStyle=rgba(col);bg.fill();if(stroke>0){bg.shadowColor='transparent';bg.strokeStyle=rgba(hexRGB('#cddcf0'),stroke);bg.lineWidth=2;bg.stroke()}}
-    else{const gr=bg.createLinearGradient(-w/2,-h/2,w/2,h/2);// azul → blanco del calendario
-      const kc=E.inOutSine(clamp((toSun-0.45)/0.5));
-      gr.addColorStop(0,rgba(mixRGB(C.sky,C.white,kc)));gr.addColorStop(1,rgba(mixRGB(C.brand,C.white,kc)));bg.fillStyle=gr;bg.fill();}
-    bg.restore();
-  }
-}
-
-/* ───────── escena 4 ───────── */
-const S4A=words($('s4a'),'Y queremos hacerlo de una manera ~distinta.~');
-function s4(t){
-  const on=t>23.0&&t<28.3;vis($('s4'),on);if(!on)return;
-  reveal(S4A,t,23.5,0.085,0.85);
-  S($('s4a'),inOut(t,23,0.01,27.7,0.45,90,16));
+  bg.restore();
 }
 
 /* ───────── escena 5: fecha ───────── */
@@ -558,8 +509,7 @@ const ridge=(L,x)=>L.soft
   ? L.base-L.amp[0]*Math.sin(x*L.f[0]+L.ph[0])-L.amp[1]*Math.sin(x*L.f[1]+L.ph[1])-L.amp[2]*0.4*Math.sin(x*L.f[2]+L.ph[2])-L.peak[1]*Math.exp(-(((x-L.peak[0])/L.peak[2])**2))
   : L.base+40-L.amp[0]*2*rdg(x*L.f[0]+L.ph[0])-L.amp[1]*1.6*rdg(x*L.f[1]+L.ph[1])-L.amp[2]*1.3*rdg(x*L.f[2]+L.ph[2])-L.peak[1]*Math.exp(-(((x-L.peak[0])/L.peak[2])**2));
 const PIN={x:330,layer:2};
-const S5X=words($('s5x'),'Nos encontraremos el');
-(()=>{const r=$('s5roll');for(let i=1;i<=7;i++){const d=document.createElement('div');d.textContent=i;r.appendChild(d)}})();
+(()=>{const r=$('s9roll');for(let i=1;i<=7;i++){const d=document.createElement('div');d.textContent=i;r.appendChild(d)}})();
 function sky(t){
   const a=P(t,27.0,28.6,E.inOutSine)*(1-P(t,36.7,37.6,E.inOutSine));
   if(a<=0)return;
@@ -641,16 +591,6 @@ function pin(t,dy,par){
   bg.shadowColor='transparent';bg.fillStyle='#fff';bg.beginPath();bg.arc(0,-68,21,0,Math.PI*2);bg.fill();
   bg.fillStyle='#0055b8';bg.font='800 30px Head';bg.textAlign='center';bg.textBaseline='middle';bg.fillText('?',0,-66);
   bg.restore();
-}
-function s5(t){
-  const on=t>27.3&&t<34.6;vis($('s5'),on);if(!on)return;
-  reveal(S5X,t,27.9,0.08,0.8);
-  const out=P(t,33.9,34.4,E.inCubic);
-  S($('s5x'),{op:1-out,y:-out*60,b:out*14});
-  // el calendario toma el relevo de la baldosa (mismo tamaño y lugar)
-  const ci=P(t,27.35,27.55,E.lin);
-  S($('s5cal'),{op:ci*(1-out),s:1-out*0.1,y:out*60,b:out*10});
-  const rl=P(t,28.5,29.5,E.inOutQuint);$('s5roll').style.transform=`translateY(${-rl*6*290}px)`;
 }
 
 
@@ -781,7 +721,7 @@ function s7(t){
 
 /* ───────── escena 8: nos vemos ───────── */
 const S8A=chars($('s8l1'),'NOS VEMOS');
-const S9D=words($('s9d'),'Miércoles 7 de octubre');
+const S9H=words($('s9h'),'Nos encontraremos el');
 const CONF=(()=>{const r=rng(88),a=[];for(let i=0;i<150;i++){const ang=r()*Math.PI*2,sp=170+r()*560;a.push({ang,sp,h:4+r()*8,rot:r()*6,vr:(r()-.5)*3,c:[C.light,C.brand,C.soft,C.mid,C.deep][i%5],d:r()*0.25,dm:r()*0.3,ph:r()*6.28})}return a})();
 function s8(t){
   const on=t>62.4&&t<66.6;vis($('s8'),on);if(!on)return;
@@ -802,11 +742,14 @@ function confetti(t){
     bg.beginPath();hexPath(bg,x,y,lerp(q.h,3.4,m),1.86,(q.rot+q.vr*tt)*(1-m));bg.fill();bg.globalAlpha=1;});
 }
 function s9i(t){
-  const on=t>58.6&&t<62.7;vis($('s9i'),on);if(!on)return;
-  reveal(S9D,t,59.0,0.08,0.8);
-  const tp=P(t,59.6,60.35,E.outBack), o=inOut(t,58.6,0.01,62.0,0.5,40,14);
-  S($('s9d'),o);S($('s9l'),{...o,s:lerp(0.7,1,tp),op:o.op*clamp(tp*2)});
-  const ph=((t-59.6)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
+  const on=t>58.6&&t<63.7;vis($('s9i'),on);if(!on)return;
+  const out=P(t,63.0,63.5,E.inCubic);
+  reveal(S9H,t,58.8,0.08,0.8);S($('s9h'),{op:1-out,y:-out*50,b:out*12});
+  const cp=P(t,59.1,59.85,E.spring);
+  S($('s9cal'),{s:lerp(0.4,1,cp)*(1-out*0.1),op:Math.min(1,cp*3)*(1-out),y:(1-cp)*80+out*50,r:(1-cp)*-8,b:out*10});
+  const rl=P(t,59.4,60.4,E.inOutQuint);$('s9roll').style.transform=`translateY(${-rl*6*290}px)`;
+  const tp=P(t,60.6,61.35,E.outBack);S($('s9l'),{s:lerp(0.7,1,tp),op:clamp(tp*2)*(1-out),y:out*50});
+  const ph=((t-60.6)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
 }
 
 
@@ -869,14 +812,14 @@ function outro(t){
 /* ───────── cuadro ───────── */
 function renderFrame(t){
   fg.clearRect(0,0,W,H);
-  ambient(t,clamp((t-4.3)/0.8)*(1-P(t-D5-D6-D7,65.8,67.0)));
-  const u=t-D5, v=u-D6, w=v-D7;   // relojes de las escenas 5, 6–7 y 8+ (desfases para tiempos de lectura)
+  ambient(t,clamp((t-4.3)/0.8)*(1-P(t-D5-D6-D7-D9,65.8,67.0)));
+  const u=t-D5, v=u-D6, w=v-D7, z=w-D9;   // relojes: objetivo/equipo (v), tarjetas/R35/fecha (w), «Nos vemos» y logo (z)
   particles(t);
   plan(t);
   target(v);
   team(v);
-  s1(t);s2(t);s3(t);s4(t);s5(u);s6(v);s6t(v);s7(w);s9(w);s9i(w);s8(w);confetti(w);
-  outro(w);
+  s1(t);s2(t);s3(t);s6(v);s6t(v);s7(w);s9(w);s9i(w);s8(z);confetti(z);
+  outro(z);
   intro(t);
 }
 window.renderFrame=renderFrame;

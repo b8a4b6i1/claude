@@ -1,7 +1,7 @@
 # Oxiquim · Jornada GPER «Del diagnóstico a la acción» — invitación en video
 
-Pieza vertical 9:16 (1080×1920, 60 fps, 78,7 s) basada en el libreto *Invitación Olmué v3* y en los
-*Lineamientos de marca 2025* (versiones anteriores: `oxiquim_jornada_gper_olmue.mp4` = v1, `_v2.mp4` = v2, `_v3.mp4` = v3, `_v4.mp4` = v4, `_v5.mp4` = v5 sin efectos de sonido, `_v6.mp4` = v6 aún con Olmué como lugar; v7 con «un lugar por confirmar» a mitad del video).
+Pieza vertical 9:16 (1080×1920, 60 fps, 67,4 s; 68,4 s en la versión WhatsApp) basada en el libreto *Invitación Olmué v3* y en los
+*Lineamientos de marca 2025* (versiones anteriores: `oxiquim_jornada_gper_olmue.mp4` = v1, `_v2.mp4` = v2, `_v3.mp4` = v3, `_v4.mp4` = v4, `_v5.mp4` = v5 sin efectos de sonido, `_v6.mp4` = v6 aún con Olmué como lugar; v7 con «un lugar por confirmar» a mitad del video; v8 con la fecha a mitad del video).
 Todo es código: la animación es una función determinista del tiempo (`renderFrame(t)` en `index.html`),
 capturada cuadro a cuadro con Playwright y codificada con ffmpeg. La música (120 BPM, Re mayor) se sintetiza en `scripts/audio.py` y los efectos de sonido en `scripts/sfx.py`.
 
@@ -10,16 +10,14 @@ capturada cuadro a cuadro con Playwright y codificada con ffmpeg. La música (12
 | 0–4,5 s | Logo | Punto → trazo del isotipo → relleno → logotipo → zoom a través del hexágono interior e iris hexagonal |
 | 4,5–11 s | 1 · Invitación / Jornada Gerencia de Personas / “Del diagnóstico a la acción” | Nube de datos que se ordena en el título; «A la acción» entra con estela |
 | 11–17 s | 2 · Ya tenemos los resultados del diagnóstico… | Las mismas partículas forman un gráfico de columnas con barrido de escaneo |
-| 17–23 s | 3 · Ahora queremos compartirlos contigo… | Las columnas se reordenan en un Gantt con hitos y ruta |
-| 23–28 s | 4 · Y queremos hacerlo de una manera distinta. | Barras → cuadrícula; una baldosa se voltea, el resto cae |
-| 28–35 s | 5 · Nos encontraremos el miércoles 7 de octubre | La baldosa distinta crece y se convierte en el calendario |
-| 35–45 s | 6 · ¿Para qué nos reuniremos? … | Blanco de hexágonos que entra en foco; cometa al centro |
-| 44–51 s | 7 · También será un espacio para encontrarnos… | Doce personas forman un círculo unido alrededor del núcleo |
-| 51–59 s | 8 · Queremos terminar el día con… | Tres tarjetas con íconos animados |
-| 59–66 s | 9 · R35 / Necesita a personas. | «R35» formado por figuras de personas |
-| 66–70 s | 10 · Miércoles 7 de octubre · Lugar por confirmar | Recordatorio discreto con un punto que late |
-| 70–74 s | 11 · Nos vemos | Letras con resorte y estallido de hexágonos |
-| 74–78,7 s | Logo | Los hexágonos del confeti se reúnen en el isotipo; cierre con brillo |
+| 17–23 s | 3 · Ahora queremos compartirlos contigo… | Las columnas se reordenan en un Gantt; al salir se contraen en el núcleo del objetivo |
+| 23–32 s | 4 · ¿Para qué nos reuniremos? … | Blanco de hexágonos que entra en foco; cometa al centro |
+| 31–38 s | 5 · También será un espacio para encontrarnos… | Doce personas forman un círculo unido alrededor del núcleo |
+| 38–47 s | 6 · Queremos terminar el día con… | Tres tarjetas con íconos animados |
+| 47–54 s | 7 · R35 / Necesita a personas. | «R35» formado por figuras de personas |
+| 54–59 s | 8 · Nos encontraremos el [calendario: miércoles 7 de octubre] · Lugar por confirmar | Calendario grande; etiqueta discreta con un punto que late |
+| 59–63 s | 9 · Nos vemos | Letras con resorte y estallido de hexágonos |
+| 63–67,4 s | Logo | Los hexágonos del confeti se reúnen en el isotipo; cierre con brillo |
 
 ## Marca
 
@@ -58,7 +56,7 @@ ffmpeg -i out/video.mp4 -i out/audio.wav -c:v copy -c:a aac -b:a 256k -shortest 
 
 ```bash
 node scripts/render.mjs --fps 60 --crf 8 --out out/video_master.mp4   # máster casi sin pérdida
-node scripts/render.mjs --stills 64.5 && cp out/stills/t64.50.png out/cover_r35.png
+node scripts/render.mjs --stills 52.2 && cp out/stills/t52.20.png out/cover_r35.png
 ./scripts/whatsapp.sh                                                  # dos pasadas, objetivo 29 MB
 ```
 
