@@ -1,7 +1,7 @@
 """Efectos de sonido sincronizados con index.html, en la línea de las librerías de UI/motion (clics limpios,
 swipes, pops, risers, golpes suaves de sub, brillos). Todo sintetizado.
 
-Relojes (como en index.html): t = absoluto · u = t − 0.8 · v = t − 1.8 · w = t − 10.2
+Relojes (como en index.html): t = absoluto · u = t − 0.8 · v = t + 0.7 · w = t − 7.7
 Los tiempos con dispersión aleatoria (personas de las escenas 7 y 10) se leen de out/cues.json
 (node scripts/export_cues.mjs), así coinciden cuadro a cuadro con la animación.
 
@@ -12,7 +12,7 @@ import os
 import numpy as np
 from scipy.signal import butter, sosfilt
 
-D5, D6, D8 = 0.8, 1.8, 10.2
+D5, D6, D8 = 0.8, -0.7, 7.7   # u = t − D5 · v = t − D6 · w = t − D8 (index.html: D5=0.8, D6=−1.5, D7=8.4)
 
 
 def build(N, SR):
@@ -226,38 +226,20 @@ def build(N, SR):
     add(swipe(0.3, 900, 5000, a=0.5), 24.95, 0.14, pan=-0.2); add(swipe(0.3, 5000, 900, a=0.2), 25.25, 0.14, pan=0.2)   # volteo
     add(ping(midi(86), 0.5), 25.25, 0.08)
     add(pop(700, 0.18), 25.5, 0.22); add(shimmer(0.5, 4, 3), 25.6, 0.06)        # se eleva
-    text_in(26.2)
     for k, tk in enumerate((26.45, 26.53, 26.6, 26.7)):                         # caen las demás
         add(swipe(0.7, 2200 - k * 200, 300, a=0.15), tk, 0.08, pan=rng.uniform(-0.7, 0.7))
-    add(morph(1.6, 440, 660), 26.7, 0.12, rev=0.5)                              # se vuelve sol
-    n = int(10.2 * SR); x = np.arange(n) / n                                   # aire libre (paisaje)
-    wind = lp(rng.standard_normal(n), 700) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.23 * np.arange(n) / SR)) * np.minimum(1, x * 6) * np.minimum(1, (1 - x) * 4)
-    add(wind, 27.4, 0.05, rev=0.4)
-    # ═════════ 5 · Un lugar por confirmar (u)
-    for li in range(4): add(rumble(1.3), 28.5 + li * 0.08 * 2.2 + D5, 0.22, pan=-0.3 + li * 0.2)
-    add(air(1.0, True), 28.4 + D5, 0.1)
-    text_in(29.6 + D5)
-    add(hit(1.2, 65), 29.95 + D5 + 0.25, 0.22); add(shimmer(0.8, 2, 5), 30.0 + D5, 0.08, rev=0.5)   # «un lugar»
-    add(pop(980, 0.16), 30.6 + D5 + 0.2, 0.16); add(ping(midi(90), 0.5), 30.6 + D5 + 0.25, 0.05, rev=0.5)   # «por confirmar»
-    for k in range(5): add(bloop(1200, 0.12), 30.6 + D5 + 1.1 * (k + 1), 0.025, rev=0.3)                   # el punto late
-    for k in range(12): add(click(2800, 0.01), 30.4 + D5 + k * 0.08, 0.035, pan=0.3 - k * 0.05)   # ruta
-    add(whistle_down(0.13), 31.0 + D5, 0.07)
-    t_land = 31.0 + D5 + 0.165 * 0.75
-    add(thud(), t_land, 0.3, pan=-0.35); add(pop(520, 0.16), t_land, 0.12, pan=-0.35)
-    add(bloop(560), t_land + 0.05, 0.1, pan=-0.35, rev=0.4)                      # onda
-    for k, ((a, b), x) in enumerate(zip(((32.25, 32.8), (33.05, 33.6)), (0.1, 0.5))):   # el pin salta buscando
-        add(swipe(0.4, 700, 2600, a=0.5), a + D5, 0.09, pan=x - 0.4, pan_to=x)
-        add(pop(560 + 140 * k, 0.16), b + D5, 0.13, pan=x); add(bloop(620 + 140 * k), b + D5 + 0.05, 0.08, pan=x, rev=0.4)
-        for j in range(3): add(click(2600 + 200 * j, 0.01), a + D5 + 0.1 + j * 0.12, 0.03, pan=x)   # la ruta se recalcula
-    add(shimmer(0.9, 6, 3), 33.75 + D5, 0.05, pan=0.5, rev=0.5)                 # queda flotando
-    add(pop(420, 0.2), 31.85 + D5 + 0.12, 0.25); add(swipe(0.35, 600, 3000), 31.8 + D5, 0.08)     # calendario
+    add(air(1.5, True), 26.7, 0.1)                                              # la baldosa crece y se vuelve calendario
+    add(morph(1.5, 440, 660), 26.75, 0.07, rev=0.5)
+    # ═════════ 5 · Fecha (u)
+    add(thud(150), 27.45 + D5, 0.14); add(pop(420, 0.2), 27.5 + D5, 0.18)        # el calendario toma el relevo
+    text_in(27.9 + D5)
     for k in range(1, 7):                                                       # número 1 → 7
-        tk = 32.05 + D5 + inv_ease(inOutQuint, k / 6) * 1.05
+        tk = 28.5 + D5 + inv_ease(inOutQuint, k / 6) * 1.0
         add(click(2200 + k * 120, 0.016), tk, 0.12 if k < 6 else 0.2)
-    add(air(0.9, False), 36.35 + D5, 0.12)                                      # se hunden los cerros
-    add(rumble(0.8, False), 36.4 + D5, 0.12)
-    add(morph(1.15, 660, 990), 36.75 + D5, 0.1, rev=0.5)                        # sol → núcleo
+    add(shimmer(0.7, 3, 4), 29.55 + D5, 0.06, rev=0.5)
+    add(air(0.6, False), 33.9 + D5, 0.1)
     # ═════════ 6 · ¿Para qué nos reuniremos? (v)
+    add(pop(500, 0.18), 35.95 + 0.25 + D6, 0.18)                                # aparece el núcleo
     for i in range(1, 7): add(bloop(220 + i * 40, 0.25), 35.9 + i * 0.06 + D6, 0.07, pan=(-1) ** i * 0.3)
     text_in(36.25 + D6)
     add(focus(1.0), 36.5 + D6, 0.12); add(snap(), 37.5 + D6, 0.16)               # entra en foco
@@ -289,27 +271,35 @@ def build(N, SR):
     for k in range(8): add(click(3000, 0.01), 46.25 + 0.3 + k * 0.12 + D8, 0.03)
     add(pop(990), 46.25 + 0.3 + 0.8 * 1.5 + D8, 0.16)                          # nodo de la ruta
     for i in range(3): add(swipe(0.4, 800, 4000, a=0.3), 51.15 + i * 0.07 + D8, 0.08, pan=-0.3 + 0.3 * i)
-    # ═════════ 9 · Nos vemos allá (w)
-    for i in range(13):
-        if i == 3: continue                                              # espacios
-        add(pop(midi(PENTA[i % len(PENTA)]), 0.12), 51.75 + i * 0.05 + 0.165 + D8, 0.1, pan=-0.6 + i * 0.075)
-    add(hit(1.2, 62), 52.35 + D8, 0.22)
-    for k in range(26):                                                         # confeti
-        add(click(rng.uniform(4000, 9000), 0.01), 52.35 + D8 + rng.exponential(0.35), 0.05, pan=rng.uniform(-0.9, 0.9), rev=0.4)
-    add(shimmer(1.2, 5, 6), 52.4 + D8, 0.1, rev=0.6)
-    add(air(0.6, False), 55.15 + D8, 0.08)
-    # ═════════ 10 · R35 (w)
+    # ═════════ 9 · R35 necesita a personas (w)
     for q in cues['people']:                                                    # llegan las personas
-        ta = 55.55 + q['d'] + inv_ease(outQuint, 0.9) * 1.25 + D8
+        ta = 51.75 + q['d'] + inv_ease(outQuint, 0.9) * 1.25 + D8
         add(lp(click(rng.uniform(1400, 2600), 0.02), 3500), ta, 0.035, pan=(q['x'] - 540) / 600)
-    add(air(1.6, True), 55.4 + D8, 0.08)
-    text_in(57.6 + D8)
-    add(hit(1.0, 60), 57.6 + D8 + 0.4, 0.16)
-    add(riser(1.3), 61.75 + D8, 0.22)                                           # convergen al isotipo
-    swarm(61.75 + D8, 1.5, lambda x: 120 * np.sin(np.pi * x) + 10, g=0.035)
-    add(hit(1.8, 50), 63.3 + D8, 0.45, rev=0.3)                                # aparece la marca
-    for i in range(6): add(click(2400 + i * 150), 63.55 + i * 0.07 + D8, 0.16, pan=-0.3 + i * 0.12)
-    add(shimmer(1.0, 3, 6), 64.8 + D8, 0.14, pan=-0.6, pan_to=0.6, rev=0.6)     # brillo final
+    add(air(1.6, True), 51.6 + D8, 0.08)
+    text_in(53.8 + D8)
+    add(hit(1.0, 60), 53.8 + D8 + 0.4, 0.16)
+    add(air(1.0, False), 58.0 + D8, 0.1)                                        # vuelven por donde llegaron
+    swarm(58.0 + D8, 1.0, lambda x: 90 * (1 - x) + 10, g=0.03)
+    # ═════════ 10 · Fecha y lugar por confirmar (w)
+    text_in(58.8 + D8, 0.06)
+    add(pop(980, 0.16), 59.45 + 0.2 + D8, 0.12)
+    for k in range(1, 3): add(bloop(1200, 0.12), 59.45 + 1.1 * k + D8, 0.02, rev=0.3)   # el punto late
+    add(air(0.5, False), 62.0 + D8, 0.07)
+    # ═════════ 11 · Nos vemos (w)
+    for i in range(9):
+        if i == 3: continue                                                    # espacio
+        add(pop(midi(PENTA[i % len(PENTA)]), 0.12), 62.6 + i * 0.06 + 0.165 + D8, 0.1, pan=-0.5 + i * 0.12)
+    add(hit(1.2, 62), 63.1 + D8, 0.22)
+    for k in range(30):                                                         # confeti
+        add(click(rng.uniform(4000, 9000), 0.01), 63.15 + D8 + rng.exponential(0.35), 0.05, pan=rng.uniform(-0.9, 0.9), rev=0.4)
+    add(shimmer(1.2, 5, 6), 63.2 + D8, 0.1, rev=0.6)
+    add(air(0.5, False), 65.9 + D8, 0.07)
+    add(riser(1.1), 65.8 + D8, 0.2)                                             # el confeti se reúne en el isotipo
+    swarm(65.8 + D8, 1.2, lambda x: 110 * np.sin(np.pi * x) + 10, g=0.03)
+    # ═════════ Marca (w)
+    add(hit(1.8, 50), 67.0 + D8, 0.45, rev=0.3)
+    for i in range(6): add(click(2400 + i * 150), 67.35 + i * 0.07 + D8, 0.16, pan=-0.3 + i * 0.12)
+    add(shimmer(1.0, 3, 6), 68.6 + D8, 0.14, pan=-0.6, pan_to=0.6, rev=0.6)     # brillo final
 
     # reverb corta (sala pequeña) propia del bus de efectos
     from scipy.signal import fftconvolve

@@ -102,13 +102,13 @@ def tick(f=2200, g=1.0):
 
 
 def inside(t, spans): return any(a <= t < b for a, b in spans)
-INTRO_END, END_GROOVE = 4.45, 73.3
-FULL = [(11.0, 37.2), (38.2, 61.2), (61.6, 71.6)]          # pulso completo (con respiros de un compás)
-LEAD = [(29.3, 37.2), (45.6, 53.4), (61.6, 71.6)]          # melodía principal: paisaje, equipo, cierre
+INTRO_END, END_GROOVE = 4.45, 74.6
+FULL = [(11.0, 34.8), (35.6, 58.8), (59.3, 73.6)]          # pulso completo (respiros antes del objetivo, de R35 y del logo)
+LEAD = [(28.8, 34.8), (43.1, 50.9), (59.3, 73.6)]          # melodía principal: fecha, equipo, cierre
 
 # ── pad brillante (acordes abiertos) con intensidad por sección
 def pad_level(t):
-    pts = [(0, 0.25), (2, 0.55), (4.45, 0.45), (11, 0.5), (29.3, 0.65), (37.2, 0.8), (38.2, 0.55), (61.6, 0.8), (71.6, 0.95), (73.3, 0.9), (78.7, 0.0)]
+    pts = [(0, 0.25), (2, 0.55), (4.45, 0.45), (11, 0.5), (28.8, 0.65), (34.8, 0.8), (35.6, 0.55), (59.3, 0.8), (73.6, 0.95), (74.6, 0.9), (78.7, 0.0)]
     return np.interp(t, [q[0] for q in pts], [q[1] for q in pts])
 for bar in range(int(DUR / BAR) + 1):
     t0 = bar * BAR; seg = int((BAR + 0.5) * SR); s = np.zeros(seg)
@@ -124,7 +124,7 @@ for b in range(int(DUR / BEAT)):
     t = b * BEAT
     if inside(t, FULL): kicks.append((t, 0.9))
     elif INTRO_END <= t < 11.0: kicks.append((t, 0.6))
-    elif END_GROOVE <= t < 76.3 and b % 2 == 0: kicks.append((t, 0.45))
+    elif END_GROOVE <= t < 77.6 and b % 2 == 0: kicks.append((t, 0.45))
 for t, g in kicks: add(kick(g), t, 0.9)
 duck = np.ones(N)
 for t, g in kicks:
@@ -144,7 +144,7 @@ for b in range(int(DUR / BEAT)):
     t = b * BEAT
     if inside(t, FULL) and b % 2 == 1: add(clap(0.2), t, 1.0, rev=0.45)
     # redoble de palmas antes de cada respiro
-for t_end in (37.2, 61.2, 71.6):
+for t_end in (34.8, 58.8, 73.6):
     for k in range(8): add(clap(0.05 + 0.02 * k), t_end - 1.0 + k * BEAT / 4, 1.0, rev=0.3)
 
 # ── bajo saltarín: contratiempos con octava, raíz del acorde
@@ -177,7 +177,7 @@ ARP = np.zeros(N); ARPR = np.zeros(N)
 pattern = [0, 1, 2, 3, 2, 1, 3, 2]
 for s16 in range(int(DUR / (BEAT / 4))):
     t = s16 * BEAT / 4
-    if not (inside(t, FULL) or (INTRO_END <= t < 11 ) or (73.3 <= t < 77.5 and s16 % 2 == 0)): continue
+    if not (inside(t, FULL) or (INTRO_END <= t < 11 ) or (74.6 <= t < 78.0 and s16 % 2 == 0)): continue
     m = CH[chord_at(t)][pattern[s16 % 8]] + 24
     n = int(0.25 * SR); tn = tt(n); f = midi(m)
     tone = np.sin(2 * np.pi * f * tn) + 0.3 * np.sin(2 * np.pi * 2 * f * tn) + 0.1 * np.sin(2 * np.pi * 3 * f * tn)
@@ -206,7 +206,7 @@ def chime(notes, t0, step=0.09, g=0.05):
 
 # campanas musicales de la intro (parte de la música; los efectos van en scripts/sfx.py)
 for i, (t0, m) in enumerate([(0.1, 74), (0.5, 78), (0.9, 81), (1.3, 85)]): add(bell(midi(m + 12)), t0, 0.05, pan=(-0.5 if i % 2 else 0.5), rev=0.9)
-chime([86, 90, 93, 98], 73.35, 0.12, 0.05)
+chime([86, 90, 93, 98], 74.65, 0.12, 0.05)
 
 # ── reverb por convolución
 n_ir = int(2.6 * SR); t_ir = tt(n_ir)

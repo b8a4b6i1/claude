@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Jornada Gerencia de Personas · Invitación v3</title>
+<title>Jornada Gerencia de Personas · Invitación</title>
 <style>
 /* Títulos: Goli (oficial) — sustituto Figtree mientras no esté el archivo de Goli. Texto: Trebuchet MS (oficial). */
 @font-face{font-family:'Head';src:local('Goli'),local('Goli Sans'),url(fonts/goli.woff2) format('woff2'),url(fonts/figtree-latin-wght-normal.woff2) format('woff2');font-weight:300 900;font-display:block}
@@ -56,18 +56,15 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="blk" id="s3t" style="top:1170px;font-size:74px;font-weight:600;letter-spacing:-0.03em;line-height:1.13;color:var(--slate)"></div>
   </div>
 
-  <!-- 4 · Manera diferente / Fuera de la oficina -->
+  <!-- 4 · Una manera distinta -->
   <div class="scene" id="s4">
     <div class="blk ctr" id="s4a" style="top:1150px;font-size:86px;font-weight:800;letter-spacing:-0.04em;line-height:1.06"></div>
-    <div class="blk ctr" id="s4b" style="top:1440px;font-size:96px;font-weight:800;letter-spacing:-0.04em;line-height:1.06;color:var(--brand)"></div>
   </div>
 
-  <!-- 5 · Lugar por confirmar, miércoles 7 de octubre -->
+  <!-- 5 · Fecha: miércoles 7 de octubre -->
   <div class="scene" id="s5">
-    <div class="abs ctr" id="s5x" style="left:0;width:1080px;top:236px;font-size:68px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
-    <div class="abs ctr" id="s5p" style="left:0;width:1080px;top:536px;white-space:nowrap"><span class="tag"><i id="s5dot"></i>por confirmar</span></div>
-    <div class="abs ctr" id="s5a" style="left:0;width:1080px;top:318px;font-size:184px;font-weight:800;letter-spacing:-0.045em;line-height:1.05;white-space:nowrap"></div>
-    <div class="cal" id="s5cal" style="left:340px;top:1420px">
+    <div class="abs ctr" id="s5x" style="left:0;width:1080px;top:600px;font-size:72px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    <div class="cal" id="s5cal" style="left:340px;top:740px">
       <div class="hd">OCTUBRE</div>
       <div class="wd">MIÉRCOLES</div>
       <div class="dg"><div class="roll" id="s5roll"></div></div>
@@ -93,12 +90,18 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="card" id="k3" style="top:1220px"><div class="ic" style="background:linear-gradient(160deg,#f1f6fd,#e0eaf7)"><canvas id="ic3" width="170" height="170"></canvas></div><div class="tx">y una hoja de ruta <span class="g">compartida.</span></div></div>
   </div>
 
-  <!-- 8 · Nos vemos -->
+  <!-- 11 · Nos vemos (última frase) -->
   <div class="scene" id="s8">
-    <div class="abs ctr" id="s8a" style="left:0;width:1080px;top:740px;font-size:150px;font-weight:800;letter-spacing:-0.035em;line-height:1.08;white-space:nowrap"><div id="s8l1"></div><div id="s8l2"></div></div>
+    <div class="abs ctr" id="s8a" style="left:0;width:1080px;top:850px;font-size:170px;font-weight:800;letter-spacing:-0.035em;line-height:1.08;white-space:nowrap"><div id="s8l1"></div></div>
   </div>
 
-  <!-- 9 · Rumbo 35 -->
+  <!-- 10 · Fecha y lugar por confirmar (discreto, casi al final) -->
+  <div class="scene" id="s9i">
+    <div class="abs ctr" id="s9d" style="left:0;width:1080px;top:840px;font-size:76px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    <div class="abs ctr" id="s9l" style="left:0;width:1080px;top:966px;white-space:nowrap"><span class="tag" style="font-size:46px;gap:16px;padding:10px 30px 12px 24px"><i id="s9dot" style="width:16px;height:16px"></i>Lugar por confirmar</span></div>
+  </div>
+
+  <!-- 9 · R35 necesita a personas -->
   <div class="scene" id="s9">
     <div class="abs ctr" id="s9b" style="left:0;width:1080px;top:1210px;font-size:74px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
   </div>
@@ -109,7 +112,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
 <script src="assets/logo-paths.js"></script>
 <script>
 'use strict';
-const W=1080,H=1920,D5=0.8,D6=1.0,D7=8.4,DUR=68.5+D5+D6+D7;
+const W=1080,H=1920,D5=0.8,D6=-1.5,D7=8.4,DUR=71.0+D5+D6+D7;
 window.DUR=DUR;
 /* ───────── utilidades ───────── */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -473,7 +476,7 @@ const SPECIAL=9;
 const tileRect=k=>{const r=(k/TILE.cols)|0,c=k%TILE.cols;return[TILE.x0+c*(TILE.w+TILE.gx),TILE.y0+r*(TILE.h+TILE.gy),TILE.w,TILE.h]};
 const NT=TILE.cols*TILE.rows;
 const segOf=k=>{const b=k%6, nseg=Math.ceil((NT-b)/6), s=(k/6)|0;const [x0,x1]=BARS[b];const w=(x1-x0)/nseg;return[x0+s*w+(s?3:0),BAR_Y0+b*BAR_DY-BAR_H/2,w-(s<nseg-1?3:0)-(s?3:0),BAR_H,b];};
-const SUN={x:770,y:860,r:118};
+const CAL={x:340,y:740,w:400,h:450,r:64};
 function plan(t){
   if(t<18.4||t>29.4)return;
   const solid=P(t,18.5,19.1,E.inOutSine);
@@ -514,40 +517,36 @@ function plan(t){
       if(flip>0.5){col=null}
       sc=1+0.14*lift;rot=-7*lift*(1-toSun);
       if(toSun>0){
-        const cx0=x+w/2,cy0=y+h/2;const cx=lerp(cx0,SUN.x,toSun),cy=lerp(cy0,SUN.y,toSun)-Math.sin(Math.PI*toSun)*120;
-        const s=lerp(Math.max(w,h)*sc,SUN.r*2,toSun);
-        w=lerp(w*sc,SUN.r*2,toSun);h=lerp(h*sc,SUN.r*2,toSun);rad=lerp(26,SUN.r,E.inOutCubic(toSun));
+        const cx0=x+w/2,cy0=y+h/2;const cx=lerp(cx0,CAL.x+CAL.w/2,toSun),cy=lerp(cy0,CAL.y+CAL.h/2,toSun)-Math.sin(Math.PI*toSun)*90;
+        w=lerp(w*sc,CAL.w,toSun);h=lerp(h*sc,CAL.h,toSun);rad=lerp(26,CAL.r,E.inOutCubic(toSun));
         x=cx-w/2;y=cy-h/2;sc=1;
       }
-      if(t>28.3+D5)continue; // a partir de aquí lo dibuja el sol
+      if(t>28.4)continue; // a partir de aquí lo dibuja el calendario (DOM)
     } else {
       const ft=t-fall0-((Math.abs(k%4-1.5)+((k/4)|0)*0.6)*0.07);
       if(ft>0){y+=-260*ft+0.5*4200*ft*ft;rot=(k%2?1:-1)*(30+k*7)*ft;al=clamp(1-ft/1.0)}
       if(y>H+200||al<=0)continue;
     }
     bg.save();bg.globalAlpha=al;bg.translate(x+w/2,y+h/2);bg.rotate(rot*Math.PI/180);bg.scale(sx2*sc,sc);
-    if(k===SPECIAL&&flip>0){bg.shadowColor=`rgba(0,50,130,${0.35*lift*(1-toSun)})`;bg.shadowBlur=50*lift;bg.shadowOffsetY=24*lift;}
+    if(k===SPECIAL&&flip>0){bg.shadowColor=`rgba(0,50,130,${0.35*lift*(1-toSun)+0.3*toSun})`;bg.shadowBlur=50*lift+30*toSun;bg.shadowOffsetY=24*lift;}
     bg.beginPath();rrect(bg,-w/2,-h/2,w,h,rad);
     if(col){bg.fillStyle=rgba(col);bg.fill();if(stroke>0){bg.shadowColor='transparent';bg.strokeStyle=rgba(hexRGB('#cddcf0'),stroke);bg.lineWidth=2;bg.stroke()}}
-    else{const gr=bg.createLinearGradient(-w/2,-h/2,w/2,h/2);// azul → claro → amarillo (sin pasar por gris)
-      const kc=E.inOutSine(clamp((toSun-0.1)/0.25)), via=(a,b)=>kc<.5?mixRGB(a,hexRGB('#f4f7fc'),kc*2):mixRGB(hexRGB('#f4f7fc'),b,kc*2-1);
-      gr.addColorStop(0,rgba(via(C.sky,hexRGB('#fde2ad'))));gr.addColorStop(1,rgba(via(C.brand,C.am)));bg.fillStyle=gr;bg.fill();}
+    else{const gr=bg.createLinearGradient(-w/2,-h/2,w/2,h/2);// azul → blanco del calendario
+      const kc=E.inOutSine(clamp((toSun-0.45)/0.5));
+      gr.addColorStop(0,rgba(mixRGB(C.sky,C.white,kc)));gr.addColorStop(1,rgba(mixRGB(C.brand,C.white,kc)));bg.fillStyle=gr;bg.fill();}
     bg.restore();
   }
 }
 
 /* ───────── escena 4 ───────── */
 const S4A=words($('s4a'),'Y queremos hacerlo de una manera ~distinta.~');
-const S4B=words($('s4b'),'Fuera de la oficina.');
 function s4(t){
-  const on=t>23.0&&t<29.6;vis($('s4'),on);if(!on)return;
+  const on=t>23.0&&t<28.3;vis($('s4'),on);if(!on)return;
   reveal(S4A,t,23.5,0.085,0.85);
-  reveal(S4B,t,26.2,0.09,0.85);
-  const out=inOut(t,23,0.01,29.05,0.45,90,16);
-  S($('s4a'),{...out,y:out.y-P(t,26.3,27.1,E.outExpo)*30});S($('s4b'),out);
+  S($('s4a'),inOut(t,23,0.01,27.7,0.45,90,16));
 }
 
-/* ───────── escena 5: un lugar por confirmar ───────── */
+/* ───────── escena 5: fecha ───────── */
 const MT=[ // capas de cerros: base, amplitudes, color, retardo
   {base:1120,amp:[70,40,22],f:[0.0042,0.011,0.023],ph:[0.4,1.9,2.7],c:'#d3dded',d:0.0,peak:[780,170,240]},
   {base:1235,amp:[60,34,18],f:[0.0051,0.013,0.029],ph:[2.2,0.3,1.1],c:'#9fb7dc',d:0.08,peak:[230,120,210]},
@@ -559,8 +558,7 @@ const ridge=(L,x)=>L.soft
   ? L.base-L.amp[0]*Math.sin(x*L.f[0]+L.ph[0])-L.amp[1]*Math.sin(x*L.f[1]+L.ph[1])-L.amp[2]*0.4*Math.sin(x*L.f[2]+L.ph[2])-L.peak[1]*Math.exp(-(((x-L.peak[0])/L.peak[2])**2))
   : L.base+40-L.amp[0]*2*rdg(x*L.f[0]+L.ph[0])-L.amp[1]*1.6*rdg(x*L.f[1]+L.ph[1])-L.amp[2]*1.3*rdg(x*L.f[2]+L.ph[2])-L.peak[1]*Math.exp(-(((x-L.peak[0])/L.peak[2])**2));
 const PIN={x:330,layer:2};
-const S5X=words($('s5x'),'Nos encontraremos en');
-const S5A=chars($('s5a'),'un lugar');
+const S5X=words($('s5x'),'Nos encontraremos el');
 (()=>{const r=$('s5roll');for(let i=1;i<=7;i++){const d=document.createElement('div');d.textContent=i;r.appendChild(d)}})();
 function sky(t){
   const a=P(t,27.0,28.6,E.inOutSine)*(1-P(t,36.7,37.6,E.inOutSine));
@@ -645,17 +643,16 @@ function pin(t,dy,par){
   bg.restore();
 }
 function s5(t){
-  const on=t>29.3&&t<37.4;vis($('s5'),on);if(!on)return;
-  reveal(S5X,t,29.6,0.08,0.8);
-  S5A.forEach((c,i)=>{const p=P(t,29.95+i*0.05,30.85+i*0.05,E.outExpo);S(c,{y:(1-p)*160,op:Math.min(1,p*2),b:(1-p)*10});});
-  // etiqueta «por confirmar» con un punto que late (como una ubicación que se está buscando)
-  const tp=P(t,30.6,31.4,E.outBack);S($('s5p'),{s:lerp(0.6,1,tp),op:clamp(tp*2)*(1-P(t,36.4,36.9,E.inCubic)),y:-P(t,36.4,36.9,E.inCubic)*60});
-  const ph=((t-30.6)%1.1)/1.1;$('s5dot').style.boxShadow=`0 0 0 ${ph*22}px rgba(0,85,184,${0.45*(1-ph)})`;
-  const outA=P(t,36.4,36.9,E.inCubic);S($('s5a'),{op:1-outA,y:-outA*60,b:outA*14});S($('s5x'),{op:1-outA,y:-outA*60,b:outA*14});
-  const cp=P(t,31.85,32.6,E.spring), co=P(t,36.35,36.85,E.inCubic);
-  S($('s5cal'),{s:lerp(0.4,1,cp),op:Math.min(1,cp*3)*(1-co),y:(1-cp)*80+co*200,r:(1-cp)*-8});
-  const rl=P(t,32.05,33.1,E.inOutQuint);$('s5roll').style.transform=`translateY(${-rl*6*290}px)`;
+  const on=t>27.3&&t<34.6;vis($('s5'),on);if(!on)return;
+  reveal(S5X,t,27.9,0.08,0.8);
+  const out=P(t,33.9,34.4,E.inCubic);
+  S($('s5x'),{op:1-out,y:-out*60,b:out*14});
+  // el calendario toma el relevo de la baldosa (mismo tamaño y lugar)
+  const ci=P(t,27.35,27.55,E.lin);
+  S($('s5cal'),{op:ci*(1-out),s:1-out*0.1,y:out*60,b:out*10});
+  const rl=P(t,28.5,29.5,E.inOutQuint);$('s5roll').style.transform=`translateY(${-rl*6*290}px)`;
 }
+
 
 /* ───────── escena 6: objetivo ───────── */
 const S6A=words($('s6a'),'¿PARA QUÉ NOS REUNIREMOS?');
@@ -679,12 +676,12 @@ function target(t){
     bg.beginPath();hexPath(bg,TGT.x,TGT.y-out*80,(h+pulse)*lerp(0.7,1,p)*(1+out*0.4),1.86,rot);bg.stroke();bg.restore();
   }
   // núcleo (el sol transformado) — se mantiene
-  if(t>36.85){const fl=t>hit?Math.exp(-(t-hit)*3):0;
+  if(t>35.95){const fl=t>hit?Math.exp(-(t-hit)*3):0;const pin=E.outBack(clamp((t-35.95)/0.6));
     bg.save();bg.globalAlpha=1-coreOut;
     if(fl>0.01){const gr=bg.createRadialGradient(TGT.x,TGT.y,0,TGT.x,TGT.y,260);gr.addColorStop(0,`rgba(0,85,184,${0.35*fl})`);gr.addColorStop(1,'rgba(0,85,184,0)');bg.fillStyle=gr;bg.fillRect(0,0,W,H);}
     const gr=bg.createLinearGradient(TGT.x-46,TGT.y-46,TGT.x+46,TGT.y+46);gr.addColorStop(0,rgba(C.light));gr.addColorStop(1,rgba(C.brand));
     const pulse=t>46.2?1+0.04*Math.sin((t-46.2)*3):1;
-    bg.fillStyle=gr;bg.beginPath();hexPath(bg,TGT.x,TGT.y,46*(1+fl*0.15)*pulse*(1-coreOut*0.5),1.86);bg.fill();bg.restore();}
+    bg.fillStyle=gr;bg.beginPath();hexPath(bg,TGT.x,TGT.y,46*pin*(1+fl*0.15)*pulse*(1-coreOut*0.5),1.86);bg.fill();bg.restore();}
   // trayectoria "avanzamos hacia": cometa que sube y da en el centro
   const ap=P(t,hit-1.0,hit,E.inOutCubic);
   if(ap>0&&t<hit+0.6){
@@ -783,18 +780,35 @@ function s7(t){
 }
 
 /* ───────── escena 8: nos vemos ───────── */
-const S8A=[...chars($('s8l1'),'NOS VEMOS'),...chars($('s8l2'),'ALLÁ','g')];
-const CONF=(()=>{const r=rng(88),a=[];for(let i=0;i<46;i++){const ang=r()*Math.PI*2,sp=280+r()*520;a.push({ang,sp,h:5+r()*10,rot:r()*6,vr:(r()-.5)*4,c:[C.light,C.brand,C.soft,C.mid][i%4],d:r()*0.25})}return a})();
+const S8A=chars($('s8l1'),'NOS VEMOS');
+const S9D=words($('s9d'),'Miércoles 7 de octubre');
+const CONF=(()=>{const r=rng(88),a=[];for(let i=0;i<150;i++){const ang=r()*Math.PI*2,sp=170+r()*560;a.push({ang,sp,h:4+r()*8,rot:r()*6,vr:(r()-.5)*3,c:[C.light,C.brand,C.soft,C.mid,C.deep][i%5],d:r()*0.25,dm:r()*0.3,ph:r()*6.28})}return a})();
 function s8(t){
-  const on=t>51.6&&t<56.0;vis($('s8'),on);if(!on)return;
-  const out=P(t,55.15,55.75,E.inCubic);
-  S8A.forEach((c,i)=>{const p=P(t,51.75+i*0.05,52.75+i*0.05,E.spring);S(c,{y:(1-p)*200,op:clamp(p*3),s:lerp(0.6,1,p),r:(1-p)*(i%2?10:-10)})});
+  const on=t>62.4&&t<66.6;vis($('s8'),on);if(!on)return;
+  const out=P(t,65.9,66.4,E.inCubic);
+  S8A.forEach((c,i)=>{const p=P(t,62.6+i*0.06,63.6+i*0.06,E.spring);S(c,{y:(1-p)*200,op:clamp(p*3),s:lerp(0.6,1,p),r:(1-p)*(i%2?10:-10)})});
   S($('s8a'),{op:1-out,s:1-out*0.12,b:out*12});
-  // estallido amable de hexágonos
-  CONF.forEach(q=>{const tt=t-52.35-q.d;if(tt<0)return;const life=clamp(tt/2.4);if(life>=1)return;
-    const dist=q.sp*E.outCubic(clamp(tt/1.6));const x=540+Math.cos(q.ang)*dist*1.0,y=905+Math.sin(q.ang)*dist*1.0+tt*tt*40;
-    bg.globalAlpha=(1-life)*(1-out);bg.fillStyle=rgba(q.c);bg.beginPath();hexPath(bg,x,y,q.h,1.86,q.rot+q.vr*tt);bg.fill();bg.globalAlpha=1;});
 }
+// estallido amable de hexágonos que luego se reúnen en el isotipo
+function confetti(t){
+  if(t<63.15||t>67.6)return;
+  const fade=1-P(t,67.0,67.5,E.inOutSine);
+  CONF.forEach(q=>{const tt=t-63.15-q.d;if(tt<0||!q.m)return;
+    const dist=q.sp*E.outCubic(clamp(tt/1.6));
+    const x0=540+Math.cos(q.ang)*dist+Math.sin(t*0.9+q.ph)*10, y0=950+Math.sin(q.ang)*dist*1.15+Math.cos(t*0.7+q.ph)*10;
+    const m=E.inOutQuint(clamp((t-65.8-q.dm)/1.0));
+    const x=lerp(x0,q.m[0],m), y=lerp(y0,q.m[1],m)-Math.sin(Math.PI*m)*50;
+    bg.globalAlpha=clamp(tt*5)*fade;bg.fillStyle=rgba(mixRGB(q.c,hexRGB(LG.color),m));
+    bg.beginPath();hexPath(bg,x,y,lerp(q.h,3.4,m),1.86,(q.rot+q.vr*tt)*(1-m));bg.fill();bg.globalAlpha=1;});
+}
+function s9i(t){
+  const on=t>58.6&&t<62.7;vis($('s9i'),on);if(!on)return;
+  reveal(S9D,t,58.8,0.08,0.8);
+  const tp=P(t,59.45,60.2,E.outBack), o=inOut(t,58.6,0.01,62.0,0.5,40,14);
+  S($('s9d'),o);S($('s9l'),{...o,s:lerp(0.7,1,tp),op:o.op*clamp(tp*2)});
+  const ph=((t-59.45)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
+}
+
 
 /* ───────── escena 9 y 10: personas → 35 → marca ───────── */
 const S9B=words($('s9b'),'NECESITA A ~PERSONAS.~');
@@ -810,6 +824,7 @@ function buildPeople(){
     const d=g.getImageData(0,0,W,H).data,pts=[];for(let y=0;y<H;y+=6)for(let x=0;x<W;x+=6){if(d[(y*W+x)*4+3]>200)pts.push([x,y])}return pts})();
   const r=rng(35);
   for(let i=mk.length-1;i>0;i--){const j=(r()*(i+1))|0;[mk[i],mk[j]]=[mk[j],mk[i]]}
+  CONF.forEach((q,i)=>q.m=mk[(i*37)%mk.length]);
   PEOPLE=s.map((p,i)=>{const side=r();let sx,sy;
     if(side<0.5){sx=r()*W;sy=H+60+r()*500}else if(side<0.75){sx=-60-r()*300;sy=600+r()*1300}else{sx=W+60+r()*300;sy=600+r()*1300}
     return{x:p[0],y:p[1],sx,sy,d:(1-(p[1]-700)/400)*0.5+r()*0.55,c:[C.deep,C.brand,C.brand,C.mid,C.sky,C.light][(r()*6)|0],ph:r()*6.28,m:mk[i%mk.length],dm:r()*0.35};});
@@ -822,48 +837,45 @@ function person(g,x,y,s,col,a,morph){
   g.beginPath();g.moveTo(x-k*0.38,y+k*0.42);g.quadraticCurveTo(x-k*0.38,y-k*0.06,x,y-k*0.06);g.quadraticCurveTo(x+k*0.38,y-k*0.06,x+k*0.38,y+k*0.42);g.closePath();g.fill();
 }
 function s9(t){
-  const on=t>55.4&&t<62.6;vis($('s9'),on);
-  if(t>55.4&&t<64.2){
+  const on=t>51.6&&t<58.8;vis($('s9'),on);
+  if(t>51.6&&t<59.3){
     PEOPLE.forEach((q,i)=>{
-      const p=E.outQuint(clamp((t-55.55-q.d)/1.25));
+      const p=E.outQuint(clamp((t-51.75-q.d)/1.25));
       const walk=Math.sin((t*9+q.ph))*(1-p)*10;
       let x=lerp(q.sx,q.x,p), y=lerp(q.sy,q.y,p)+walk-Math.abs(walk)*0.5;
       const idle=p>=1?Math.sin(t*2.2+q.ph)*1.6:0;y+=idle;
-      // escena 10: convergen al isotipo
-      const m=E.inOutQuint(clamp((t-61.75-q.dm)/1.25));
-      x=lerp(x,q.m[0],m);y=lerp(y,q.m[1],m)-Math.sin(Math.PI*m)*60;
-      const fade=1-P(t,63.1,63.6,E.inOutSine);
-      const col=mixRGB(q.c,hexRGB(LG.color),m);
-      person(bg,x,y,24,col,Math.min(1,p*3)*fade,m);
+      // salida: cada persona vuelve por donde llegó
+      const m=E.inQuint(clamp((t-58.0-q.dm)/0.9));
+      x=lerp(x,q.sx,m);y=lerp(y,q.sy,m);
+      person(bg,x,y,24,q.c,Math.min(1,p*3),0);
     });
   }
   if(!on)return;
-  reveal(S9B,t,57.6,0.1,0.9);
-  S($('s9b'),inOut(t,55,0.01,61.6,0.5,40,14));
+  reveal(S9B,t,53.8,0.1,0.9);
+  S($('s9b'),inOut(t,51,0.01,57.9,0.5,40,14));
 }
+
 function outro(t){
-  if(t<62.9)return;
-  const f=P(t,63.1,63.6,E.inOutSine);
+  if(t<66.6)return;
+  const f=P(t,66.9,67.4,E.inOutSine);
   drawLogo(bg,LOCK.x,LOCK.y,LK,{markFill:f,stroke:0,
-    letters:LETTERS.map((L,i)=>{const p=P(t,63.45+i*0.07,64.25+i*0.07,E.outExpo);return{op:p,dy:(1-p)*36}}),
-    sheen:P(t,64.8,65.7,E.inOutSine)});
+    letters:LETTERS.map((L,i)=>{const p=P(t,67.25+i*0.07,68.05+i*0.07,E.outExpo);return{op:p,dy:(1-p)*36}}),
+    sheen:P(t,68.6,69.5,E.inOutSine)});
   // halo suave al asentarse la marca
-  const h=P(t,63.2,64.4,E.outCubic);if(h<1){const cx=LOCK.x+INNER[0]*LK,cy=LOCK.y+INNER[1]*LK;const gr=bg.createRadialGradient(cx,cy,0,cx,cy,600*h+60);gr.addColorStop(0,`rgba(90,176,255,${0.22*(1-h)})`);gr.addColorStop(1,'rgba(90,176,255,0)');bg.fillStyle=gr;bg.fillRect(0,0,W,H);}
+  const h=P(t,67.0,68.2,E.outCubic);if(h<1&&h>0){const cx=LOCK.x+INNER[0]*LK,cy=LOCK.y+INNER[1]*LK;const gr=bg.createRadialGradient(cx,cy,0,cx,cy,600*h+60);gr.addColorStop(0,`rgba(0,85,184,${0.16*(1-h)})`);gr.addColorStop(1,'rgba(0,85,184,0)');bg.fillStyle=gr;bg.fillRect(0,0,W,H);}
 }
+
 
 /* ───────── cuadro ───────── */
 function renderFrame(t){
   fg.clearRect(0,0,W,H);
-  ambient(t,clamp((t-4.3)/0.8)*(1-P(t-D5-D6-D7,62.2,63.4)));
+  ambient(t,clamp((t-4.3)/0.8)*(1-P(t-D5-D6-D7,65.8,67.0)));
   const u=t-D5, v=u-D6, w=v-D7;   // relojes de las escenas 5, 6–7 y 8+ (desfases para tiempos de lectura)
-  sky(u);
   particles(t);
   plan(t);
-  sun(u);
-  mountains(u);
   target(v);
   team(v);
-  s1(t);s2(t);s3(t);s4(t);s5(u);s6(v);s6t(v);s7(w);s8(w);s9(w);
+  s1(t);s2(t);s3(t);s4(t);s5(u);s6(v);s6t(v);s7(w);s9(w);s9i(w);s8(w);confetti(w);
   outro(w);
   intro(t);
 }
