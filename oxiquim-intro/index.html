@@ -342,7 +342,7 @@ function s2(t){
 
 /* ───────── 3 · Luego, conversamos. (una voz se vuelve muchas, en grupos pequeños) ───────── */
 const S3T=words($('s3t'),'Luego, conversaremos.');
-const S3S=words($('s3s'),'En grupos pequeños, donde _todas_ _las_ _voces_ _cuentan._');
+const S3S=words($('s3s'),'Sobre los resultados del diagnóstico, / en grupos pequeños donde _todas_ _las_ _voces_ _cuentan._');
 const VY=660, GX=[420,800,1180,1540], GN=[4,3,4,3];
 const VOICES=(()=>{const r=rng(12),a=[];let i=0;
   const cols=[C.deep,C.brand,C.mid,C.sky,C.light,C.brand,C.mid];
@@ -374,7 +374,7 @@ function s4txt(t){
     const o=out(t,28.35);S($('s4t'),o);S($('s4s'),o);}
 }
 const S4T=words($('s4t'),'Después, priorizaremos.');
-const S4S=words($('s4s'),'Primero cada uno. _Luego,_ _juntos._');
+const S4S=words($('s4s'),'Las prioridades del plan de trabajo: / primero cada uno. _Luego,_ _juntos._');
 function voices(t){
   if(t<16.6||t>29.4)return;
   const g=fg;
