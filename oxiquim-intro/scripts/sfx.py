@@ -9,7 +9,11 @@ from scipy.signal import butter, sosfilt
 
 
 
+OFF = 2 * 63.1 / 26        # la bienvenida (index.html) desplaza todo lo posterior dos compases
+
+
 def build(N, SR):
+    SHIFT = [0.0]
     rng = np.random.default_rng(2026)
     L = np.zeros(N); R = np.zeros(N); RL = np.zeros(N); RR = np.zeros(N)
     tt = lambda n: np.arange(n) / SR
@@ -21,7 +25,7 @@ def build(N, SR):
 
     def add(sig, t0, g=1.0, pan=0.0, pan_to=None, rev=0.15):
         """Coloca una señal mono; pan_to hace un barrido estéreo durante el sonido."""
-        i = int(round(t0 * SR))
+        i = int(round((t0 + SHIFT[0]) * SR))
         if i >= N or g <= 0: return
         if i < 0: sig = sig[-i:]; i = 0
         sig = sig[: N - i]; n = len(sig)
@@ -178,6 +182,12 @@ def build(N, SR):
     add(hit(1.2, 62), 0.42, 0.22)
     for i in range(6): add(click(2300 + i * 140), arrive(1.05 + i * 0.07, 0.8, outExpo, 0.6), 0.16, pan=-0.3 + i * 0.12)   # letras
     add(shimmer(0.9, 3, 5), 2.15, 0.14, pan=-0.6, pan_to=0.6, rev=0.5)          # brillo
+    # ═════════ Bienvenida: el logo sube y aparece el nombre de la jornada
+    add(swipe(1.0, 400, 2200, a=0.55), 3.15, 0.1, pan=0.0)
+    text_in(3.6, 0.06); text_in(4.05, 0.08)
+    add(shimmer(1.0, 2, 5), 4.6, 0.06, rev=0.6)
+    add(air(0.5, False), 3.1 + OFF, 0.07)
+    SHIFT[0] = OFF                                                              # desde aquí, tiempos del resto del video (+ OFF)
     for i in range(6): add(click(3000 - i * 140, 0.012), 3.3 + (5 - i) * 0.04 + 0.2, 0.07, pan=0.3 - i * 0.12)   # letras se van
     add(air(0.7, False), 3.55, 0.12)                                            # el isotipo vuelve a su núcleo
     add(morph(0.8, 760, 520), 3.55, 0.1)
@@ -252,10 +262,10 @@ def build(N, SR):
         if k:                                                                   # contador mecánico
             add(click(1900, 0.02), at - 0.2 + 0.32, 0.12, pan=-0.6); add(click(2500, 0.012), at + 0.4, 0.07, pan=-0.6)
         text_in(at, 0.08); add(thud(110), at + 0.35, 0.07)
-        add(air(0.45, False), at + 2.3 if k < 3 else 58.4, 0.05)
+        add(air(0.45, False), at + 2.3 if k < 3 else 58.0, 0.05)
     # ═════════ 8 · Y al final del día
-    text_in(59.2, 0.05); text_in(59.75, 0.08)
-    add(shimmer(0.9, 2, 5), 60.2, 0.05, rev=0.6)
+    text_in(58.6, 0.05); text_in(59.1, 0.08)
+    add(shimmer(0.9, 2, 5), 59.6, 0.05, rev=0.6)
     add(air(0.5, False), 62.6, 0.07)
     # ═════════ 9 · ¡Vamos a trabajar!
     add(riser(1.25), 61.85, 0.3)

@@ -42,6 +42,12 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
   <canvas class="layer" id="bg" width="1920" height="1080"></canvas>
   <div id="glass"></div>
 
+  <!-- 0 · Bienvenida -->
+  <div class="scene" id="s0">
+    <div class="abs ctr" id="s0a" style="left:0;width:1920px;top:536px;font-size:58px;font-weight:500;letter-spacing:-0.01em;color:var(--slate);white-space:nowrap"></div>
+    <div class="abs ctr title" id="s0b" style="left:0;width:1920px;top:628px;font-size:112px"></div>
+  </div>
+
   <!-- 1 · Hoy nos detenemos -->
   <div class="scene" id="s1">
     <div class="abs ctr" id="s1g" style="left:0;width:1920px;top:318px">
@@ -95,7 +101,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
   <!-- 8 · Al final del día -->
   <div class="scene" id="s8">
     <div class="abs ctr sub" id="s8a" style="left:0;width:1920px;top:282px;font-size:60px"></div>
-    <div class="abs ctr title" id="s8b" style="left:0;width:1920px;top:400px;font-size:140px"></div>
+    <div class="abs ctr title" id="s8b" style="left:0;width:1920px;top:400px;font-size:112px"></div>
   </div>
 
   <!-- 10 · R35 necesita a personas -->
@@ -109,7 +115,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 <script src="assets/logo-paths.js"></script>
 <script>
 'use strict';
-const W=1920,H=1080,DUR=79.0;
+const W=1920,H=1080,OFF=2*63.1/26,DUR=79.0+OFF;   // OFF: la bienvenida desplaza todo lo posterior dos compases de música
 window.DUR=DUR;
 /* ───────── utilidades ───────── */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -255,23 +261,35 @@ function glass(t){
 /* ───────── 0–1 · logo → su núcleo se vuelve el punto de «Hoy nos detenemos.» ───────── */
 let DOT_REST={x:0,y:0,r:17}, DOT_END={x:0,y:0,r:17};
 function intro(t){
-  if(t>4.95)return;
+  const u=t-OFF;               // reloj del resto del video
+  if(u>4.95)return;
   const L=lockAt(LK0);
-  const s=lerp(1.035,1,P(t,0.3,2.6,E.outCubic));
-  const k=LK0*s, ox=W/2+(L.x-W/2)*s, oy=H/2+(L.y-H/2)*s;
+  // el logo sube y se achica para dar paso a la bienvenida
+  const up=P(t,3.15,4.15,E.inOutQuint);
+  const s=lerp(1.035,1,P(t,0.3,2.6,E.outCubic))*lerp(1,0.6,up), cy=lerp(H/2,372,up);
+  const k=LK0*s, ox=W/2+(L.x-W/2)*s, oy=cy+(L.y-H/2)*s;
   const ix=ox+INNER[0]*k, iy=oy+INNER[1]*k;
   // aparición: el isotipo se abre desde su núcleo; cierre: vuelve a su núcleo
-  const open=P(t,0.35,1.5,E.outCubic), shut=P(t,3.55,4.25,E.inOutCubic);
+  const open=P(t,0.35,1.5,E.outCubic), shut=P(u,3.55,4.25,E.inOutCubic);
   const rEnd=DOT_REST.r/k;
   let clipR=t<1.5?lerp(0,130,open):lerp(130,rEnd,shut);
   if(t>=1.5&&shut<=0)clipR=null;
-  const mv=P(t,4.1,4.9,E.inOutQuint);
+  const mv=P(u,4.1,4.9,E.inOutQuint);
   const dx=lerp(ix,DOT_REST.x,mv)-ix, dy=lerp(iy,DOT_REST.y,mv)-iy;
   drawLogo(fg,ox+dx,oy+dy,k,{
     markFill:1, clipR,
-    letters:LETTERS.map((Lt,i)=>{const p=P(t,1.05+i*0.07,1.85+i*0.07,E.outExpo), q=P(t,3.3+(5-i)*0.04,3.65+(5-i)*0.04,E.inCubic);return{op:p*(1-q),dy:(1-p)*30-q*14}}),
+    letters:LETTERS.map((Lt,i)=>{const p=P(t,1.05+i*0.07,1.85+i*0.07,E.outExpo), q=P(u,3.3+(5-i)*0.04,3.65+(5-i)*0.04,E.inCubic);return{op:p*(1-q),dy:(1-p)*30-q*14}}),
     sheen:P(t,2.15,3.05,E.inOutSine),
   });
+}
+
+/* ───────── 0 · Bienvenida ───────── */
+const S0A=words($('s0a'),'Bienvenidos a la jornada');
+const S0B=words($('s0b'),'“Del diagnóstico a la ~acción”~');
+function s0(t){
+  const on=t>3.4&&t<8.6;vis($('s0'),on);if(!on)return;
+  reveal(S0A,t,3.6,0.07);reveal(S0B,t,4.05,0.08,0.95);
+  const o=out(t,3.1+OFF,0.45,36,12);S($('s0a'),o);S($('s0b'),o);
 }
 
 /* ───────── 1 · Hoy nos detenemos. ───────── */
@@ -471,21 +489,21 @@ const S7E=words($('s7e'),'Nuestros acuerdos para hoy');
 const AG=['Escuchar / para ~entender.~','Hablar con franqueza / y ~respeto.~','Lo que se comparte aquí, / se ~cuida.~','Pensar en / lo que ~viene.~'].map((s,k)=>words($('a'+k),s));
 const AT=[48.0,50.7,53.4,56.1];
 function s7(t){
-  const on=t>47.3&&t<59.0;vis($('s7'),on);if(!on)return;
-  reveal(S7E,t,47.45,0.07);S($('s7e'),out(t,58.4));
-  const ti=P(t,47.75,48.6,E.outExpo), to=out(t,58.4);
+  const on=t>47.3&&t<58.6;vis($('s7'),on);if(!on)return;
+  reveal(S7E,t,47.45,0.07);S($('s7e'),out(t,58.0));
+  const ti=P(t,47.75,48.6,E.outExpo), to=out(t,58.0);
   S($('tab'),{op:ti*to.op,x:(1-ti)*-40,y:to.y,b:to.b});
   const roll=[1,2,3].reduce((a,k)=>a+P(t,AT[k]-0.2,AT[k]+0.45,E.inOutQuint),0);
   $('tabr').style.transform=`translateY(${-236*roll}px)`;
-  AG.forEach((ws,k)=>{reveal(ws,t,AT[k],0.07,0.9);S($('a'+k),out(t,k<3?AT[k]+2.3:58.4,0.4,34,12));$('a'+k).style.visibility=t>AT[k]-0.1&&t<(k<3?AT[k]+2.8:59)?'inherit':'hidden';});
+  AG.forEach((ws,k)=>{reveal(ws,t,AT[k],0.07,0.9);S($('a'+k),out(t,k<3?AT[k]+2.3:58.0,0.4,34,12));$('a'+k).style.visibility=t>AT[k]-0.1&&t<(k<3?AT[k]+2.8:58.6)?'inherit':'hidden';});
 }
 
 /* ───────── 8 · Y al final del día ───────── */
-const S8A=words($('s8a'),'Y al final del día:');
-const S8B=words($('s8b'),'compromisos que / construiremos ~juntos.~');
+const S8A=words($('s8a'),'Y al final del día');
+const S8B=words($('s8b'),'Levantaremos compromisos / que construiremos ~juntos.~');
 function s8(t){
-  const on=t>59.0&&t<63.3;vis($('s8'),on);if(!on)return;
-  reveal(S8A,t,59.2,0.07);reveal(S8B,t,59.75,0.09,0.95);
+  const on=t>58.4&&t<63.3;vis($('s8'),on);if(!on)return;
+  reveal(S8A,t,58.6,0.07);reveal(S8B,t,59.1,0.08,0.95);
   const o=out(t,62.6,0.45,40,14);S($('s8a'),o);S($('s8b'),o);
 }
 
@@ -567,9 +585,10 @@ function outro(t){
 /* ───────── cuadro ───────── */
 function renderFrame(t){
   fg.clearRect(0,0,W,H);
-  ambient(t,P(t,10.1,11.1,E.inOutSine)*(1-P(t,15.0,15.8,E.inOutSine))+P(t,29.0,30.2,E.inOutSine)*(1-P(t,34.8,35.6,E.inOutSine)));
-  glass(t);
-  s1(t);s2(t);s3(t);s4txt(t);voices(t);s5(t);s6(t);s7(t);s8(t);s9(t);outro(t);
+  const u=t-OFF;               // escenas posteriores a la bienvenida
+  ambient(u,P(u,10.1,11.1,E.inOutSine)*(1-P(u,15.0,15.8,E.inOutSine))+P(u,29.0,30.2,E.inOutSine)*(1-P(u,34.8,35.6,E.inOutSine)));
+  glass(u);
+  s0(t);s1(u);s2(u);s3(u);s4txt(u);voices(u);s5(u);s6(u);s7(u);s8(u);s9(u);outro(u);
   intro(t);
 }
 window.renderFrame=renderFrame;

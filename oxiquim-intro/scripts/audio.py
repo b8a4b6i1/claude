@@ -1,5 +1,5 @@
 """Banda sonora del video introductorio (≈99 BPM, Re mayor): piano, pad y un pulso suave que crece hacia
-«¡Vamos a trabajar!» (63,1 s, cae en tiempo fuerte) y resuelve con el logo. Sintetizada.
+«¡Vamos a trabajar!» (≈67,95 s, compás 28, tiempo fuerte) y resuelve con el logo. Sintetizada.
 Salida: out/audio.wav (44,1 kHz, estéreo) + stems."""
 import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
@@ -7,9 +7,10 @@ import wave, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 SR = 44100
-DUR = 79.0
+BAR = 63.1 / 26            # compás (≈98,9 BPM)
+OFF = 2 * BAR              # la bienvenida agrega dos compases tras el logo (= OFF de index.html)
+DUR = 79.0 + OFF
 N = int(SR * DUR)
-BAR = 63.1 / 26            # «¡Vamos a trabajar!» = compás 26
 BEAT = BAR / 4
 rng = np.random.default_rng(7)
 L = np.zeros(N); R = np.zeros(N); RL = np.zeros(N); RR = np.zeros(N)
@@ -81,12 +82,12 @@ def bell(f, dur=2.5, g=1.0):
     n = int(dur * SR); t = tt(n)
     return (np.sin(2 * np.pi * f * t) + 0.35 * np.sin(2 * np.pi * f * 2.0 * t) * np.exp(-t * 3) + 0.12 * np.sin(2 * np.pi * f * 5.4 * t) * np.exp(-t * 8)) * np.exp(-t * 2.0) * g * np.minimum(1, t / 0.002)
 
-LOGO_HIT = 73.95
-END_BAR = 30                                       # el ritmo se detiene; acorde final con el logo
+LOGO_HIT = 73.95 + OFF
+END_BAR = 32                                       # el ritmo se detiene; acorde final con el logo
 
 # ── pad: respira con la historia
 def pad_level(t):
-    pts = [(0, 0.0), (1.0, 0.5), (4.85, 0.35), (9.7, 0.45), (29.1, 0.6), (46.1, 0.55), (59.5, 0.75), (63.1, 1.0), (72.8, 0.7), (DUR, 0.0)]
+    pts = [(0, 0.0), (1.0, 0.5), (4.85, 0.42)] + [(a + OFF, v) for a, v in [(4.85, 0.35), (9.7, 0.45), (29.1, 0.6), (46.1, 0.55), (59.5, 0.75), (63.1, 1.0), (72.8, 0.7)]] + [(DUR, 0.0)]
     return np.interp(t, [p[0] for p in pts], [p[1] for p in pts])
 for b in range(END_BAR):
     t0 = tb(b); add(pad_chord(CH[b % 4], BAR + 1.0, 0.012 * pad_level(t0 + 1), 900 + 1800 * pad_level(t0)), t0 - 0.4, 1.0, pan=-0.2, rev=0.6)
@@ -94,47 +95,47 @@ for b in range(END_BAR):
 add(pad_chord([50, 57, 62, 64, 66], DUR - LOGO_HIT + 0.3, 0.016, 2400), LOGO_HIT - 0.15, 1.0, rev=0.7)
 
 # ── piano: notas sueltas en la marca, acordes en «Hoy nos detenemos», arpegio desde el diagnóstico
-for t0, m, v in [(0.38, 74, 0.5), (1.1, 78, 0.35), (1.6, 81, 0.35), (2.15, 86, 0.4), (4.88, 69, 0.45)]:
+for t0, m, v in [(0.38, 74, 0.5), (1.1, 78, 0.35), (1.6, 81, 0.35), (2.15, 86, 0.4), (4.88 + OFF, 69, 0.45)]:
     add(piano(midi(m), 3.5, v), t0, 0.16, pan=0.1, rev=0.6)
-for b in (2, 3):
+for b in (2, 3, 4, 5):                             # bienvenida y «Hoy nos detenemos»
     for j, m in enumerate(CH[b % 4]): add(piano(midi(m + 12), BAR + 0.6, 0.45), tb(b) + j * 0.025, 0.07, pan=-0.3 + j * 0.2, rev=0.5)
 ARP = [0, 2, 1, 3, 2, 1, 3, 2]
 for e8 in range(int(tb(END_BAR) / (BEAT / 2))):
     t = e8 * BEAT / 2
-    if t < tb(4): continue
+    if t < tb(6): continue
     ch = CH[chord_at(t)]
     m = ch[ARP[e8 % 8]] + 12 + (12 if (e8 % 8) in (3, 6) else 0)
-    v = 0.32 + 0.12 * (e8 % 2 == 0) + 0.1 * (t >= 63.1)
+    v = 0.32 + 0.12 * (e8 % 2 == 0) + 0.1 * (t >= tb(28))
     add(piano(midi(m), 1.6, v), t, 0.06, pan=0.35 * np.sin(e8 * 0.9), rev=0.45)
     if e8 % 8 == 0: add(piano(midi(ROOT[chord_at(t)] + 12), 2.4, 0.5), t, 0.07, pan=-0.1, rev=0.35)
 
 # ── pulso suave: corcheas apagadas en la raíz
 for e8 in range(int(tb(END_BAR) / (BEAT / 2))):
     t = e8 * BEAT / 2
-    if t < tb(4) or t >= tb(END_BAR): continue
+    if t < tb(6) or t >= tb(END_BAR): continue
     n = int(0.16 * SR); tn = tt(n); f = midi(ROOT[chord_at(t)] + 24)
     s = (np.sin(2 * np.pi * f * tn) + 0.3 * np.sin(2 * np.pi * 2 * f * tn)) * np.exp(-tn * 26) * np.minimum(1, tn / 0.003)
-    g = 0.05 if t < tb(12) else 0.06
+    g = 0.05 if t < tb(14) else 0.06
     add(lp(s, 1400), t, g * (1.0 if e8 % 2 == 0 else 0.7), pan=0.15 * (1 if e8 % 2 else -1))
 
 # ── percusión: shaker desde el compás 8; bombo y aro en las secciones de trabajo; plenitud en «¡Vamos!»
-KB = [(12, 19), (26, END_BAR)]
+KB = [(14, 21), (28, END_BAR)]
 kicks = []
 for q in range(int(tb(END_BAR) / BEAT)):
     t = q * BEAT; b = bar_of(t)
-    if any(a <= b < c for a, c in KB): kicks.append((t, 0.75 if b < 26 else 1.0))
-    elif 24.5 * BAR <= t < tb(26) and q % 2 == 0: kicks.append((t, 0.5))
+    if any(a <= b < c for a, c in KB): kicks.append((t, 0.75 if b < 28 else 1.0))
+    elif 26.5 * BAR <= t < tb(28) and q % 2 == 0: kicks.append((t, 0.5))
 for t, g in kicks: add(kick(g), t, 0.55)
 for s16 in range(int(tb(END_BAR) / (BEAT / 4))):
     t = s16 * BEAT / 4; b = bar_of(t)
-    if b < 8: continue
+    if b < 10: continue
     add(shaker(0.018 if s16 % 2 else 0.03), t, 1.0, pan=0.35)
 for q in range(int(tb(END_BAR) / BEAT)):
     t = q * BEAT; b = bar_of(t)
     if q % 4 in (1, 3):
-        if 12 <= b < 19: add(rim(0.05), t, 1.0, pan=-0.2, rev=0.3)
-        if 26 <= b < END_BAR: add(clap(0.16), t, 1.0, rev=0.4)
-for k in range(8): add(clap(0.03 + 0.02 * k), tb(26) - BAR / 2 + k * BEAT / 4, 1.0, rev=0.3)   # redoble suave hacia «¡Vamos!»
+        if 14 <= b < 21: add(rim(0.05), t, 1.0, pan=-0.2, rev=0.3)
+        if 28 <= b < END_BAR: add(clap(0.16), t, 1.0, rev=0.4)
+for k in range(8): add(clap(0.03 + 0.02 * k), tb(28) - BAR / 2 + k * BEAT / 4, 1.0, rev=0.3)   # redoble suave hacia «¡Vamos!»
 
 # ── bajo (sub) en las secciones con bombo
 duck = np.ones(N)
@@ -160,12 +161,12 @@ def melody(a, b, inst, g):
             tk = t + k * BEAT / 2
             if tk < tb(b): add(inst(midi(m)), tk, g, pan=0.12 * ((k % 3) - 1), rev=0.55)
         t += 2 * BAR
-melody(15, 19, lambda f: piano(f, 2.0, 0.55), 0.07)
-melody(26, END_BAR, lambda f: bell(f, 2.0), 0.045)
+melody(17, 21, lambda f: piano(f, 2.0, 0.55), 0.07)
+melody(28, END_BAR, lambda f: bell(f, 2.0), 0.045)
 
 # ── final: acorde con el logo
 for j, m in enumerate([38, 50, 57, 62, 64, 66, 69]): add(piano(midi(m), 5.5, 0.6), LOGO_HIT + j * 0.018, 0.09, pan=-0.4 + j * 0.13, rev=0.6)
-for j, m in enumerate([86, 90, 93, 98]): add(bell(midi(m), 2.5), 75.7 + j * 0.1, 0.03, pan=-0.5 + j * 0.33, rev=0.9)
+for j, m in enumerate([86, 90, 93, 98]): add(bell(midi(m), 2.5), 75.7 + OFF + j * 0.1, 0.03, pan=-0.5 + j * 0.33, rev=0.9)
 
 # ── reverb por convolución
 n_ir = int(3.0 * SR); t_ir = tt(n_ir)
@@ -190,7 +191,7 @@ act = s_rms > s_rms.max() * 0.02
 base = (np.sqrt(np.mean(m_rms[act] ** 2)) / np.sqrt(np.mean(s_rms[act] ** 2))) * 10 ** (-9 / 20)
 SL *= base; SRR *= base
 # 1b) por escena: el bus de efectos ~10 dB bajo la música en las ventanas donde suena (la música cambia mucho de nivel)
-SECT = [0, 4.9, 10, 16.5, 22.6, 28.8, 36, 47, 59, 63, 66, 72.4, DUR]
+SECT = [0, 3.2, 8.1] + [a + OFF for a in (4.9, 10, 16.5, 22.6, 28.8, 36, 47, 59, 63, 66, 72.4)] + [DUR]
 s_rms, _, _ = env(0.5 * (SL + SRR)); tw = idx / SR; gsec = []
 for a0, b0 in zip(SECT[:-1], SECT[1:]):
     w = (tw >= a0) & (tw < b0) & (s_rms > s_rms.max() * 0.01)
