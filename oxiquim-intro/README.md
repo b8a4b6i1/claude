@@ -4,7 +4,7 @@ Abre la jornada: encuadre del día, agenda en cinco verbos (escuchar, conversar,
 
 - `index.html`: animación determinista 1920 × 1080, `renderFrame(t)` (0–79 s). `?play` la reproduce en el navegador; `?t=12.5` muestra un cuadro.
 - `assets/logo-paths.js`: vectores oficiales del logo (lineamientos 2025; coinciden con `Logo_Oxiquim.ai`, azul #0055b8).
-- `fonts/`: Figtree (sustituto de Goli mientras no esté el archivo completo) y Trebuchet MS (`scripts/get_fonts.sh`).
+- `fonts/`: Goli (títulos, tipografía oficial, licencia SIL OFL 1.1) y Trebuchet MS para textos (`scripts/get_fonts.sh`, no se versiona).
 
 ## Producción
 

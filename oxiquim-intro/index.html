@@ -4,8 +4,12 @@
 <meta charset="utf-8">
 <title>Jornada Gerencia de Personas · Video introductorio</title>
 <style>
-/* Títulos: Goli (oficial) — sustituto Figtree mientras no esté el archivo completo de Goli. Texto: Trebuchet MS (oficial). */
-@font-face{font-family:'Head';src:local('Goli'),local('Goli Sans'),url(fonts/goli.woff2) format('woff2'),url(fonts/figtree-latin-wght-normal.woff2) format('woff2');font-weight:300 900;font-display:block}
+/* Títulos: Goli (oficial, OFL). Texto: Trebuchet MS (oficial). */
+@font-face{font-family:'Head';src:url(fonts/goli-light.otf) format('opentype');font-weight:300;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-regular.otf) format('opentype');font-weight:400;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-medium.otf) format('opentype');font-weight:500;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-semibold.otf) format('opentype');font-weight:600;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-bold.otf) format('opentype');font-weight:700;font-display:block}
 @font-face{font-family:'Body';src:url(fonts/trebuc.ttf) format('truetype');font-weight:400;font-display:block}
 @font-face{font-family:'Body';src:url(fonts/trebucbd.ttf) format('truetype');font-weight:700 900;font-display:block}
 :root{--ink:#162851;--slate:#4b5571;--brand:#0055b8;--mid:#2a6fc4;--light:#7aa9e3;--soft:#b3cbea;--pale:#dde6f3}
@@ -19,9 +23,9 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 .w{display:inline-block;will-change:transform}
 .mask{display:inline-block;overflow:hidden;padding:0.1em 0.06em 0.18em;margin:-0.1em -0.06em -0.18em;vertical-align:top}
 .g{background:linear-gradient(95deg,#162851 0%,#0055b8 55%,#2a6fc4 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.title{font-size:120px;font-weight:800;letter-spacing:-0.045em;line-height:1.02;color:var(--ink);white-space:nowrap}
+.title{font-size:120px;font-weight:700;letter-spacing:-0.045em;line-height:1.02;color:var(--ink);white-space:nowrap}
 .sub{font-family:'Body',sans-serif;font-size:46px;line-height:1.32;color:var(--slate);white-space:nowrap}
-.eyebrow{font-size:46px;font-weight:800;letter-spacing:-0.01em;color:var(--brand);white-space:nowrap}
+.eyebrow{font-size:46px;font-weight:700;letter-spacing:-0.01em;color:var(--brand);white-space:nowrap}
 #dot{display:inline-block;width:0.19em;height:0.19em;border-radius:50%;background:var(--brand);margin-left:0.035em;vertical-align:baseline}
 #glass{position:absolute;visibility:hidden;border-radius:48px;
   -webkit-backdrop-filter:blur(30px) saturate(1.7);backdrop-filter:blur(30px) saturate(1.7);
@@ -29,8 +33,8 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 /* viñeta de marca (pestaña con punta, lineamientos 2025) */
 #tab{position:absolute;left:160px;top:372px;width:190px;height:236px;background:var(--brand);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%);overflow:hidden}
 #tabr{position:absolute;left:0;top:0;width:133px}
-#tabr div{height:236px;line-height:236px;text-align:center;font-size:150px;font-weight:800;color:#fff;letter-spacing:-0.04em}
-.agr{position:absolute;left:430px;top:372px;width:1420px;font-size:108px;font-weight:800;letter-spacing:-0.045em;line-height:1.04;color:var(--ink);white-space:nowrap}
+#tabr div{height:236px;line-height:236px;text-align:center;font-size:150px;font-weight:700;color:#fff;letter-spacing:-0.04em}
+.agr{position:absolute;left:430px;top:372px;width:1420px;font-size:108px;font-weight:700;letter-spacing:-0.045em;line-height:1.04;color:var(--ink);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -41,14 +45,14 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
   <!-- 1 · Hoy nos detenemos -->
   <div class="scene" id="s1">
     <div class="abs ctr" id="s1g" style="left:0;width:1920px;top:318px">
-      <div id="s1a" style="font-size:180px;font-weight:800;letter-spacing:-0.05em;line-height:1.02;white-space:nowrap"></div>
+      <div id="s1a" style="font-size:164px;font-weight:700;letter-spacing:-0.05em;line-height:1.02;white-space:nowrap"></div>
       <div id="s1b" style="margin-top:44px;font-size:78px;font-weight:700;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
     </div>
   </div>
 
   <!-- 2 · Escuchamos -->
   <div class="scene" id="s2">
-    <div class="abs title" id="s2t" style="left:160px;top:330px"></div>
+    <div class="abs title" id="s2t" style="left:160px;top:336px;font-size:112px"></div>
     <div class="abs sub" id="s2s" style="left:164px;top:628px"></div>
   </div>
 
@@ -66,7 +70,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 
   <!-- 5 · Fundamentamos -->
   <div class="scene" id="s5">
-    <div class="abs title" id="s5t" style="left:160px;top:350px;font-size:90px"></div>
+    <div class="abs title" id="s5t" style="left:160px;top:358px;font-size:76px"></div>
     <div class="abs sub" id="s5s" style="left:164px;top:600px"></div>
   </div>
 
@@ -96,7 +100,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 
   <!-- 10 · R35 necesita a personas -->
   <div class="scene" id="s10">
-    <div class="abs ctr" id="s10b" style="left:0;width:1920px;top:718px;font-size:84px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    <div class="abs ctr" id="s10b" style="left:0;width:1920px;top:718px;font-size:84px;font-weight:700;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
   </div>
 
   <canvas class="layer" id="fg" width="1920" height="1080"></canvas>
@@ -273,7 +277,7 @@ function intro(t){
 /* ───────── 1 · Hoy nos detenemos. ───────── */
 const S1A=words($('s1a'),'Hoy nos detenemos');
 const DOT=document.createElement('span');DOT.id='dot';$('s1a').appendChild(DOT);
-const S1B=words($('s1b'),'~para~ ~mirar~ ~hacia~ ~adelante.~');
+const S1B=words($('s1b'),'_para_ _mirar_ _hacia_ _adelante._');
 const s1drift=t=>1+0.025*P(t,4.9,9.6,E.inOutSine);
 function s1(t){
   const on=t>4.0&&t<10.0;vis($('s1'),on);if(!on)return;
@@ -285,7 +289,7 @@ function s1(t){
 }
 
 /* ───────── 2 · Primero, escuchamos. (el punto se estira y es la base del gráfico) ───────── */
-const S2T=words($('s2t'),'Primero, / escuchamos.');
+const S2T=words($('s2t'),'Primero, / escucharemos.');
 const S2S=words($('s2s'),'Los resultados del diagnóstico / de _CIS_ _Consultores._');
 const BASE_Y=770, BAR_W=52, BARS=[170,250,210,390,290,330,230], TALL=3;
 const barX=i=>1090+i*88+BAR_W/2;
@@ -319,7 +323,7 @@ function s2(t){
 }
 
 /* ───────── 3 · Luego, conversamos. (una voz se vuelve muchas, en grupos pequeños) ───────── */
-const S3T=words($('s3t'),'Luego, conversamos.');
+const S3T=words($('s3t'),'Luego, conversaremos.');
 const S3S=words($('s3s'),'En grupos pequeños, donde _todas_ _las_ _voces_ _cuentan._');
 const VY=660, GX=[420,800,1180,1540], GN=[4,3,4,3];
 const VOICES=(()=>{const r=rng(12),a=[];let i=0;
@@ -351,7 +355,7 @@ function s4txt(t){
   if(on){reveal(S4T,t,23.1,0.1);reveal(S4S,t,23.75,0.06);
     const o=out(t,28.35);S($('s4t'),o);S($('s4s'),o);}
 }
-const S4T=words($('s4t'),'Después, priorizamos.');
+const S4T=words($('s4t'),'Después, priorizaremos.');
 const S4S=words($('s4s'),'Primero cada uno. _Luego,_ _juntos._');
 function voices(t){
   if(t<16.6||t>29.4)return;
@@ -390,7 +394,7 @@ function voices(t){
 }
 
 /* ───────── 5 · Y fundamentamos. ───────── */
-const S5T=words($('s5t'),'Y fundamentamos.');
+const S5T=words($('s5t'),'Y fundamentaremos.');
 const S5S=words($('s5s'),'Cada prioridad, con sus razones / y sus _indicadores._');
 const KPI=[0.14,0.24,0.2,0.38,0.5,0.63,0.86];
 const kx=i=>PAN.x+70+i*(PAN.w-140)/6, ky=v=>PAN.y+610-v*210;
@@ -478,7 +482,7 @@ function s7(t){
 
 /* ───────── 8 · Y al final del día ───────── */
 const S8A=words($('s8a'),'Y al final del día:');
-const S8B=words($('s8b'),'compromisos que / construimos ~juntos.~');
+const S8B=words($('s8b'),'compromisos que / construiremos ~juntos.~');
 function s8(t){
   const on=t>59.0&&t<63.3;vis($('s8'),on);if(!on)return;
   reveal(S8A,t,59.2,0.07);reveal(S8B,t,59.75,0.09,0.95);
@@ -486,7 +490,7 @@ function s8(t){
 }
 
 /* ───────── 9 · ¡Vamos a trabajar! → las letras se vuelven personas → R35 ───────── */
-const VAMOS={f:'800 250px Head',ls:'-11px',l1:['¡Vamos a',478],l2:['trabajar!',752]};
+const VAMOS={f:'700 250px Head',ls:'-11px',l1:['¡Vamos a',478],l2:['trabajar!',752]};
 function vamosText(g,a,sc,blur){
   if(a<=0.002)return;
   g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.translate(-W/2,-H/2);
@@ -506,7 +510,7 @@ function sampleText(draw,y0,y1,st){
   return pts;
 }
 function buildPeople(){
-  const r35=sampleText(g=>{g.fillStyle='#000';g.font='800 470px Head';g.letterSpacing='-13px';g.textAlign='center';g.fillText('R35',W/2,646);},250,660,27);
+  const r35=sampleText(g=>{g.fillStyle='#000';g.font='700 470px Head';g.letterSpacing='-13px';g.textAlign='center';g.fillText('R35',W/2,646);},250,660,27);
   let st=20,tx=[];
   for(;st<70;st+=0.5){tx=sampleText(g=>vamosText(g,1,1,0),220,820,st);if(tx.length<=r35.length)break;}
   const byX=(a,b)=>a[0]-b[0]||a[1]-b[1];
@@ -575,7 +579,7 @@ function measureDot(){
   const rd=s=>{S(g,{s});S($('s1a'),{});const b=DOT.getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2,r:b.width/2}};
   DOT_END=rd(s1drift(9.4));DOT_REST=rd(1);
 }
-Promise.all([document.fonts.load('800 100px Head'),document.fonts.load('700 100px Head'),document.fonts.load('400 100px Body'),document.fonts.load('700 100px Body')]).then(()=>{
+Promise.all([document.fonts.load('700 100px Head'),document.fonts.load('400 100px Body'),document.fonts.load('700 100px Body')]).then(()=>{
   measureDot();buildPeople();
   const q=new URLSearchParams(location.search);
   if(q.has('play')){const t0=performance.now()-(+q.get('play')||0)*1000;const loop=()=>{renderFrame(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)};loop();}
