@@ -1,6 +1,6 @@
 # Video introductorio · Jornada Gerencia de Personas (16:9)
 
-Abre la jornada: bienvenida («Del diagnóstico a la acción»), encuadre del día, agenda en cinco verbos (escuchar, conversar, priorizar, fundamentar, salir con una hoja de ruta), acuerdos de conversación, «¡Vamos a trabajar!» y cierre con «R35 necesita a personas» y el logo.
+Abre la jornada: bienvenida («Del diagnóstico a la acción»), encuadre del día, agenda en cinco verbos (conocer, conversar, priorizar, fundamentar, salir con una hoja de ruta), acuerdos de conversación, «¡Vamos a trabajar!» y cierre con «R35 necesita a personas» y el logo.
 
 - `index.html`: animación determinista 1920 × 1080, `renderFrame(t)` (0–83,85 s; tras la bienvenida, las escenas corren con `t − OFF`, OFF = dos compases de la música). `?play` la reproduce en el navegador; `?t=12.5` muestra un cuadro.
 - `index_v2.html`: versión color, misma información y tiempos. Fotografías de la identidad visual (`assets/photos/`) detrás de los paneles de vidrio, en las burbujas de «conversaremos»; paleta completa de marca solo en gráfica (tarjetas, puntos de los hitos, pestaña de acuerdos). El texto se mantiene en tinta y azules, como la versión 1. Se renderiza con `--page index_v2.html` y usa el mismo `out/audio.wav`.
