@@ -17,7 +17,10 @@ const browser = await chromium.launch({ args: ['--font-render-hinting=none', '--
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('pageerror', (e) => { console.error('PAGE ERROR', e.message); process.exit(1); });
 page.on('console', (m) => { if (m.type() === 'error') console.error('console:', m.text()); });
-await page.goto(pathToFileURL(path.join(root, arg('page', 'index.html'))).href);
+// --dpr 1.3333333333 → salida 2560 × 1440 («2K»): la página dibuja sus lienzos a esa densidad y CDP captura a esa escala
+const DPRX = +arg('dpr', 1);
+const SHOT = { format: 'png', optimizeForSpeed: true, ...(DPRX !== 1 ? { clip: { x: 0, y: 0, width: 1920, height: 1080, scale: DPRX } } : {}) };
+await page.goto(pathToFileURL(path.join(root, arg('page', 'index.html'))).href + (DPRX !== 1 ? `?dpr=${DPRX}` : ''));
 await page.waitForFunction(() => window.READY === true);
 fs.mkdirSync(path.join(root, 'out/stills'), { recursive: true });
 
@@ -25,7 +28,8 @@ const stills = arg('stills');
 if (stills) {
   for (const s of stills.split(',').map(Number)) {
     await page.evaluate((t) => window.renderFrame(t), s);
-    await page.screenshot({ path: path.join(root, `out/stills/t${s.toFixed(2).padStart(5, '0')}.png`) });
+    const { data } = await (await page.context().newCDPSession(page)).send('Page.captureScreenshot', SHOT);
+    fs.writeFileSync(path.join(root, `out/stills/t${s.toFixed(2).padStart(5, '0')}.png`), Buffer.from(data, 'base64'));
   }
   console.log('stills ok');
 } else {
@@ -39,7 +43,7 @@ if (stills) {
   const n = Math.round((to - from) * fps), t0 = Date.now();
   for (let i = 0; i < n; i++) {
     await page.evaluate((t) => window.renderFrame(t), from + i / fps);
-    const { data } = await cdp.send('Page.captureScreenshot', { format: 'png', optimizeForSpeed: true });
+    const { data } = await cdp.send('Page.captureScreenshot', SHOT);
     if (!ff.stdin.write(Buffer.from(data, 'base64'))) await new Promise((r) => ff.stdin.once('drain', r));
     if (i % 300 === 0) console.log(`frame ${i}/${n}  ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   }
