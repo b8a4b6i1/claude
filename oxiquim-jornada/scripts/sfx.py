@@ -1,7 +1,7 @@
 """Efectos de sonido sincronizados con index.html, en la línea de las librerías de UI/motion (clics limpios,
 swipes, pops, risers, golpes suaves de sub, brillos). Todo sintetizado.
 
-Relojes (como en index.html): t = absoluto · v = t + 13 · w = t + 4.6 · z = t + 3.6
+Relojes (como en index.html): t = absoluto · v = t + 13 · w = t + 4.6 · z = t + 2.1
 Los tiempos con dispersión aleatoria (personas de las escenas 7 y 10) se leen de out/cues.json
 (node scripts/export_cues.mjs), así coinciden cuadro a cuadro con la animación.
 
@@ -12,7 +12,7 @@ import os
 import numpy as np
 from scipy.signal import butter, sosfilt
 
-D5, D6, D8, D9 = 0.8, -13.0, -4.6, -3.6   # t = v + D6 = w + D8 = z + D9 (index.html: D6=−13.8, D7=8.4, D9=1)
+D5, D6, D8, D9 = 0.8, -13.0, -4.6, -2.1   # t = v + D6 = w + D8 = z + D9 (index.html: D6=−13.8, D7=8.4, D9=2.5)
 
 
 def build(N, SR):
@@ -262,15 +262,20 @@ def build(N, SR):
     add(hit(1.0, 60), 53.8 + D8 + 0.4, 0.16)
     add(air(0.9, False), 57.6 + D8, 0.1)                                        # vuelven por donde llegaron
     swarm(57.6 + D8, 1.0, lambda x: 90 * (1 - x) + 10, g=0.03)
-    # ═════════ 10 · Fecha (calendario) y lugar por confirmar (w)
+    # ═════════ 10 · Fecha (calendario) y lugar: Casa Conecta (w)
     text_in(58.8 + D8, 0.06)
     add(swipe(0.35, 600, 3000), 59.05 + D8, 0.08); add(pop(420, 0.2), 59.1 + 0.12 + D8, 0.22)   # calendario
     for k in range(1, 7):                                                       # número 1 → 7
         tk = 59.4 + D8 + inv_ease(inOutQuint, k / 6) * 1.0
         add(click(2200 + k * 120, 0.016), tk, 0.12 if k < 6 else 0.2)
-    add(pop(980, 0.16), 60.6 + 0.2 + D8, 0.12)                                 # «Lugar por confirmar»
-    for k in range(1, 3): add(bloop(1200, 0.12), 60.6 + 1.1 * k + D8, 0.02, rev=0.3)   # el punto late
-    add(air(0.5, False), 63.0 + D8, 0.07)
+    for li in range(3): add(rumble(1.2), 60.2 + li * 0.1 + D8, 0.16, pan=-0.3 + li * 0.3)   # sube la ciudad
+    add(air(1.0, True), 60.1 + D8, 0.08)
+    text_in(60.55 + D8, 0.05)                                                   # «en»
+    add(swipe(0.6, 500, 3500, a=0.6), 60.75 + D8, 0.1, pan=-0.3, pan_to=0.0)    # el símbolo de Casa Conecta gira
+    add(pop(760, 0.18), 61.3 + D8, 0.2); add(shimmer(0.8, 4, 4), 61.35 + D8, 0.07, rev=0.5)
+    text_in(61.0 + D8, 0.07)                                                    # «Casa Conecta»
+    for k in range(14): add(click(rng.uniform(3200, 5200), 0.01), 60.9 + D8 + rng.uniform(0, 1.6), 0.025, pan=rng.uniform(-0.8, 0.8))   # ventanas
+    add(air(0.6, False), 64.5 + D8, 0.08)
     # ═════════ 11 · Nos vemos (z)
     for i in range(9):
         if i == 3: continue                                                    # espacio

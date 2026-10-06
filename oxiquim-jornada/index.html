@@ -80,15 +80,19 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
     <div class="abs ctr" id="s8a" style="left:0;width:1080px;top:850px;font-size:170px;font-weight:800;letter-spacing:-0.035em;line-height:1.08;white-space:nowrap"><div id="s8l1"></div></div>
   </div>
 
-  <!-- 10 · Fecha (calendario) y lugar por confirmar, casi al final -->
+  <!-- 10 · Fecha (calendario) y lugar: Casa Conecta, con paisaje urbano -->
   <div class="scene" id="s9i">
-    <div class="abs ctr" id="s9h" style="left:0;width:1080px;top:520px;font-size:72px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
-    <div class="cal" id="s9cal" style="left:340px;top:650px">
+    <div class="abs ctr" id="s9h" style="left:0;width:1080px;top:372px;font-size:70px;font-weight:800;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    <div class="cal" id="s9cal" style="left:340px;top:452px">
       <div class="hd">OCTUBRE</div>
       <div class="wd">MIÉRCOLES</div>
       <div class="dg"><div class="roll" id="s9roll"></div></div>
     </div>
-    <div class="abs ctr" id="s9l" style="left:0;width:1080px;top:1160px;white-space:nowrap"><span class="tag" style="font-size:46px;gap:16px;padding:10px 30px 12px 24px"><i id="s9dot" style="width:16px;height:16px"></i>Lugar por confirmar</span></div>
+    <div class="abs ctr" id="s9en" style="left:0;width:1080px;top:892px;font-size:60px;font-weight:700;letter-spacing:-0.02em;color:var(--slate)">en</div>
+    <div class="abs" id="s9cc" style="left:0;width:1080px;top:978px;display:flex;align-items:center;justify-content:center;gap:28px;white-space:nowrap">
+      <canvas id="ccLogo" width="132" height="132" style="width:132px;height:132px;flex:none"></canvas>
+      <div id="s9ccn" style="font-size:92px;font-weight:800;letter-spacing:-0.04em;line-height:1"></div>
+    </div>
   </div>
 
   <!-- 9 · R35 necesita a personas -->
@@ -102,7 +106,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1080px;height:1920px}
 <script src="assets/logo-paths.js"></script>
 <script>
 'use strict';
-const W=1080,H=1920,D5=0.8,D6=-13.8,D7=8.4,D9=1.0,DUR=72.0+D5+D6+D7;
+const W=1080,H=1920,D5=0.8,D6=-13.8,D7=8.4,D9=2.5,DUR=71.0+D9+D5+D6+D7;
 window.DUR=DUR;
 /* ───────── utilidades ───────── */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
@@ -722,6 +726,8 @@ function s7(t){
 /* ───────── escena 8: nos vemos ───────── */
 const S8A=chars($('s8l1'),'NOS VEMOS');
 const S9H=words($('s9h'),'Nos encontraremos el');
+const S9CC=chars($('s9ccn'),'Casa Conecta');
+const CC_CTX=$('ccLogo').getContext('2d');let CC_IMG=null;
 const CONF=(()=>{const r=rng(88),a=[];for(let i=0;i<150;i++){const ang=r()*Math.PI*2,sp=170+r()*560;a.push({ang,sp,h:4+r()*8,rot:r()*6,vr:(r()-.5)*3,c:[C.light,C.brand,C.soft,C.mid,C.deep][i%5],d:r()*0.25,dm:r()*0.3,ph:r()*6.28})}return a})();
 function s8(t){
   const on=t>62.4&&t<66.6;vis($('s8'),on);if(!on)return;
@@ -742,14 +748,54 @@ function confetti(t){
     bg.beginPath();hexPath(bg,x,y,lerp(q.h,3.4,m),1.86,(q.rot+q.vr*tt)*(1-m));bg.fill();bg.globalAlpha=1;});
 }
 function s9i(t){
-  const on=t>58.6&&t<63.7;vis($('s9i'),on);if(!on)return;
-  const out=P(t,63.0,63.5,E.inCubic);
+  const on=t>58.6&&t<65.2;vis($('s9i'),on);if(!on)return;
+  const out=P(t,64.5,65.0,E.inCubic);
   reveal(S9H,t,58.8,0.08,0.8);S($('s9h'),{op:1-out,y:-out*50,b:out*12});
   const cp=P(t,59.1,59.85,E.spring);
-  S($('s9cal'),{s:lerp(0.4,1,cp)*(1-out*0.1),op:Math.min(1,cp*3)*(1-out),y:(1-cp)*80+out*50,r:(1-cp)*-8,b:out*10});
+  S($('s9cal'),{s:lerp(0.35,0.82,cp),op:Math.min(1,cp*3)*(1-out),y:(1-cp)*80-out*40,r:(1-cp)*-8,b:out*10});
   const rl=P(t,59.4,60.4,E.inOutQuint);$('s9roll').style.transform=`translateY(${-rl*6*290}px)`;
-  const tp=P(t,60.6,61.35,E.outBack);S($('s9l'),{s:lerp(0.7,1,tp),op:clamp(tp*2)*(1-out),y:out*50});
-  const ph=((t-60.6)%1.1+1.1)%1.1/1.1;$('s9dot').style.boxShadow=`0 0 0 ${ph*16}px rgba(0,85,184,${0.45*(1-ph)})`;
+  const en=P(t,60.55,61.2,E.outExpo);S($('s9en'),{op:en*(1-out),y:(1-en)*30-out*40,b:(1-en)*8});
+  // Casa Conecta: el símbolo gira y se abre; el nombre entra letra a letra
+  const lp=P(t,60.8,61.7,E.outBack);
+  const g=CC_CTX;g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,132,132);
+  if(lp>0&&CC_IMG){g.translate(66,66);g.rotate((1-lp)*-2.2);const k=Math.max(0.001,lp);g.scale(k,k);g.drawImage(CC_IMG,-66,-66,132,132);}
+  S9CC.forEach((c,i)=>{const p=P(t,61.0+i*0.035,61.8+i*0.035,E.outExpo);S(c,{y:(1-p)*90,op:clamp(p*2)});});
+  S($('s9cc'),{op:1-out,y:-out*40,b:out*10});
+  city(t);
+}
+// paisaje urbano en azules: tres planos de edificios que suben; ventanas que se encienden
+const CITY=(()=>{const r=rng(2026),L=[];
+  const mk=(n,hmin,hmax,wmin,wmax,base)=>{const a=[];let x=-30;while(x<W+30){const w=wmin+r()*(wmax-wmin),h=hmin+r()*(hmax-hmin);a.push({x,w,h,base,cap:r()<0.25?1:(r()<0.15?2:0),ph:r()*6.28});x+=w+(r()<0.3?r()*14:0);}return a};
+  L.push({b:mk(0,180,420,70,140,1920),c:'#cddbef',d:0});
+  L.push({b:mk(0,140,330,80,150,1920),c:'#8fb0de',d:0.1});
+  const near=mk(0,90,250,90,170,1920);
+  // dos torres que marcan el perfil
+  near.splice(3,0,{x:0,w:120,h:560,base:1920,cap:2,ph:1});near.splice(9,0,{x:0,w:110,h:470,base:1920,cap:1,ph:2});
+  let x=-20;near.forEach(q=>{q.x=x;x+=q.w+6;});
+  L.push({b:near,c:'#0055b8',d:0.2,win:1});
+  return L;})();
+function city(t){
+  const out=P(t,64.5,65.1,E.inCubic);
+  CITY.forEach((L,li)=>{
+    const up=P(t,60.2+L.d,61.3+L.d,E.outExpo);if(up<=0)return;
+    const dy=(1-up)*700+out*800;
+    L.b.forEach(q=>{
+      const top=q.base-q.h+dy;if(top>H)return;
+      bg.fillStyle=L.c;bg.fillRect(q.x,top,q.w,q.h+10);
+      if(q.cap===1){bg.fillRect(q.x+q.w*0.35,top-34,q.w*0.3,34);bg.fillRect(q.x+q.w*0.47,top-90,q.w*0.06,58);}
+      if(q.cap===2){bg.beginPath();bg.moveTo(q.x,top);bg.lineTo(q.x+q.w/2,top-q.w*0.55);bg.lineTo(q.x+q.w,top);bg.closePath();bg.fill();}
+      if(L.win){// ventanas: se encienden de a poco
+        for(let wy=top+26;wy<H-20;wy+=34)for(let wx=q.x+16;wx<q.x+q.w-22;wx+=26){
+          const k=Math.sin(wx*12.9898+wy*78.233)*43758.5453;const rr=k-Math.floor(k);
+          const on=P(t,60.9+rr*1.4,61.2+rr*1.4,E.outCubic)*(0.35+0.65*(0.5+0.5*Math.sin(t*1.5+rr*30)));
+          if(rr<0.55&&on>0){bg.fillStyle=`rgba(220,234,252,${0.8*on})`;bg.fillRect(wx,wy,12,16);}
+        }
+      }
+    });
+  });
+  // brillo suave del cielo tras los edificios
+  const up=P(t,60.2,61.3,E.outExpo)*(1-out);
+  if(up>0){const gr=bg.createLinearGradient(0,1150,0,1920);gr.addColorStop(0,'rgba(122,169,227,0)');gr.addColorStop(1,`rgba(122,169,227,${0.10*up})`);bg.fillStyle=gr;bg.fillRect(0,1150,W,770);}
 }
 
 
@@ -824,7 +870,11 @@ function renderFrame(t){
 }
 window.renderFrame=renderFrame;
 
-Promise.all([document.fonts.load('800 100px Head'),document.fonts.load('700 100px Head'),document.fonts.load('400 100px Body'),document.fonts.load('700 100px Body')]).then(()=>{
+const ccLoad=new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=400;const g=c.getContext('2d');
+  g.drawImage(im,0,0,400,400);g.globalCompositeOperation='source-in';g.fillStyle='#0055b8';g.fillRect(0,0,400,400);
+  // recorte al contenido del símbolo (bbox del alfa) para centrarlo
+  const k=document.createElement('canvas');k.width=k.height=400;const kg=k.getContext('2d');kg.drawImage(c,15,60,375,282,12,12+(375-282)/2,376,282);CC_IMG=k;res();};im.onerror=()=>res();im.src='assets/casa-conecta-logo.png';});
+Promise.all([ccLoad,document.fonts.load('800 100px Head'),document.fonts.load('700 100px Head'),document.fonts.load('400 100px Body'),document.fonts.load('700 100px Body')]).then(()=>{
   buildFormations();buildPeople();
   const q=new URLSearchParams(location.search);
   if(q.has('play')){const t0=performance.now()-(+q.get('play')||0)*1000;const loop=()=>{renderFrame(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)};loop();}
