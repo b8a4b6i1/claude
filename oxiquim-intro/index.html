@@ -24,8 +24,8 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 .mask{display:inline-block;overflow:hidden;padding:0.1em 0.06em 0.18em;margin:-0.1em -0.06em -0.18em;vertical-align:top}
 .g{background:linear-gradient(95deg,#162851 0%,#0055b8 55%,#2a6fc4 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .title{font-size:120px;font-weight:700;letter-spacing:-0.045em;line-height:1.02;color:var(--ink);white-space:nowrap}
-.sub{font-family:'Body',sans-serif;font-size:46px;line-height:1.32;color:var(--slate);white-space:nowrap}
-.eyebrow{font-size:46px;font-weight:700;letter-spacing:-0.01em;color:var(--brand);white-space:nowrap}
+.sub{font-family:'Body',sans-serif;font-size:58px;line-height:1.32;color:var(--slate);white-space:nowrap}
+.eyebrow{font-size:58px;font-weight:700;letter-spacing:-0.01em;color:var(--brand);white-space:nowrap}
 #dot{display:inline-block;width:0.19em;height:0.19em;border-radius:50%;background:var(--brand);margin-left:0.035em;vertical-align:baseline}
 #glass{position:absolute;visibility:hidden;border-radius:48px;
   -webkit-backdrop-filter:blur(30px) saturate(1.7);backdrop-filter:blur(30px) saturate(1.7);
@@ -44,7 +44,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 
   <!-- 0 · Bienvenida -->
   <div class="scene" id="s0">
-    <div class="abs ctr" id="s0a" style="left:0;width:1920px;top:536px;font-size:58px;font-weight:500;letter-spacing:-0.01em;color:var(--slate);white-space:nowrap"></div>
+    <div class="abs ctr" id="s0a" style="left:0;width:1920px;top:524px;font-size:66px;font-weight:500;letter-spacing:-0.01em;color:var(--slate);white-space:nowrap"></div>
     <div class="abs ctr title" id="s0b" style="left:0;width:1920px;top:628px;font-size:112px"></div>
   </div>
 
@@ -100,7 +100,7 @@ canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
 
   <!-- 8 · Al final del día -->
   <div class="scene" id="s8">
-    <div class="abs ctr sub" id="s8a" style="left:0;width:1920px;top:282px;font-size:60px"></div>
+    <div class="abs ctr sub" id="s8a" style="left:0;width:1920px;top:276px;font-size:68px"></div>
     <div class="abs ctr title" id="s8b" style="left:0;width:1920px;top:400px;font-size:112px"></div>
   </div>
 
@@ -308,7 +308,7 @@ function s1(t){
 
 /* ───────── 2 · Primero, escuchamos. (el punto se estira y es la base del gráfico) ───────── */
 const S2T=words($('s2t'),'Primero, / escucharemos.');
-const S2S=words($('s2s'),'Los resultados del diagnóstico / de _CIS_ _Consultores._');
+const S2S=words($('s2s'),'Los resultados / del diagnóstico de / _CIS_ _Consultores._');
 const BASE_Y=770, BAR_W=52, BARS=[170,250,210,390,290,330,230], TALL=3;
 const barX=i=>1090+i*88+BAR_W/2;
 const BAR_C=[C.soft,C.light,C.soft,C.brand,C.light,C.soft,C.light];
@@ -413,7 +413,7 @@ function voices(t){
 
 /* ───────── 5 · Y fundamentamos. ───────── */
 const S5T=words($('s5t'),'Y fundamentaremos.');
-const S5S=words($('s5s'),'Cada prioridad, con sus razones / y sus _indicadores._');
+const S5S=words($('s5s'),'Cada prioridad, / con sus razones / y sus _indicadores._');
 const KPI=[0.14,0.24,0.2,0.38,0.5,0.63,0.86];
 const kx=i=>PAN.x+70+i*(PAN.w-140)/6, ky=v=>PAN.y+610-v*210;
 function s5(t){
