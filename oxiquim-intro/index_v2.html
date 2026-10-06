@@ -314,7 +314,7 @@ function intro(t){
 
 /* ───────── 0 · Bienvenida ───────── */
 const S0A=words($('s0a'),'Bienvenidos a la jornada');
-const S0B=words($('s0b'),'“Del diagnóstico a la ^acción”^',{img:'aceite-calido',size:'230% auto',pos:'8% 30%'});
+const S0B=words($('s0b'),'“Del diagnóstico a la ~acción”~');
 function s0(t){
   const on=t>3.4&&t<8.6;vis($('s0'),on);if(!on)return;
   reveal(S0A,t,3.6,0.07);reveal(S0B,t,4.05,0.08,0.95);
@@ -483,8 +483,8 @@ function s5(t){
 /* ───────── 6 · Para salir con… (un camino con tres hitos) ───────── */
 const ROAD_Y=640, MX=[960,1720,2480], MT=[36.8,40.2,43.4], MO=[39.35,42.55,45.6];
 const S6E=words($('s6e'),'Para salir con');
-const LAB=[['lab0','una mirada común.'],['lab1','prioridades claras.'],['lab2','una hoja de ruta compartida.']].map(([id,s])=>words($(id),s));
-const MSC=[C.brand,C.vo,C.mo];LAB.forEach((ws,k)=>{ws[ws.length-1].style.color=rgba(MSC[k])});
+const LAB=[['lab0','una mirada común.'],['lab1','prioridades claras.'],['lab2','una hoja de ruta ~compartida.~']].map(([id,s])=>words($(id),s));
+const MSC=[C.brand,C.vo,C.mo];   // color de cada hito (solo gráfica; el texto queda en la paleta azul)
 function cam(t){
   const raw=760*P(t,39.4,40.3,E.inOutQuint)+760*P(t,42.6,43.5,E.inOutQuint);
   const zo=P(t,45.8,46.9,E.inOutQuint);
@@ -517,8 +517,8 @@ function s6(t){
 
 /* ───────── 7 · Nuestros acuerdos para hoy ───────── */
 const S7E=words($('s7e'),'Nuestros acuerdos para hoy');
-const AG=['Escuchar / para entender.','Hablar con franqueza / y respeto.','Lo que se comparte aquí, / se cuida.','Pensar en / lo que viene.'].map((s,k)=>words($('a'+k),s));
-const AGC=[C.brand,C.vo,C.mo,C.vc];AG.forEach((ws,k)=>{ws[ws.length-1].style.color=rgba(AGC[k])});
+const AG=['Escuchar / para ~entender.~','Hablar con franqueza / y ~respeto.~','Lo que se comparte aquí, / se ~cuida.~','Pensar en / lo que ~viene.~'].map((s,k)=>words($('a'+k),s));
+const AGC=[C.brand,C.vo,C.mo,C.vc];   // color de la pestaña en cada acuerdo
 const AT=[48.0,50.7,53.4,56.1];
 function s7(t){
   const on=t>47.3&&t<58.6;vis($('s7'),on);if(!on)return;
@@ -534,7 +534,7 @@ function s7(t){
 
 /* ───────── 8 · Y al final del día ───────── */
 const S8A=words($('s8a'),'Y al final del día');
-const S8B=words($('s8b'),'Levantaremos compromisos / que construiremos ^juntos.^',{img:'aceite-color',size:'220% auto',pos:'30% 20%'});
+const S8B=words($('s8b'),'Levantaremos compromisos / que construiremos ~juntos.~');
 function s8(t){
   const on=t>58.4&&t<63.3;vis($('s8'),on);if(!on)return;
   reveal(S8A,t,58.6,0.07);reveal(S8B,t,59.1,0.08,0.95);
@@ -543,20 +543,15 @@ function s8(t){
 
 /* ───────── 9 · ¡Vamos a trabajar! → las letras se vuelven personas → R35 ───────── */
 const VAMOS={f:'700 250px Head',ls:'-11px',l1:['¡Vamos a',478],l2:['trabajar!',752]};
-const vbuf=new OffscreenCanvas(W,H), vb=vbuf.getContext('2d');
-function vamosText(g,a,sc,blur,t=0,mask=false){
+function vamosText(g,a,sc,blur){
   if(a<=0.002)return;
-  vb.setTransform(1,0,0,1,0,0);vb.globalCompositeOperation='source-over';vb.clearRect(0,0,W,H);
-  vb.font=VAMOS.f;vb.letterSpacing=VAMOS.ls;vb.textAlign='center';vb.fillStyle='#000';
-  vb.fillText(VAMOS.l1[0],W/2,VAMOS.l1[1]);vb.fillText(VAMOS.l2[0],W/2,VAMOS.l2[1]);
-  vb.globalCompositeOperation='source-in';
-  const im=mask?null:PH['aceite-color'];
-  if(im){const k=Math.max(W/im.width,H/im.height)*1.05, dx=Math.sin(t*0.4)*18;vb.drawImage(im,W/2-im.width*k/2+dx,H/2-im.height*k/2,im.width*k,im.height*k);}
-  else{vb.fillStyle=mask?'#000':rgba(C.brand);vb.fillRect(0,0,W,H);}
-  if(!mask){vb.globalCompositeOperation='source-atop';vb.fillStyle='rgba(22,40,81,0.12)';vb.fillRect(0,0,W,H);}   // un punto más de contraste sobre blanco
   g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.translate(-W/2,-H/2);
   if(blur>0.1)g.filter=`blur(${blur}px)`;
-  g.globalAlpha=a;g.drawImage(vbuf,0,0);g.restore();
+  g.globalAlpha=a;g.font=VAMOS.f;g.letterSpacing=VAMOS.ls;g.textAlign='center';
+  g.fillStyle=rgba(C.ink);g.fillText(VAMOS.l1[0],W/2,VAMOS.l1[1]);
+  const gr=g.createLinearGradient(560,0,1360,0);gr.addColorStop(0,'#162851');gr.addColorStop(0.55,'#0055b8');gr.addColorStop(1,'#2a6fc4');
+  g.fillStyle=gr;g.fillText(VAMOS.l2[0],W/2,VAMOS.l2[1]);
+  g.restore();
 }
 const vamosScale=t=>lerp(1.1,1,P(t,63.1,64.2,E.outExpo))*lerp(1,0.97,P(t,64.2,65.9,E.inOutSine));
 let PEOPLE=[];
@@ -569,7 +564,7 @@ function sampleText(draw,y0,y1,st){
 function buildPeople(){
   const r35=sampleText(g=>{g.fillStyle='#000';g.font='700 470px Head';g.letterSpacing='-13px';g.textAlign='center';g.fillText('R35',W/2,646);},250,660,27);
   let st=20,tx=[];
-  for(;st<70;st+=0.5){tx=sampleText(g=>vamosText(g,1,1,0,0,true),220,820,st);if(tx.length<=r35.length)break;}
+  for(;st<70;st+=0.5){tx=sampleText(g=>vamosText(g,1,1,0),220,820,st);if(tx.length<=r35.length)break;}
   const byX=(a,b)=>a[0]-b[0]||a[1]-b[1];
   r35.sort(byX);tx.sort(byX);
   // destinos en el isotipo del logo final
@@ -579,7 +574,7 @@ function buildPeople(){
   const r=rng(35);
   for(let i=mk.length-1;i>0;i--){const j=(r()*(i+1))|0;[mk[i],mk[j]]=[mk[j],mk[i]]}
   PEOPLE=r35.map((p,i)=>{const s=tx[Math.min(tx.length-1,Math.floor(i*tx.length/r35.length))];
-    return{x:p[0],y:p[1],sx:s[0],sy:s[1],d:(p[0]-560)/800*0.45+r()*0.3,c:[C.deep,C.brand,C.brand,C.mid,C.sky,C.vo,C.vc,C.am,C.mo][(r()*9)|0],ph:r()*6.28,m:mk[i%mk.length],dm:r()*0.35};});
+    return{x:p[0],y:p[1],sx:s[0],sy:s[1],d:(p[0]-560)/800*0.45+r()*0.3,c:[C.deep,C.brand,C.brand,C.mid,C.sky,C.light][(r()*6)|0],ph:r()*6.28,m:mk[i%mk.length],dm:r()*0.35};});
   window.NPEOPLE=PEOPLE.length;window.TEXTSTEP=st;
 }
 function person(g,x,y,s,col,a,morph){
@@ -589,12 +584,12 @@ function person(g,x,y,s,col,a,morph){
   g.beginPath();g.arc(x,y-k*0.34,k*0.24,0,Math.PI*2);g.fill();
   g.beginPath();g.moveTo(x-k*0.38,y+k*0.42);g.quadraticCurveTo(x-k*0.38,y-k*0.06,x,y-k*0.06);g.quadraticCurveTo(x+k*0.38,y-k*0.06,x+k*0.38,y+k*0.42);g.closePath();g.fill();
 }
-const S10B=words($('s10b'),'NECESITA A ^PERSONAS.^',{img:'aceite-color',size:'140% auto',pos:'0% 35%'});
+const S10B=words($('s10b'),'NECESITA A ~PERSONAS.~');
 function s9(t){
   if(t<63.0||t>79)return;
   const sc=vamosScale(t);
   if(t<66.3){const a=P(t,63.1,63.9,E.outCubic)*(1-P(t,65.6,66.1,E.inOutSine));
-    vamosText(bg,a,sc,lerp(18,0,P(t,63.1,64.0,E.outExpo)),t);}
+    vamosText(bg,a,sc,lerp(18,0,P(t,63.1,64.0,E.outExpo)));}
   if(t<65.6)return;
   const fin=P(t,65.6,66.1,E.inOutSine);
   PEOPLE.forEach(q=>{
