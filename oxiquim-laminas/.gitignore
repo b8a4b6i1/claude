@@ -1,0 +1,5 @@
+node_modules/
+*.pdf
+qa-*.jpg
+qa_sheet.jpg
+art/_sheet*.png
