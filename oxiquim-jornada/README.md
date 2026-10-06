@@ -15,7 +15,7 @@ capturada cuadro a cuadro con Playwright y codificada con ffmpeg. La música (12
 | 31–38 s | 5 · También será un espacio para encontrarnos… | Doce personas forman un círculo unido alrededor del núcleo |
 | 38–47 s | 6 · Queremos terminar el día con… | Tres tarjetas con íconos animados |
 | 47–54 s | 7 · R35 / Necesita a personas. | «R35» formado por figuras de personas |
-| 54–60 s | 8 · Nos encontraremos el [calendario: miércoles 7 de octubre] en Casa Conecta | Calendario; el símbolo de Casa Conecta gira y se abre junto al nombre; sube un paisaje urbano en azules con ventanas que se encienden |
+| 54–60 s | 8 · Nos encontraremos el [calendario: miércoles 7 de octubre] en Casa Conecta | Calendario; el símbolo de Casa Conecta gira y se abre junto al nombre; sube un paisaje de Santiago en azules (cordillera nevada, cerro San Cristóbal con la Virgen, torre Costanera y edificios con ventanas que se encienden) |
 | 60–65 s | 9 · Nos vemos | Letras con resorte y estallido de hexágonos |
 | 65–68,9 s | Logo | Los hexágonos del confeti se reúnen en el isotipo; cierre con brillo |
 
