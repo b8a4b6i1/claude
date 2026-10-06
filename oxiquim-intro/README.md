@@ -3,6 +3,7 @@
 Abre la jornada: bienvenida («Del diagnóstico a la acción»), encuadre del día, agenda en cinco verbos (escuchar, conversar, priorizar, fundamentar, salir con una hoja de ruta), acuerdos de conversación, «¡Vamos a trabajar!» y cierre con «R35 necesita a personas» y el logo.
 
 - `index.html`: animación determinista 1920 × 1080, `renderFrame(t)` (0–83,85 s; tras la bienvenida, las escenas corren con `t − OFF`, OFF = dos compases de la música). `?play` la reproduce en el navegador; `?t=12.5` muestra un cuadro.
+- `index_v2.html`: versión color, misma información y tiempos. Fotografías de la identidad visual (`assets/photos/`) detrás de los paneles de vidrio, en las burbujas de «conversaremos» y como relleno de «acción», «juntos», «¡Vamos a trabajar!» y «PERSONAS»; paleta completa de marca en tarjetas, hitos y acuerdos. Se renderiza con `--page index_v2.html` y usa el mismo `out/audio.wav`.
 - `assets/logo-paths.js`: vectores oficiales del logo (lineamientos 2025; coinciden con `Logo_Oxiquim.ai`, azul #0055b8).
 - `fonts/`: Goli (títulos, tipografía oficial, licencia SIL OFL 1.1) y Trebuchet MS para textos (`scripts/get_fonts.sh`, no se versiona).
 

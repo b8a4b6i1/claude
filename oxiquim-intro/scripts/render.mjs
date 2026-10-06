@@ -17,7 +17,7 @@ const browser = await chromium.launch({ args: ['--font-render-hinting=none', '--
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
 page.on('pageerror', (e) => { console.error('PAGE ERROR', e.message); process.exit(1); });
 page.on('console', (m) => { if (m.type() === 'error') console.error('console:', m.text()); });
-await page.goto(pathToFileURL(path.join(root, 'index.html')).href);
+await page.goto(pathToFileURL(path.join(root, arg('page', 'index.html'))).href);
 await page.waitForFunction(() => window.READY === true);
 fs.mkdirSync(path.join(root, 'out/stills'), { recursive: true });
 

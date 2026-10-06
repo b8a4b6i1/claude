@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Jornada Gerencia de Personas · Video introductorio (versión color)</title>
+<style>
+/* Títulos: Goli (oficial, OFL). Texto: Trebuchet MS (oficial). */
+@font-face{font-family:'Head';src:url(fonts/goli-light.otf) format('opentype');font-weight:300;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-regular.otf) format('opentype');font-weight:400;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-medium.otf) format('opentype');font-weight:500;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-semibold.otf) format('opentype');font-weight:600;font-display:block}
+@font-face{font-family:'Head';src:url(fonts/goli-bold.otf) format('opentype');font-weight:700;font-display:block}
+@font-face{font-family:'Body';src:url(fonts/trebuc.ttf) format('truetype');font-weight:400;font-display:block}
+@font-face{font-family:'Body';src:url(fonts/trebucbd.ttf) format('truetype');font-weight:700 900;font-display:block}
+:root{--ink:#162851;--slate:#4b5571;--brand:#0055b8;--mid:#2a6fc4;--light:#7aa9e3;--soft:#b3cbea;--pale:#dde6f3}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#fff}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#fff;font-family:'Head',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+canvas.layer{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.scene{position:absolute;inset:0;visibility:hidden}
+.abs{position:absolute}
+.ctr{text-align:center}
+.w{display:inline-block;will-change:transform}
+.mask{display:inline-block;overflow:hidden;padding:0.1em 0.06em 0.18em;margin:-0.1em -0.06em -0.18em;vertical-align:top}
+.g{background:linear-gradient(95deg,#162851 0%,#0055b8 55%,#2a6fc4 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ph{background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;color:transparent}
+.title{font-size:120px;font-weight:700;letter-spacing:-0.045em;line-height:1.02;color:var(--ink);white-space:nowrap}
+.sub{font-family:'Body',sans-serif;font-size:46px;line-height:1.32;color:var(--slate);white-space:nowrap}
+.eyebrow{font-size:46px;font-weight:700;letter-spacing:-0.01em;color:var(--brand);white-space:nowrap}
+#dot{display:inline-block;width:0.19em;height:0.19em;border-radius:50%;background:var(--brand);margin-left:0.035em;vertical-align:baseline}
+#glass{position:absolute;visibility:hidden;border-radius:48px;
+  -webkit-backdrop-filter:blur(30px) saturate(1.7);backdrop-filter:blur(30px) saturate(1.7);
+  box-shadow:0 60px 110px -50px rgba(22,40,81,0.30),0 2px 8px rgba(22,40,81,0.05),inset 0 1.5px 0 rgba(255,255,255,0.95),inset 0 0 0 1.5px rgba(255,255,255,0.55)}
+/* viñeta de marca (pestaña con punta, lineamientos 2025) */
+#tab{position:absolute;left:160px;top:372px;width:190px;height:236px;background:var(--brand);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%);overflow:hidden}
+#tabr{position:absolute;left:0;top:0;width:133px}
+#tabr div{height:236px;line-height:236px;text-align:center;font-size:150px;font-weight:700;color:#fff;letter-spacing:-0.04em}
+.agr{position:absolute;left:430px;top:372px;width:1420px;font-size:108px;font-weight:700;letter-spacing:-0.045em;line-height:1.04;color:var(--ink);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas class="layer" id="bg" width="1920" height="1080"></canvas>
+  <div id="glass"></div>
+
+  <!-- 0 · Bienvenida -->
+  <div class="scene" id="s0">
+    <div class="abs ctr" id="s0a" style="left:0;width:1920px;top:536px;font-size:58px;font-weight:500;letter-spacing:-0.01em;color:var(--slate);white-space:nowrap"></div>
+    <div class="abs ctr title" id="s0b" style="left:0;width:1920px;top:628px;font-size:112px"></div>
+  </div>
+
+  <!-- 1 · Hoy nos detenemos -->
+  <div class="scene" id="s1">
+    <div class="abs ctr" id="s1g" style="left:0;width:1920px;top:318px">
+      <div id="s1a" style="font-size:164px;font-weight:700;letter-spacing:-0.05em;line-height:1.02;white-space:nowrap"></div>
+      <div id="s1b" style="margin-top:44px;font-size:78px;font-weight:700;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+    </div>
+  </div>
+
+  <!-- 2 · Escuchamos -->
+  <div class="scene" id="s2">
+    <div class="abs title" id="s2t" style="left:160px;top:340px;font-size:104px"></div>
+    <div class="abs sub" id="s2s" style="left:164px;top:628px"></div>
+  </div>
+
+  <!-- 3 · Conversamos -->
+  <div class="scene" id="s3">
+    <div class="abs ctr title" id="s3t" style="left:0;width:1920px;top:118px"></div>
+    <div class="abs ctr sub" id="s3s" style="left:0;width:1920px;top:282px"></div>
+  </div>
+
+  <!-- 4 · Priorizamos -->
+  <div class="scene" id="s4">
+    <div class="abs ctr title" id="s4t" style="left:0;width:1920px;top:118px"></div>
+    <div class="abs ctr sub" id="s4s" style="left:0;width:1920px;top:282px"></div>
+  </div>
+
+  <!-- 5 · Fundamentamos -->
+  <div class="scene" id="s5">
+    <div class="abs title" id="s5t" style="left:160px;top:358px;font-size:76px"></div>
+    <div class="abs sub" id="s5s" style="left:164px;top:600px"></div>
+  </div>
+
+  <!-- 6 · Para salir con -->
+  <div class="scene" id="s6">
+    <div class="abs ctr eyebrow" id="s6e" style="left:0;width:1920px;top:312px"></div>
+    <div class="abs ctr title" id="lab0" style="left:60px;width:1800px;top:420px;font-size:104px"></div>
+    <div class="abs ctr title" id="lab1" style="left:60px;width:1800px;top:420px;font-size:104px"></div>
+    <div class="abs ctr title" id="lab2" style="left:60px;width:1800px;top:420px;font-size:104px"></div>
+  </div>
+
+  <!-- 7 · Acuerdos -->
+  <div class="scene" id="s7">
+    <div class="abs eyebrow" id="s7e" style="left:160px;top:240px"></div>
+    <div id="tab"><div id="tabr"><div>1</div><div>2</div><div>3</div><div>4</div></div></div>
+    <div class="agr" id="a0"></div>
+    <div class="agr" id="a1"></div>
+    <div class="agr" id="a2"></div>
+    <div class="agr" id="a3"></div>
+  </div>
+
+  <!-- 8 · Al final del día -->
+  <div class="scene" id="s8">
+    <div class="abs ctr sub" id="s8a" style="left:0;width:1920px;top:282px;font-size:60px"></div>
+    <div class="abs ctr title" id="s8b" style="left:0;width:1920px;top:400px;font-size:112px"></div>
+  </div>
+
+  <!-- 10 · R35 necesita a personas -->
+  <div class="scene" id="s10">
+    <div class="abs ctr" id="s10b" style="left:0;width:1920px;top:718px;font-size:84px;font-weight:700;letter-spacing:-0.035em;line-height:1.1;white-space:nowrap"></div>
+  </div>
+
+  <canvas class="layer" id="fg" width="1920" height="1080"></canvas>
+</div>
+
+<script src="assets/logo-paths.js"></script>
+<script>
+'use strict';
+const W=1920,H=1080,OFF=2*63.1/26,DUR=79.0+OFF;   // OFF: la bienvenida desplaza todo lo posterior dos compases de música
+window.DUR=DUR;
+/* ───────── utilidades ───────── */
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,k)=>a+(b-a)*k;
+const E={
+  lin:t=>t,
+  outCubic:t=>1-Math.pow(1-t,3),
+  inCubic:t=>t*t*t,
+  inOutCubic:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+  outQuint:t=>1-Math.pow(1-t,5),
+  inQuint:t=>t*t*t*t*t,
+  outExpo:t=>t>=1?1:1-Math.pow(2,-10*t),
+  inExpo:t=>t<=0?0:Math.pow(2,10*t-10),
+  inOutQuint:t=>t<.5?16*t*t*t*t*t:1-Math.pow(-2*t+2,5)/2,
+  outBack:t=>{const c1=1.7,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)},
+  inOutSine:t=>-(Math.cos(Math.PI*t)-1)/2,
+};
+const P=(t,a,b,e=E.outExpo)=>e(clamp((t-a)/(b-a)));
+const $=id=>document.getElementById(id);
+function S(el,o={}){
+  const {op=1,x=0,y=0,s=1,b=0}=o;
+  el.style.opacity=op<0.001?0:op;
+  el.style.transform=`translate(${x}px,${y}px) scale(${s})`;
+  el.style.filter=b>0.05?`blur(${b}px)`:'none';
+}
+function vis(el,on){el.style.visibility=on?'visible':'hidden'}
+// salida de bloque: sube con desenfoque
+function out(t,c,d=0.45,dist=36,blur=12){const o=P(t,c,c+d,E.inCubic);return{op:1-o,y:-o*dist,b:o*blur}}
+// texto con marcado mínimo: _color de marca_, ~degradado~; « / » = salto de línea
+// ^palabra^ = relleno con fotografía de marca: ph={img,size,pos}
+function words(el,src,ph){
+  el.innerHTML='';const res=[];
+  src.split(' ').forEach((tok,i,arr)=>{
+    if(tok==='/'){el.appendChild(document.createElement('br'));return;}
+    let cls='',txt=tok;
+    const m=tok.match(/^([_~^])(.*?)([_~^])?$/);
+    if(m){txt=m[2];cls=m[1]}
+    const mk=document.createElement('span');mk.className='mask';
+    const s=document.createElement('span');s.className='w'+(cls==='~'?' g':'');s.textContent=txt;
+    if(cls==='_')s.style.color='var(--brand)';
+    if(cls==='^'&&ph){s.classList.add('ph');s.style.backgroundImage=`url(assets/photos/${ph.img}.jpg)`;s.style.backgroundSize=ph.size||'cover';s.style.backgroundPosition=ph.pos||'50% 50%';}
+    mk.appendChild(s);el.appendChild(mk);
+    if(i<arr.length-1&&arr[i+1]!=='/')el.appendChild(document.createTextNode(' '));
+    res.push(s);
+  });
+  return res;
+}
+// revelado palabra a palabra desde una máscara
+function reveal(ws,t,a,stag=0.07,d=0.85,dist=1.1){
+  ws.forEach((w,i)=>{const p=P(t,a+i*stag,a+i*stag+d,E.outExpo);
+    const fs=parseFloat(getComputedStyle(w).fontSize);
+    S(w,{y:(1-p)*fs*dist,op:Math.min(1,p*2.5)});});
+}
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hexRGB=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const mixRGB=(a,b,k)=>[lerp(a[0],b[0],k),lerp(a[1],b[1],k),lerp(a[2],b[2],k)];
+const rgba=(c,a=1)=>`rgba(${c[0]|0},${c[1]|0},${c[2]|0},${a})`;
+const C={ink:hexRGB('#162851'),deep:hexRGB('#162851'),brand:hexRGB('#0055b8'),mid:hexRGB('#2a6fc4'),sky:hexRGB('#4d8bd6'),light:hexRGB('#7aa9e3'),soft:hexRGB('#b3cbea'),pale:hexRGB('#dde6f3'),gray:hexRGB('#c6cad3'),vo:hexRGB('#225f58'),vc:hexRGB('#819e49'),mo:hexRGB('#410c5c'),am:hexRGB('#f9ab3a'),white:[255,255,255]};
+
+// radios negativos por sobrepaso de easing → 0
+for(const P2 of [CanvasRenderingContext2D.prototype,OffscreenCanvasRenderingContext2D.prototype]){
+  const arc=P2.arc,ell=P2.ellipse;
+  P2.arc=function(x,y,r,...a){return arc.call(this,x,y,Math.max(0,r),...a)};
+  P2.ellipse=function(x,y,rx,ry,...a){return ell.call(this,x,y,Math.max(0,rx),Math.max(0,ry),...a)};
+}
+const bg=$('bg').getContext('2d'), fg=$('fg').getContext('2d');
+/* ───────── fotografías de la identidad visual (cargan antes de READY) ───────── */
+const PH={};
+const phLoad=Promise.all(['granulos','burbujas','aceite-calido','aceite-color','burbujas-verde'].map(n=>new Promise(res=>{const im=new Image();im.onload=()=>{PH[n]=im;res()};im.onerror=()=>res();im.src=`assets/photos/${n}.jpg`;})));
+// foto recortada tipo «cover» dentro de un rectángulo redondeado, con deriva lenta (zoom)
+function photoCard(g,img,x,y,w,h,r,op,zoom=1,fx=0.5,fy=0.5){
+  if(!img||op<=0.002)return;
+  const k=Math.max(w/img.width,h/img.height)*zoom, sw=w/k, sh=h/k;
+  const sx=clamp(fx*img.width-sw/2,0,img.width-sw), sy=clamp(fy*img.height-sh/2,0,img.height-sh);
+  g.save();g.globalAlpha=op;g.beginPath();rrect(g,x,y,w,h,r);g.clip();g.drawImage(img,sx,sy,sw,sh,x,y,w,h);g.restore();
+}
+// pastilla/círculo relleno con una zona de la foto (u,v ∈ 0..1) y un brillo físico suave
+function photoPill(g,cx,cy,w,h,r,img,u,v,span,a){
+  if(!img||a<=0.002)return;
+  const sw=img.width*span, sh=sw*h/w, sx=clamp(u*img.width-sw/2,0,img.width-sw), sy=clamp(v*img.height-sh/2,0,img.height-sh);
+  g.save();g.globalAlpha=a;g.beginPath();rrect(g,cx-w/2,cy-h/2,w,h,r);g.clip();
+  g.drawImage(img,sx,sy,sw,sh,cx-w/2,cy-h/2,w,h);
+  const gr=g.createRadialGradient(cx-w*0.22,cy-h*0.28,0,cx-w*0.22,cy-h*0.28,Math.max(w,h)*0.7);
+  gr.addColorStop(0,'rgba(255,255,255,0.38)');gr.addColorStop(0.45,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(cx-w/2,cy-h/2,w,h);
+  g.restore();
+}
+function rrect(g,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+function pill(g,cx,cy,w,h,r,col,a=1){g.fillStyle=rgba(col,a);g.beginPath();rrect(g,cx-w/2,cy-h/2,w,h,r);g.fill();}
+function disc(g,x,y,r,col,a=1){g.fillStyle=rgba(col,a);g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();}
+function ring(g,x,y,r,col,a,lw=2){if(a<=0.002)return;g.strokeStyle=rgba(col,a);g.lineWidth=lw;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.stroke();}
+
+/* ───────── logo oficial (vectores del archivo de marca) ───────── */
+const LG=window.LOGO;
+const LP={};for(const k in LG.parts)LP[k]=new Path2D(LG.parts[k].d);
+const LETTERS=['X','I','Q','U','I2','M'];
+const LB={x0:LG.parts.mark.bbox[0],x1:LG.parts.M.bbox[2],y0:LG.parts.mark.bbox[1],y1:LG.parts.mark.bbox[3]};
+const lockAt=k=>({x:W/2-(LB.x0+LB.x1)/2*k,y:H/2-(LB.y0+LB.y1)/2*k});
+const LK0=700/(LB.x1-LB.x0), LK1=760/(LB.x1-LB.x0);
+const MB=LG.parts.mark.bbox, MC=[(MB[0]+MB[2])/2,(MB[1]+MB[3])/2];
+// centro del hexágono interior del isotipo
+const INNER=(()=>{const c=new OffscreenCanvas(LG.w*4,LG.h*4),g=c.getContext('2d');g.scale(4,4);g.fill(LP.mark);
+  const d=g.getImageData(0,0,c.width,c.height).data;
+  let sx=0,sy=0,n=0;const cy=Math.round(MC[1]*4);
+  for(let y=cy-30;y<cy+30;y++)for(let x=Math.round(MC[0]*4-90);x<MC[0]*4+90;x++){if(d[(y*c.width+x)*4+3]>128){sx+=x;sy+=y;n++}}
+  return [sx/n/4,sy/n/4];})();
+const logoBuf=new OffscreenCanvas(W,H), lb=logoBuf.getContext('2d');
+function drawLogo(g,ox,oy,k,o){
+  lb.setTransform(1,0,0,1,0,0);lb.clearRect(0,0,W,H);
+  lb.setTransform(k,0,0,k,ox,oy);
+  const col=LG.color;
+  if(o.markFill>0){
+    lb.save();
+    if(o.clipR!=null){lb.beginPath();lb.arc(INNER[0],INNER[1],o.clipR,0,Math.PI*2);lb.clip();}
+    lb.globalAlpha=o.markFill;lb.fillStyle=col;lb.fill(LP.mark);lb.restore();
+  }
+  if(o.letters){
+    LETTERS.forEach((L,i)=>{const s=o.letters[i];if(!s||s.op<=0)return;
+      const bb=LG.parts[L].bbox;
+      lb.save();lb.beginPath();lb.rect(bb[0]-4,bb[1]-2,bb[2]-bb[0]+8,bb[3]-bb[1]+6);lb.clip();
+      lb.translate(0,s.dy);lb.globalAlpha=s.op;lb.fillStyle=col;lb.fill(LP[L]);lb.restore();});
+  }
+  if(o.sheen!=null&&o.sheen>0&&o.sheen<1){
+    lb.save();lb.globalCompositeOperation='source-atop';
+    const x=lerp(LB.x0-80,LB.x1+80,o.sheen);
+    const gr=lb.createLinearGradient(x-40,0,x+40,0);
+    gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,'rgba(200,228,255,0.8)');gr.addColorStop(1,'rgba(255,255,255,0)');
+    lb.setTransform(k,0,0,k,ox,oy);lb.transform(1,0,-0.5,1,0,0);
+    lb.fillStyle=gr;lb.fillRect(LB.x0-200,LB.y0-20,LB.x1-LB.x0+400,LB.y1-LB.y0+40);lb.restore();
+  }
+  lb.setTransform(1,0,0,1,0,0);
+  g.drawImage(logoBuf,0,0);
+}
+
+/* ───────── fondo: blanco; color tenue solo detrás del vidrio ───────── */
+const CARD={x:960,y:130,w:900,h:820,r:56};
+function ambient(t,amt){
+  bg.fillStyle='#fff';bg.fillRect(0,0,W,H);
+  // escena 2: burbujas; escena 5: gránulos — la foto aparece desde su centro y deriva lentamente
+  const a2=P(t,9.9,10.9,E.outExpo)*(1-P(t,15.0,15.6,E.inCubic)), a5=P(t,28.85,29.9,E.outExpo)*(1-P(t,34.8,35.4,E.inCubic));
+  [[a2,'burbujas',9.9,0.62,0.45],[a5,'granulos',28.85,0.5,0.42]].forEach(([a,n,t0,fx,fy])=>{if(a<=0.002)return;
+    const sc=lerp(0.94,1,a), w=CARD.w*sc, h=CARD.h*sc;
+    photoCard(bg,PH[n],CARD.x+(CARD.w-w)/2,CARD.y+(CARD.h-h)/2,w,h,CARD.r,a,lerp(1.1,1.0,clamp((t-t0)/6)),fx,fy);});
+  return;
+  const blobs=[[1220,360,320,C.light,0.42,0.21],[1600,740,340,C.brand,0.2,0.17],[1240,760,260,C.sky,0.22,0.25]];
+  blobs.forEach(([x,y,r,c,a,f],i)=>{
+    const cx=x+Math.sin(t*f+i*2)*60, cy=y+Math.cos(t*f*1.3+i)*50;
+    const gr=bg.createRadialGradient(cx,cy,0,cx,cy,r);
+    gr.addColorStop(0,rgba(c,a*amt));gr.addColorStop(1,rgba(c,0));
+    bg.fillStyle=gr;bg.fillRect(0,0,W,H);
+  });
+}
+
+/* ───────── vidrio (DOM con backdrop-filter) ───────── */
+const GL=$('glass');
+const PAN={x:1000,y:200,w:760,h:680,r:48};
+function glassSet(x,y,w,h,r,col,a,op,dy=0,sc=1){
+  vis(GL,op>0.002);
+  Object.assign(GL.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px',borderRadius:r+'px',background:rgba(col,a),opacity:op,transform:`translateY(${dy}px) scale(${sc})`});
+}
+function glass(t){
+  if(t>10.1&&t<15.7){ // escena 2: gráfico del diagnóstico
+    const i=P(t,10.2,11.1,E.outExpo), o=P(t,15.0,15.6,E.inCubic);
+    glassSet(PAN.x,PAN.y,PAN.w,PAN.h,PAN.r,C.white,0.62,i*(1-o),(1-i)*30,lerp(0.98,1,i));
+  } else if(t>=28.75&&t<35.4){ // escena 5: la prioridad se expande en panel
+    const k=P(t,28.8,30.0,E.inOutQuint), c=P(t,29.0,30.0,E.inOutCubic), o=P(t,34.8,35.3,E.inCubic);
+    const R0=ROWBAR;
+    glassSet(lerp(R0.x,PAN.x,k),lerp(R0.y,PAN.y,k),lerp(R0.w,PAN.w,k),lerp(R0.h,PAN.h,k),lerp(R0.h/2,PAN.r,k),mixRGB(C.brand,C.white,c),lerp(1,0.62,c),1-o);
+  } else vis(GL,false);
+}
+
+/* ───────── 0–1 · logo → su núcleo se vuelve el punto de «Hoy nos detenemos.» ───────── */
+let DOT_REST={x:0,y:0,r:17}, DOT_END={x:0,y:0,r:17};
+function intro(t){
+  const u=t-OFF;               // reloj del resto del video
+  if(u>4.95)return;
+  const L=lockAt(LK0);
+  // el logo sube y se achica para dar paso a la bienvenida
+  const up=P(t,3.15,4.15,E.inOutQuint);
+  const s=lerp(1.035,1,P(t,0.3,2.6,E.outCubic))*lerp(1,0.6,up), cy=lerp(H/2,372,up);
+  const k=LK0*s, ox=W/2+(L.x-W/2)*s, oy=cy+(L.y-H/2)*s;
+  const ix=ox+INNER[0]*k, iy=oy+INNER[1]*k;
+  // aparición: el isotipo se abre desde su núcleo; cierre: vuelve a su núcleo
+  const open=P(t,0.35,1.5,E.outCubic), shut=P(u,3.55,4.25,E.inOutCubic);
+  const rEnd=DOT_REST.r/k;
+  let clipR=t<1.5?lerp(0,130,open):lerp(130,rEnd,shut);
+  if(t>=1.5&&shut<=0)clipR=null;
+  const mv=P(u,4.1,4.9,E.inOutQuint);
+  const dx=lerp(ix,DOT_REST.x,mv)-ix, dy=lerp(iy,DOT_REST.y,mv)-iy;
+  drawLogo(fg,ox+dx,oy+dy,k,{
+    markFill:1, clipR,
+    letters:LETTERS.map((Lt,i)=>{const p=P(t,1.05+i*0.07,1.85+i*0.07,E.outExpo), q=P(u,3.3+(5-i)*0.04,3.65+(5-i)*0.04,E.inCubic);return{op:p*(1-q),dy:(1-p)*30-q*14}}),
+    sheen:P(t,2.15,3.05,E.inOutSine),
+  });
+}
+
+/* ───────── 0 · Bienvenida ───────── */
+const S0A=words($('s0a'),'Bienvenidos a la jornada');
+const S0B=words($('s0b'),'“Del diagnóstico a la ^acción”^',{img:'aceite-calido',size:'230% auto',pos:'8% 30%'});
+function s0(t){
+  const on=t>3.4&&t<8.6;vis($('s0'),on);if(!on)return;
+  reveal(S0A,t,3.6,0.07);reveal(S0B,t,4.05,0.08,0.95);
+  const o=out(t,3.1+OFF,0.45,36,12);S($('s0a'),o);S($('s0b'),o);
+}
+
+/* ───────── 1 · Hoy nos detenemos. ───────── */
+const S1A=words($('s1a'),'Hoy nos detenemos');
+const DOT=document.createElement('span');DOT.id='dot';$('s1a').appendChild(DOT);
+const S1B=words($('s1b'),'_para_ _mirar_ _hacia_ _adelante._');
+const s1drift=t=>1+0.025*P(t,4.9,9.6,E.inOutSine);
+function s1(t){
+  const on=t>4.0&&t<10.0;vis($('s1'),on);if(!on)return;
+  S($('s1g'),{s:s1drift(t)});
+  reveal(S1A,t,4.85,0.09,0.95);
+  reveal(S1B,t,5.95,0.07,0.95);
+  DOT.style.visibility=t>=4.9&&t<9.4?'inherit':'hidden';
+  S($('s1a'),out(t,9.35,0.45,40,14));S($('s1b'),out(t,9.25,0.45,40,14));
+}
+
+/* ───────── 2 · Primero, escuchamos. (el punto se estira y es la base del gráfico) ───────── */
+const S2T=words($('s2t'),'Primero, / escucharemos.');
+const S2S=words($('s2s'),'Los resultados del diagnóstico / de _CIS_ _Consultores._');
+const BASE_Y=770, BAR_W=52, BARS=[170,250,210,390,290,330,230], TALL=3;
+const barX=i=>1090+i*88+BAR_W/2;
+const BAR_C=[C.soft,C.light,C.soft,C.brand,C.light,C.soft,C.light];
+function s2(t){
+  const on=t>10.1&&t<15.6;vis($('s2'),on);
+  if(on){reveal(S2T,t,10.45,0.1);reveal(S2S,t,11.1,0.05);
+    const o=out(t,14.85);S($('s2t'),o);S($('s2s'),o);}
+  if(t<9.4||t>16.9)return;
+  const g=fg;
+  // punto → línea base
+  const m=P(t,9.45,10.55,E.inOutQuint), st=P(t,10.0,10.95,E.inOutQuint);
+  const lo=P(t,15.0,15.5,E.inCubic);
+  if(lo<1){
+    const cx=lerp(DOT_END.x,barX(TALL),m), cy=lerp(DOT_END.y,BASE_Y+12,m);
+    const w=lerp(DOT_END.r*2,620,st), h=lerp(DOT_END.r*2,3,st);
+    pill(g,cx,cy,w,h,h/2,mixRGB(C.brand,C.soft,st),1-lo);
+  }
+  // barras
+  BARS.forEach((hb,i)=>{
+    let p=P(t,10.95+i*0.07,12.2+i*0.07,E.outExpo);
+    if(i!==TALL){p*=1-P(t,15.0+i*0.02,15.5+i*0.02,E.inCubic);if(p<=0.002)return;
+      const hh=Math.max(6,hb*p);pill(g,barX(i),BASE_Y-hh/2,BAR_W,hh,BAR_W/2,BAR_C[i],Math.min(1,p*1.6));return;}
+    // la barra más alta se contrae a un círculo: una voz
+    const c=P(t,15.2,16.1,E.inOutQuint), mv=P(t,15.5,16.6,E.inOutQuint);
+    const hh=lerp(Math.max(BAR_W,hb*p),BAR_W,c);
+    const cy0=BASE_Y-lerp(hh/2,hb/2,c);
+    const x=lerp(barX(i),960,mv), y=lerp(cy0,VY,mv);
+    pill(g,x,y,BAR_W,hh,BAR_W/2,C.brand,Math.min(1,p*3));
+  });
+}
+
+/* ───────── 3 · Luego, conversamos. (una voz se vuelve muchas, en grupos pequeños) ───────── */
+const S3T=words($('s3t'),'Luego, conversaremos.');
+const S3S=words($('s3s'),'En grupos pequeños, donde _todas_ _las_ _voces_ _cuentan._');
+const VY=660, GX=[420,800,1180,1540], GN=[4,3,4,3];
+const VOICES=(()=>{const r=rng(12),a=[];let i=0;
+  const cols=[C.deep,C.brand,C.mid,C.sky,C.light,C.brand,C.mid];
+  GN.forEach((n,g)=>{for(let j=0;j<n;j++){const ang=-Math.PI/2+j/n*Math.PI*2+(n===4?Math.PI/4:0),R=n===4?64:58;
+    a.push({g,j,i,cx:GX[g]+Math.cos(ang)*R,cy:VY+Math.sin(ang)*R,rx:960+(i-6.5)*96,col:cols[(r()*cols.length)|0],ph:r()*6.28,u:0.08+r()*0.84,v:0.1+r()*0.8});i++}});
+  return a;})();
+// tarjetas: tema de cada prioridad individual (0 = la más compartida)
+const THEMES=[[0,1,0,2],[1,0,3],[0,1,4,2],[3,1,0]];
+const THEME_C=[C.brand,C.am,C.vc,C.vo,C.mo];
+const ROWS=(()=>{const cnt=[0,0,0,0,0];VOICES.forEach(v=>{v.th=THEMES[v.g][v.j];v.seg=cnt[v.th]++;});return cnt})();
+const ROW_Y0=520,ROW_DY=64,SEG_W=104,SEG_G=8,SEG_H=42,ROW_X0=960-(5*(SEG_W+SEG_G)-SEG_G)/2;
+const ROWBAR={x:ROW_X0,y:ROW_Y0,w:ROWS[0]*(SEG_W+SEG_G)-SEG_G,h:SEG_H};
+VOICES.forEach(v=>{
+  const col=THEMES[v.g];
+  v.slot0=v.j; // orden inicial
+  v.slot1=[...col.keys()].sort((a,b)=>col[a]-col[b]||a-b).indexOf(v.j); // orden propio
+  v.cw=[232,204,178,152,130][v.th]+((v.i*37)%11-5);
+});
+const ORDER=[...VOICES].sort((a,b)=>a.th-b.th||a.seg-b.seg).map(v=>v.i);
+const RIPPLES=[[1,19.8],[3,20.25],[0,20.7],[2,21.15]];
+function s3(t){
+  const on=t>16.4&&t<22.9;vis($('s3'),on);
+  if(on){reveal(S3T,t,16.95,0.1);reveal(S3S,t,17.5,0.05);
+    const o=out(t,22.3);S($('s3t'),o);S($('s3s'),o);}
+}
+function s4txt(t){
+  const on=t>22.6&&t<29.0;vis($('s4'),on);
+  if(on){reveal(S4T,t,23.1,0.1);reveal(S4S,t,23.75,0.06);
+    const o=out(t,28.35);S($('s4t'),o);S($('s4s'),o);}
+}
+const S4T=words($('s4t'),'Después, priorizaremos.');
+const S4S=words($('s4s'),'Primero cada uno. _Luego,_ _juntos._');
+function voices(t){
+  if(t<16.6||t>29.4)return;
+  const g=fg;
+  // ondas: cada grupo conversa
+  RIPPLES.forEach(([gi,t0])=>{for(let k=0;k<2;k++){const p=clamp((t-t0-k*0.35)/1.5);if(p<=0||p>=1)continue;
+    ring(g,GX[gi],VY,lerp(96,190,E.outCubic(p)),C.brand,0.28*(1-p)*(1-k*0.4),2);}});
+  const fu=P(t,27.7,28.3,E.inOutCubic);
+  VOICES.forEach(v=>{
+    const p1=P(t,16.75+Math.abs(v.i-6.5)*0.035,17.85+Math.abs(v.i-6.5)*0.035,E.outExpo);
+    const p2=P(t,18.5+v.g*0.07,19.75+v.g*0.07,E.inOutQuint);
+    const br=p2>=1?Math.sin(t*1.4+v.ph)*2:0;
+    let x=lerp(lerp(960,v.rx,p1),v.cx,p2), y=lerp(VY,VY,p1)+lerp(0,v.cy-VY,p2)+br;
+    let w=52,h=52,r=26,col=THEME_C[v.th],a=1,ph=1;
+    const fl=1-p1;   // la voz azul se tiñe de color al multiplicarse
+    // → tarjeta en la columna del grupo
+    const mm=P(t,22.6+v.i*0.025,23.6+v.i*0.025,E.inOutCubic);
+    if(mm>0){
+      const sp=P(t,24.4+v.g*0.1,25.45+v.g*0.1,E.inOutQuint);
+      const slot=lerp(v.slot0,v.slot1,sp), side=Math.sign(v.slot1-v.slot0)*Math.sin(Math.PI*sp)*30;
+      const colX=GX[v.g]+side, colY=560+slot*54;
+      x=lerp(x,colX,mm);y=lerp(y,colY,mm);
+      w=lerp(52,v.cw,mm);h=lerp(52,38,mm);r=lerp(26,14,mm);ph=1-mm;
+      // → juntos: filas ordenadas por acuerdo
+      const oi=ORDER.indexOf(v.i), mg=P(t,26.0+oi*0.035,27.3+oi*0.035,E.inOutQuint);
+      if(mg>0){
+        const rx=ROW_X0+v.seg*(SEG_W+SEG_G)+SEG_W/2, ry=ROW_Y0+v.th*ROW_DY+SEG_H/2;
+        const arc=Math.sin(Math.PI*mg)*-24;
+        x=lerp(x,rx,mg);y=lerp(y,ry,mg)+arc;w=lerp(w,SEG_W,mg);h=lerp(h,SEG_H,mg);r=lerp(r,SEG_H/2,mg);
+      }
+      if(v.th===0&&t>=28.75)return;          // el vidrio toma la fila ganadora
+      if(v.th>0)a=lerp(1,0.4,fu)*(1-P(t,28.8,29.3,E.inCubic));
+    }
+    if(a>0.002){if(ph<1)pill(g,x,y,w,h,r,col,a*(1-ph));photoPill(g,x,y,w,h,r,PH['aceite-color'],v.u,v.v,0.11,a*ph);if(fl>0)pill(g,x,y,w,h,r,C.brand,a*fl);}
+  });
+  if(fu>0&&t<28.75)pill(g,ROWBAR.x+ROWBAR.w/2,ROWBAR.y+SEG_H/2,ROWBAR.w,SEG_H,SEG_H/2,C.brand,fu);
+}
+
+/* ───────── 5 · Y fundamentamos. ───────── */
+const S5T=words($('s5t'),'Y fundamentaremos.');
+const S5S=words($('s5s'),'Cada prioridad, con sus razones / y sus _indicadores._');
+const KPI=[0.14,0.24,0.2,0.38,0.5,0.63,0.86];
+const kx=i=>PAN.x+70+i*(PAN.w-140)/6, ky=v=>PAN.y+610-v*210;
+function s5(t){
+  const on=t>28.9&&t<35.2;vis($('s5'),on);
+  if(on){reveal(S5T,t,29.25,0.1);reveal(S5S,t,29.85,0.05);
+    const o=out(t,34.45);S($('s5t'),o);S($('s5s'),o);}
+  if(t<29.9||t>36.4)return;
+  const g=fg, fo=1-P(t,34.6,35.0,E.inCubic);
+  if(fo>0){
+    // título de la prioridad
+    const pt=P(t,30.0,30.9,E.outExpo);
+    pill(g,PAN.x+70+150*pt,PAN.y+86,300*pt,44,22,C.brand,fo*pt);
+    // razones
+    [470,390,430].forEach((w,j)=>{const y=PAN.y+178+j*60;
+      const d=P(t,30.35+j*0.22,30.95+j*0.22,E.outBack), b=P(t,30.45+j*0.22,31.35+j*0.22,E.outExpo);
+      disc(g,PAN.x+80,y,8*d,C.brand,fo);
+      pill(g,PAN.x+112+w*b/2,y,w*b,18,9,C.soft,fo*b);});
+    // línea de meta
+    const tg=P(t,31.0,31.6,E.outCubic);
+    g.save();g.setLineDash([10,12]);g.strokeStyle=rgba(C.soft,tg*fo);g.lineWidth=2;g.beginPath();g.moveTo(kx(0),ky(0.9));g.lineTo(kx(0)+(kx(6)-kx(0))*tg,ky(0.9));g.stroke();g.restore();
+    g.strokeStyle=rgba(C.pale,fo*tg);g.lineWidth=2;g.beginPath();g.moveTo(kx(0),ky(0)+16);g.lineTo(kx(6),ky(0)+16);g.stroke();
+  }
+  // indicador: la línea se dibuja; al salir se aplana y se vuelve camino
+  const dr=P(t,31.25,32.8,E.inOutCubic), fl=P(t,34.9,36.15,E.inOutQuint);
+  if(dr<=0)return;
+  const pts=KPI.map((v,i)=>[lerp(kx(i),-80+i*2080/6,fl),lerp(ky(v),ROAD_Y,fl)]);
+  const segs=pts.slice(1).map((p,i)=>Math.hypot(p[0]-pts[i][0],p[1]-pts[i][1]));
+  let rem=segs.reduce((a,b)=>a+b,0)*dr;
+  g.strokeStyle=rgba(C.brand);g.lineWidth=lerp(6,4,fl);g.lineJoin='round';g.lineCap='round';
+  g.beginPath();g.moveTo(...pts[0]);let end=pts[0];
+  for(let i=0;i<segs.length&&rem>0;i++){const k=Math.min(1,rem/segs[i]);end=[lerp(pts[i][0],pts[i+1][0],k),lerp(pts[i][1],pts[i+1][1],k)];g.lineTo(...end);rem-=segs[i];}
+  g.stroke();
+  if(dr>=1&&fl<1){const e=P(t,32.75,33.3,E.outBack);disc(g,end[0],end[1],11*e*(1-fl),C.brand);
+    const pr=clamp((t-32.8)/1.4);if(pr>0&&pr<1)ring(g,end[0],end[1],11+44*E.outCubic(pr),C.brand,0.35*(1-pr),2);}
+}
+
+/* ───────── 6 · Para salir con… (un camino con tres hitos) ───────── */
+const ROAD_Y=640, MX=[960,1720,2480], MT=[36.8,40.2,43.4], MO=[39.35,42.55,45.6];
+const S6E=words($('s6e'),'Para salir con');
+const LAB=[['lab0','una mirada común.'],['lab1','prioridades claras.'],['lab2','una hoja de ruta compartida.']].map(([id,s])=>words($(id),s));
+const MSC=[C.brand,C.vo,C.mo];LAB.forEach((ws,k)=>{ws[ws.length-1].style.color=rgba(MSC[k])});
+function cam(t){
+  const raw=760*P(t,39.4,40.3,E.inOutQuint)+760*P(t,42.6,43.5,E.inOutQuint);
+  const zo=P(t,45.8,46.9,E.inOutQuint);
+  return{raw,c:lerp(raw,760,zo),z:lerp(1,0.5,zo)};
+}
+function s6(t){
+  const on=t>36.2&&t<47.0;vis($('s6'),on);
+  const cm=cam(t), sx=wx=>(wx-960-cm.c)*cm.z+960;
+  if(on){
+    reveal(S6E,t,36.35,0.08);S($('s6e'),out(t,45.7));
+    LAB.forEach((ws,k)=>{reveal(ws,t,MT[k]+0.15,0.08);const o=out(t,MO[k],0.4,30,10);S($('lab'+k),{...o,x:sx(MX[k])-960});});
+  }
+  if(t<36.1||t>48.0)return;
+  const g=fg;
+  const cv=P(t,47.0,47.8,E.inOutQuint), fa=1-P(t,47.45,47.95,E.inCubic);
+  const pw=t<45.8?960+cm.raw:MX[2];
+  const lx0=lerp(-100,960,cv), lx1=lerp(W+100,960,cv), px=clamp(sx(pw),lx0,lx1);
+  const ahead=mixRGB(C.brand,C.pale,P(t,36.1,36.9,E.inOutCubic));
+  g.lineCap='round';g.lineWidth=4;
+  g.strokeStyle=rgba(C.brand,fa);g.beginPath();g.moveTo(lx0,ROAD_Y);g.lineTo(px,ROAD_Y);g.stroke();
+  g.strokeStyle=rgba(ahead,fa);g.beginPath();g.moveTo(px,ROAD_Y);g.lineTo(lx1,ROAD_Y);g.stroke();
+  MX.forEach((wx,k)=>{
+    const x=lerp(sx(wx),960,cv), pk=P(t,MT[k],MT[k]+0.7,E.outBack), zs=lerp(1,0.8,P(t,45.8,46.9,E.inOutQuint));
+    const app=P(t,36.2+k*0.12,36.9+k*0.12,E.outCubic);
+    if(pk<1){disc(g,x,ROAD_Y,10*zs,C.white,fa*app);ring(g,x,ROAD_Y,9*zs,C.soft,fa*app*(1-pk),3);}
+    if(pk>0)disc(g,x,ROAD_Y,18*pk*zs,MSC[k],fa);
+    const pr=clamp((t-MT[k])/1.3);if(pr>0&&pr<1)ring(g,x,ROAD_Y,18+62*E.outCubic(pr),MSC[k],0.32*(1-pr),2);
+  });
+}
+
+/* ───────── 7 · Nuestros acuerdos para hoy ───────── */
+const S7E=words($('s7e'),'Nuestros acuerdos para hoy');
+const AG=['Escuchar / para entender.','Hablar con franqueza / y respeto.','Lo que se comparte aquí, / se cuida.','Pensar en / lo que viene.'].map((s,k)=>words($('a'+k),s));
+const AGC=[C.brand,C.vo,C.mo,C.vc];AG.forEach((ws,k)=>{ws[ws.length-1].style.color=rgba(AGC[k])});
+const AT=[48.0,50.7,53.4,56.1];
+function s7(t){
+  const on=t>47.3&&t<58.6;vis($('s7'),on);if(!on)return;
+  reveal(S7E,t,47.45,0.07);S($('s7e'),out(t,58.0));
+  const ti=P(t,47.75,48.6,E.outExpo), to=out(t,58.0);
+  S($('tab'),{op:ti*to.op,x:(1-ti)*-40,y:to.y,b:to.b});
+  const roll=[1,2,3].reduce((a,k)=>a+P(t,AT[k]-0.2,AT[k]+0.45,E.inOutQuint),0);
+  $('tabr').style.transform=`translateY(${-236*roll}px)`;
+  const ki=Math.min(2,Math.floor(roll)), kf=roll-ki;
+  $('tab').style.background=rgba(mixRGB(AGC[ki],AGC[Math.min(3,ki+1)],kf));
+  AG.forEach((ws,k)=>{reveal(ws,t,AT[k],0.07,0.9);S($('a'+k),out(t,k<3?AT[k]+2.3:58.0,0.4,34,12));$('a'+k).style.visibility=t>AT[k]-0.1&&t<(k<3?AT[k]+2.8:58.6)?'inherit':'hidden';});
+}
+
+/* ───────── 8 · Y al final del día ───────── */
+const S8A=words($('s8a'),'Y al final del día');
+const S8B=words($('s8b'),'Levantaremos compromisos / que construiremos ^juntos.^',{img:'aceite-color',size:'220% auto',pos:'30% 20%'});
+function s8(t){
+  const on=t>58.4&&t<63.3;vis($('s8'),on);if(!on)return;
+  reveal(S8A,t,58.6,0.07);reveal(S8B,t,59.1,0.08,0.95);
+  const o=out(t,62.6,0.45,40,14);S($('s8a'),o);S($('s8b'),o);
+}
+
+/* ───────── 9 · ¡Vamos a trabajar! → las letras se vuelven personas → R35 ───────── */
+const VAMOS={f:'700 250px Head',ls:'-11px',l1:['¡Vamos a',478],l2:['trabajar!',752]};
+const vbuf=new OffscreenCanvas(W,H), vb=vbuf.getContext('2d');
+function vamosText(g,a,sc,blur,t=0,mask=false){
+  if(a<=0.002)return;
+  vb.setTransform(1,0,0,1,0,0);vb.globalCompositeOperation='source-over';vb.clearRect(0,0,W,H);
+  vb.font=VAMOS.f;vb.letterSpacing=VAMOS.ls;vb.textAlign='center';vb.fillStyle='#000';
+  vb.fillText(VAMOS.l1[0],W/2,VAMOS.l1[1]);vb.fillText(VAMOS.l2[0],W/2,VAMOS.l2[1]);
+  vb.globalCompositeOperation='source-in';
+  const im=mask?null:PH['aceite-color'];
+  if(im){const k=Math.max(W/im.width,H/im.height)*1.05, dx=Math.sin(t*0.4)*18;vb.drawImage(im,W/2-im.width*k/2+dx,H/2-im.height*k/2,im.width*k,im.height*k);}
+  else{vb.fillStyle=mask?'#000':rgba(C.brand);vb.fillRect(0,0,W,H);}
+  if(!mask){vb.globalCompositeOperation='source-atop';vb.fillStyle='rgba(22,40,81,0.12)';vb.fillRect(0,0,W,H);}   // un punto más de contraste sobre blanco
+  g.save();g.translate(W/2,H/2);g.scale(sc,sc);g.translate(-W/2,-H/2);
+  if(blur>0.1)g.filter=`blur(${blur}px)`;
+  g.globalAlpha=a;g.drawImage(vbuf,0,0);g.restore();
+}
+const vamosScale=t=>lerp(1.1,1,P(t,63.1,64.2,E.outExpo))*lerp(1,0.97,P(t,64.2,65.9,E.inOutSine));
+let PEOPLE=[];
+function sampleText(draw,y0,y1,st){
+  const c=new OffscreenCanvas(W,H),g=c.getContext('2d');draw(g);
+  const d=g.getImageData(0,0,W,H).data,pts=[];
+  for(let y=y0,row=0;y<y1;y+=st*0.9,row++)for(let x=st/2+(row%2)*st/2;x<W;x+=st){if(d[((y|0)*W+(x|0))*4+3]>160)pts.push([x,y])}
+  return pts;
+}
+function buildPeople(){
+  const r35=sampleText(g=>{g.fillStyle='#000';g.font='700 470px Head';g.letterSpacing='-13px';g.textAlign='center';g.fillText('R35',W/2,646);},250,660,27);
+  let st=20,tx=[];
+  for(;st<70;st+=0.5){tx=sampleText(g=>vamosText(g,1,1,0,0,true),220,820,st);if(tx.length<=r35.length)break;}
+  const byX=(a,b)=>a[0]-b[0]||a[1]-b[1];
+  r35.sort(byX);tx.sort(byX);
+  // destinos en el isotipo del logo final
+  const L=lockAt(LK1);
+  const mk=(()=>{const c=new OffscreenCanvas(W,H),g=c.getContext('2d');g.setTransform(LK1,0,0,LK1,L.x,L.y);g.fill(LP.mark);
+    const d=g.getImageData(0,0,W,H).data,pts=[];for(let y=0;y<H;y+=6)for(let x=0;x<W;x+=6){if(d[(y*W+x)*4+3]>200)pts.push([x,y])}return pts})();
+  const r=rng(35);
+  for(let i=mk.length-1;i>0;i--){const j=(r()*(i+1))|0;[mk[i],mk[j]]=[mk[j],mk[i]]}
+  PEOPLE=r35.map((p,i)=>{const s=tx[Math.min(tx.length-1,Math.floor(i*tx.length/r35.length))];
+    return{x:p[0],y:p[1],sx:s[0],sy:s[1],d:(p[0]-560)/800*0.45+r()*0.3,c:[C.deep,C.brand,C.brand,C.mid,C.sky,C.vo,C.vc,C.am,C.mo][(r()*9)|0],ph:r()*6.28,m:mk[i%mk.length],dm:r()*0.35};});
+  window.NPEOPLE=PEOPLE.length;window.TEXTSTEP=st;
+}
+function person(g,x,y,s,col,a,morph){
+  g.fillStyle=rgba(col,a);
+  if(morph>=1){g.beginPath();g.arc(x,y,3.4,0,Math.PI*2);g.fill();return}
+  const k=lerp(s,7,morph);
+  g.beginPath();g.arc(x,y-k*0.34,k*0.24,0,Math.PI*2);g.fill();
+  g.beginPath();g.moveTo(x-k*0.38,y+k*0.42);g.quadraticCurveTo(x-k*0.38,y-k*0.06,x,y-k*0.06);g.quadraticCurveTo(x+k*0.38,y-k*0.06,x+k*0.38,y+k*0.42);g.closePath();g.fill();
+}
+const S10B=words($('s10b'),'NECESITA A ^PERSONAS.^',{img:'aceite-color',size:'140% auto',pos:'0% 35%'});
+function s9(t){
+  if(t<63.0||t>79)return;
+  const sc=vamosScale(t);
+  if(t<66.3){const a=P(t,63.1,63.9,E.outCubic)*(1-P(t,65.6,66.1,E.inOutSine));
+    vamosText(bg,a,sc,lerp(18,0,P(t,63.1,64.0,E.outExpo)),t);}
+  if(t<65.6)return;
+  const fin=P(t,65.6,66.1,E.inOutSine);
+  PEOPLE.forEach(q=>{
+    const x0=W/2+(q.sx-W/2)*sc, y0=H/2+(q.sy-H/2)*sc;
+    const p=E.outQuint(clamp((t-66.15-q.d)/1.4));
+    const walk=Math.sin(t*9+q.ph)*Math.sin(Math.PI*p)*7;
+    let x=lerp(x0,q.x,p), y=lerp(y0,q.y,p)-Math.abs(walk);
+    if(p>=1)y+=Math.sin(t*2.2+q.ph)*1.5;
+    // → isotipo
+    const m=E.inOutCubic(clamp((t-72.4-q.dm)/1.25));
+    x=lerp(x,q.m[0],m);y=lerp(y,q.m[1],m);
+    const f=P(t,73.95,74.45,E.inOutSine);
+    if(f<1)person(bg,x,y,24,mixRGB(q.c,C.brand,m),fin*(1-f),m);
+  });
+  const on=t>67.5&&t<72.6;vis($('s10'),on);
+  if(on){reveal(S10B,t,67.75,0.1,0.95);S($('s10b'),out(t,72.05,0.45,30,12));}
+}
+
+function outro(t){
+  if(t<73.8)return;
+  const L=lockAt(LK1);
+  drawLogo(bg,L.x,L.y,LK1,{markFill:P(t,73.95,74.45,E.inOutSine),
+    letters:LETTERS.map((Lt,i)=>{const p=P(t,74.3+i*0.07,75.1+i*0.07,E.outExpo);return{op:p,dy:(1-p)*30}}),
+    sheen:P(t,75.7,76.6,E.inOutSine)});
+}
+
+/* ───────── cuadro ───────── */
+function renderFrame(t){
+  fg.clearRect(0,0,W,H);
+  const u=t-OFF;               // escenas posteriores a la bienvenida
+  ambient(u,P(u,10.1,11.1,E.inOutSine)*(1-P(u,15.0,15.8,E.inOutSine))+P(u,29.0,30.2,E.inOutSine)*(1-P(u,34.8,35.6,E.inOutSine)));
+  glass(u);
+  s0(t);s1(u);s2(u);s3(u);s4txt(u);voices(u);s5(u);s6(u);s7(u);s8(u);s9(u);outro(u);
+  intro(t);
+}
+window.renderFrame=renderFrame;
+
+function measureDot(){
+  const g=$('s1g'),v=$('s1');v.style.visibility='hidden';
+  const rd=s=>{S(g,{s});S($('s1a'),{});const b=DOT.getBoundingClientRect();return{x:b.left+b.width/2,y:b.top+b.height/2,r:b.width/2}};
+  DOT_END=rd(s1drift(9.4));DOT_REST=rd(1);
+}
+Promise.all([phLoad,document.fonts.load('700 100px Head'),document.fonts.load('400 100px Body'),document.fonts.load('700 100px Body')]).then(()=>{
+  measureDot();buildPeople();
+  const q=new URLSearchParams(location.search);
+  if(q.has('play')){const t0=performance.now()-(+q.get('play')||0)*1000;const loop=()=>{renderFrame(((performance.now()-t0)/1000)%DUR);requestAnimationFrame(loop)};loop();}
+  else renderFrame(+(q.get('t')||0));
+  window.READY=true;
+});
+</script>
+</body>
+</html>
