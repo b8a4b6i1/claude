@@ -55,6 +55,14 @@ pres.defineSlideMaster({
   ],
 });
 pres.defineSlideMaster({
+  title: 'AGENDA',
+  background: { color: C.background1 },
+  objects: [
+    ...footerObjects(),
+    { placeholder: { options: { name: 'title', type: 'title', x: 0.8, y: 0.8, w: 11.7, h: 0.8, fontFace: HEAD, fontSize: 40, color: C.text1, margin: 0, valign: 'middle', align: 'left' }, text: '' } },
+  ],
+});
+pres.defineSlideMaster({
   title: 'ACTIVIDAD',
   background: { color: C.background1 },
   objects: [
@@ -105,6 +113,44 @@ pres.addSection({ title: 'Apertura' });
 }
 
 /* ── actividades (marcadas en amarillo en la agenda) */
+/* ── agenda del día: dos columnas (mañana / tarde) sobre una línea de tiempo; pausas en gris */
+{
+  const s = pres.addSlide({ masterName: 'AGENDA', sectionTitle: 'Apertura' });
+  s.addText('Agenda del día', { placeholder: 'title' });
+  const COLS = [
+    { label: 'MAÑANA', x: 0.8, rows: [
+      ['08:30 – 09:00', 'Bienvenida y desayuno'],
+      ['09:00 – 10:00', 'Video y diagnóstico CIS'],
+      ['10:00 – 10:15', 'Conversación en grupos'],
+      ['10:15 – 10:30', 'Pausa', true],
+      ['10:30 – 13:30', 'Ordenamiento de prioridades'],
+      ['13:30 – 14:30', 'Almuerzo', true],
+    ] },
+    { label: 'TARDE', x: 6.95, rows: [
+      ['14:30 – 14:45', 'Resumen del trabajo'],
+      ['14:45 – 15:45', 'Fundamentar la respuesta'],
+      ['15:45 – 16:00', 'Pausa', true],
+      ['16:00 – 17:00', 'Indicadores (KPI)'],
+      ['17:00 – 17:30', 'Conclusiones y compromisos'],
+      ['17:30 – 20:00', 'Convivencia en equipo', true],
+    ] },
+  ];
+  const Y0 = 2.55, STEP = 0.7, DOT = 0.15;
+  for (const col of COLS) {
+    s.addText(col.label, { x: col.x, y: 1.85, w: 3, h: 0.32, fontFace: HEAD_SEMI, fontSize: 14, color: C.accent1, charSpacing: 3, margin: 0, valign: 'middle', isTextBox: true });
+    // línea de tiempo que une los puntos de la columna
+    s.addShape(pres.ShapeType.line, { x: col.x + DOT / 2, y: Y0, w: 0, h: STEP * (col.rows.length - 1), line: { color: 'C6D6EE', width: 1.5 }, objectName: 'Línea ' + col.label });
+    col.rows.forEach(([time, act, pause], i) => {
+      const y = Y0 + i * STEP;
+      s.addShape(pres.ShapeType.ellipse, { x: col.x, y: y - DOT / 2, w: DOT, h: DOT,
+        fill: { color: pause ? 'FFFFFF' : '0055B8' }, line: pause ? { color: 'B3CBEA', width: 1.5 } : { type: 'none' }, objectName: 'Punto ' + act });
+      s.addText(time, { x: col.x + 0.38, y: y - 0.25, w: 1.45, h: 0.5, fontFace: HEAD_SEMI, fontSize: 15, color: pause ? C.text2 : C.accent1, margin: 0, valign: 'middle', isTextBox: true });
+      s.addText(act, { x: col.x + 2.0, y: y - 0.25, w: 3.7, h: 0.5, fontFace: pause ? BODY : HEAD_MID, fontSize: 18, color: pause ? C.text2 : C.text1, margin: 0, valign: 'middle', fit: 'shrink', isTextBox: true });
+    });
+  }
+  s.addNotes('Agenda del día, de 08:30 a 20:00.');
+}
+
 pres.addSection({ title: 'Actividades' });
 const ACTS = [
   { color: C.accent1, art: 'results', label: 'Conduce', who: 'Gerente de Personas',
