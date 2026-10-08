@@ -1,0 +1,10 @@
+{
+  "name": "saval-qms-motion",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Saval QMS · Mapa de audiencias y riesgos — motion graphic",
+  "devDependencies": {
+    "@fontsource-variable/montserrat": "5.2.5"
+  }
+}
