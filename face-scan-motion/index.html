@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Escáner facial</title>
+<style>
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#000}
+canvas{display:block}
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// Animación determinista: renderFrame(t, estilo). Solo la interfaz del escáner, sin rostro.
+// Estilos: holo · minimal · lidar · acceso. Duración 8 s.
+const W = 1920, H = 1080, TAU = Math.PI * 2, DUR = 8;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const Q = new URLSearchParams(location.search);
+const MONO = '"DejaVu Sans Mono", monospace', SANS = 'Inter, sans-serif';
+
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+const sm = (a, b, x) => { x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); };
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = (x) => 1 - Math.pow(1 - clamp(x, 0, 1), 3);
+const eio = (x) => { x = clamp(x, 0, 1); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix = (a, b, k) => { a = hex(a); b = hex(b); return `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')})`; };
+const rgba = (h, a) => { const c = hex(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+function txt(s, x, y, o = {}) {
+  ctx.save();
+  ctx.font = `${o.w || 500} ${o.size || 24}px ${o.font || SANS}`;
+  ctx.fillStyle = o.color || '#fff';
+  ctx.textAlign = o.align || 'left';
+  ctx.textBaseline = o.base || 'alphabetic';
+  ctx.letterSpacing = (o.ls || 0) + 'px';
+  ctx.globalAlpha *= o.a ?? 1;
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+// Esquinas tipo visor. k = 0..1 progreso de aparición.
+function brackets(cx, cy, w, h, len, r, k = 1) {
+  const x0 = cx - w / 2, y0 = cy - h / 2, x1 = cx + w / 2, y1 = cy + h / 2, L = len * k;
+  ctx.beginPath();
+  for (const [x, y, sx, sy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x1, y1, -1, -1], [x0, y1, 1, -1]]) {
+    ctx.moveTo(x, y + sy * (r + L));
+    ctx.lineTo(x, y + sy * r);
+    ctx.quadraticCurveTo(x, y, x + sx * r, y);
+    ctx.lineTo(x + sx * (r + L), y);
+  }
+  ctx.stroke();
+}
+function check(cx, cy, s, k) {
+  const p = [[-0.5, 0.02], [-0.15, 0.36], [0.55, -0.38]].map(([x, y]) => [cx + x * s, cy + y * s]);
+  const l1 = Math.hypot(p[1][0] - p[0][0], p[1][1] - p[0][1]), l2 = Math.hypot(p[2][0] - p[1][0], p[2][1] - p[1][1]);
+  const d = k * (l1 + l2);
+  ctx.beginPath(); ctx.moveTo(...p[0]);
+  if (d <= l1) ctx.lineTo(lerp(p[0][0], p[1][0], d / l1), lerp(p[0][1], p[1][1], d / l1));
+  else { ctx.lineTo(...p[1]); const e = (d - l1) / l2; ctx.lineTo(lerp(p[1][0], p[2][0], e), lerp(p[1][1], p[2][1], e)); }
+  ctx.stroke();
+}
+const num = (v, d = 0) => v.toFixed(d).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+// Línea de tiempo común
+function T(t) {
+  return {
+    intro: eo(t / 1.0),
+    scan: eio((t - 1.0) / 2.2),             // pasada descendente 1.0–3.2
+    scan2: eio((t - 3.2) / 1.8),            // pasada ascendente 3.2–5.0
+    scanOn: sm(0.8, 1.1, t) * (1 - sm(4.9, 5.3, t)),
+    prog: clamp((t - 1.0) / 4.8, 0, 1),     // 0–100 % entre 1.0 y 5.8
+    ok: sm(5.8, 6.2, t),
+    chk: eo((t - 6.0) / 0.6),
+    pulse: sm(5.9, 7.2, t),
+  };
+}
+// Posición del haz de barrido normalizada (0 arriba, 1 abajo)
+function beam(tm) { return tm.scan2 > 0 ? 1 - tm.scan2 : tm.scan; }
+
+// ───────────────────────── A · HOLOGRÁFICO ─────────────────────────
+function holo(t) {
+  const tm = T(t), cx = W / 2, cy = H / 2 + 10;
+  const C = mix('#3fe6ff', '#3dffb0', tm.ok), Ch = tm.ok > 0.5 ? '#3dffb0' : '#3fe6ff';
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, 1100);
+  g.addColorStop(0, '#062238'); g.addColorStop(0.45, '#020b14'); g.addColorStop(1, '#000');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // retícula de fondo
+  ctx.fillStyle = 'rgba(80,190,255,0.07)';
+  for (let x = 20; x < W; x += 40) for (let y = 20; y < H; y += 40) ctx.fillRect(x - 1, y - 1, 2, 2);
+
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  ctx.strokeStyle = C; ctx.fillStyle = C; ctx.shadowColor = C;
+  const ia = tm.intro;
+  // anillos giratorios
+  ctx.globalAlpha = 0.55 * ia; ctx.lineWidth = 2;
+  const R0 = 400 * lerp(1.25, 1, ia);
+  for (let k = 0; k < 6; k++) { const a0 = t * 0.5 + k * TAU / 6; ctx.beginPath(); ctx.arc(cx, cy, R0, a0, a0 + 0.62); ctx.stroke(); }
+  ctx.globalAlpha = 0.3 * ia; ctx.lineWidth = 1;
+  ctx.setLineDash([3, 9]); ctx.beginPath(); ctx.arc(cx, cy, R0 + 26, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+  ctx.lineWidth = 6; ctx.globalAlpha = 0.35 * ia;
+  for (let k = 0; k < 3; k++) { const a0 = -t * 0.8 + k * TAU / 3; ctx.beginPath(); ctx.arc(cx, cy, R0 + 52, a0, a0 + 0.35); ctx.stroke(); }
+  // marcas del anillo exterior
+  ctx.lineWidth = 2;
+  for (let k = 0; k < 120; k++) {
+    const a = k / 120 * TAU - Math.PI / 2, lit = k / 120 < tm.prog;
+    ctx.globalAlpha = ia * (lit ? 0.9 : 0.18);
+    const r1 = R0 + 74, r2 = r1 + (k % 10 === 0 ? 22 : 12);
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke();
+  }
+  // visor
+  const fw = 470, fh = 570, fy0 = cy - fh / 2;
+  ctx.globalAlpha = ia; ctx.lineWidth = 4; ctx.shadowBlur = 18;
+  brackets(cx, cy, fw * lerp(1.3, 1, ia), fh * lerp(1.3, 1, ia), 70, 22, ia);
+  ctx.shadowBlur = 0;
+  // matriz de puntos dentro del visor, revelada por el haz
+  const by = fy0 + beam(tm) * fh;
+  for (let x = cx - fw / 2 + 35; x < cx + fw / 2 - 20; x += 22) for (let y = fy0 + 35; y < fy0 + fh - 20; y += 22) {
+    const dy = y - by, near = Math.exp(-(dy * dy) / 900) * tm.scanOn;
+    const seen = tm.scan2 > 0 ? 1 : (y < by ? 1 : 0);
+    const a = 0.06 + 0.22 * seen * sm(0, 1, tm.scan) * (1 - tm.ok * 0.5) + 0.9 * near;
+    ctx.globalAlpha = a * ia; ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+  }
+  // haz
+  if (tm.scanOn > 0) {
+    const dir = tm.scan2 > 0 ? 1 : -1;
+    const tg = ctx.createLinearGradient(0, by, 0, by + dir * 140);
+    tg.addColorStop(0, rgba('#3fe6ff', 0.35 * tm.scanOn)); tg.addColorStop(1, rgba('#3fe6ff', 0));
+    ctx.globalAlpha = 1; ctx.fillStyle = tg; ctx.fillRect(cx - fw / 2 + 8, Math.min(by, by + dir * 140), fw - 16, 140);
+    ctx.fillStyle = C; ctx.globalAlpha = tm.scanOn; ctx.shadowBlur = 30;
+    ctx.fillRect(cx - fw / 2 - 30, by - 1.5, fw + 60, 3);
+    ctx.shadowBlur = 0;
+  }
+  // verificación
+  if (tm.ok > 0) {
+    ctx.globalAlpha = tm.ok; ctx.lineWidth = 3;
+    const pr = 120 + 90 * tm.pulse;
+    ctx.globalAlpha = 0.6 * (1 - tm.pulse); ctx.beginPath(); ctx.arc(cx, cy, pr, 0, TAU); ctx.stroke();
+    ctx.globalAlpha = tm.ok; ctx.beginPath(); ctx.arc(cx, cy, 110, 0, TAU); ctx.stroke();
+    ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.shadowBlur = 24; check(cx, cy + 6, 110, tm.chk); ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+
+  // paneles de datos
+  const L = 150, a = sm(0.5, 1.2, t);
+  txt('ESCÁNER BIOMÉTRICO', L, 330, { font: MONO, size: 20, color: Ch, ls: 4, a: a });
+  txt('SESIÓN 7F-2A91', L, 362, { font: MONO, size: 16, color: '#6f8ca3', ls: 2, a: a });
+  const rows = [['Profundidad 3D', num(30214 * eo(tm.prog * 1.4)), 'pts'], ['Infrarrojo', num(940), 'nm'],
+    ['Vivacidad', tm.prog > 0.55 ? 'OK' : '···', ''], ['Latencia', num(lerp(0, 48, eo(tm.prog))), 'ms']];
+  rows.forEach(([k, v, u], i) => {
+    const y = 440 + i * 70, ra = sm(0.9 + i * 0.12, 1.4 + i * 0.12, t);
+    ctx.fillStyle = rgba('#3fe6ff', 0.25 * ra); ctx.fillRect(L, y + 22, 300, 1);
+    txt(k.toUpperCase(), L, y, { font: MONO, size: 15, color: '#6f8ca3', ls: 2, a: ra });
+    txt(v + (u ? ' ' + u : ''), L + 300, y, { font: MONO, size: 20, color: '#e8fbff', align: 'right', a: ra });
+  });
+  // dial de progreso
+  const dx = W - 300, dy = 480, dr = 92;
+  ctx.save(); ctx.globalAlpha = a; ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(63,230,255,0.15)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(dx, dy, dr, 0, TAU); ctx.stroke();
+  ctx.strokeStyle = C; ctx.shadowColor = C; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.arc(dx, dy, dr, -Math.PI / 2, -Math.PI / 2 + TAU * tm.prog); ctx.stroke(); ctx.restore();
+  txt(num(100 * tm.prog) + '%', dx, dy + 14, { font: MONO, size: 40, w: 700, color: '#e8fbff', align: 'center', a: a });
+  const st = tm.ok > 0.5 ? 'IDENTIDAD VERIFICADA' : (tm.prog < 0.5 ? 'ESCANEANDO' : 'ANALIZANDO') + '.'.repeat(1 + Math.floor(t * 3) % 3);
+  txt(st, dx, dy + 160, { font: MONO, size: 18, color: Ch, align: 'center', ls: 3, a: a });
+}
+
+// ───────────────────────── B · MINIMAL ─────────────────────────
+function minimal(t) {
+  const tm = T(t), cx = W / 2, cy = H / 2 - 40, G = '#34c759';
+  ctx.fillStyle = '#f5f5f7'; ctx.fillRect(0, 0, W, H);
+  const ia = tm.intro;
+  // disco central
+  ctx.save(); ctx.globalAlpha = ia;
+  const dg = ctx.createRadialGradient(cx, cy - 60, 20, cx, cy, 250);
+  dg.addColorStop(0, '#ffffff'); dg.addColorStop(1, '#e6e6eb');
+  ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(cx, cy, 240 * lerp(0.85, 1, ia), 0, TAU); ctx.fill();
+  ctx.restore();
+  // arco de búsqueda giratorio dentro del disco
+  const busy = sm(0.6, 1.0, t) * (1 - tm.ok);
+  if (busy > 0) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.globalAlpha = busy;
+    const a0 = t * 3.2, cg = ctx.createConicGradient(a0, cx, cy);
+    cg.addColorStop(0, 'rgba(142,142,147,0)'); cg.addColorStop(0.3, 'rgba(142,142,147,0.85)'); cg.addColorStop(0.301, 'rgba(142,142,147,0)');
+    ctx.strokeStyle = cg; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(cx, cy, 150, a0, a0 + 0.3 * TAU); ctx.stroke();
+    for (let k = 0; k < 3; k++) {
+      const ph = ((t * 0.7 + k / 3) % 1);
+      ctx.strokeStyle = rgba('#8e8e93', 0.35 * (1 - ph)); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, 20 + 200 * ph, 0, TAU); ctx.stroke();
+    }
+    ctx.fillStyle = rgba('#8e8e93', 0.7); ctx.beginPath(); ctx.arc(cx, cy, 7, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  // corona de 72 marcas que se encienden en barrido
+  const N = 72, ringA = 1 - sm(5.8, 6.1, t);
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 6;
+  for (let k = 0; k < N; k++) {
+    const a = k / N * TAU - Math.PI / 2;
+    const on = sm(k / N - 0.02, k / N + 0.04, tm.prog * 1.02);
+    const appear = sm(0.2 + k / N * 0.6, 0.5 + k / N * 0.6, t);
+    const r1 = 272, r2 = r1 + lerp(18, 34, on);
+    ctx.globalAlpha = appear * ringA;
+    ctx.strokeStyle = mix('#c7c7cc', G, on);
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke();
+  }
+  ctx.restore();
+  // anillo sólido y check
+  if (tm.ok > 0) {
+    ctx.save(); ctx.lineCap = 'round';
+    ctx.strokeStyle = G; ctx.lineWidth = lerp(34, 10, tm.ok); ctx.globalAlpha = tm.ok;
+    ctx.beginPath(); ctx.arc(cx, cy, lerp(289, 268, tm.ok), 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 0.25 * (1 - tm.pulse); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, 268 + 70 * tm.pulse, 0, TAU); ctx.stroke();
+    const s = eo((t - 5.9) / 0.5);
+    ctx.globalAlpha = 1; ctx.fillStyle = G; ctx.beginPath(); ctx.arc(cx, cy, 96 * s, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 14; ctx.lineJoin = 'round'; check(cx, cy + 4, 100, tm.chk);
+    ctx.restore();
+  }
+  const ta = sm(0.6, 1.2, t);
+  const title = tm.ok > 0.5 ? 'Escaneo completado' : 'Escaneando';
+  txt(title, cx, cy + 410, { size: 44, w: 600, color: '#1d1d1f', align: 'center', ls: -0.5, a: ta });
+  txt(tm.ok > 0.5 ? 'Identidad verificada' : 'Mantén el rostro dentro del círculo', cx, cy + 462, { size: 26, w: 400, color: '#86868b', align: 'center', a: ta });
+}
+
+// ───────────────────────── C · PROYECTOR DE PUNTOS ─────────────────────────
+const MAGMA = ['#1b0c41', '#4a0c6b', '#781c6d', '#a52c60', '#cf4446', '#ed6925', '#fb9b06', '#f7d13d', '#fcffa4'].map(hex);
+function magma(v) { v = clamp(v, 0, 0.9999) * (MAGMA.length - 1); const i = Math.floor(v), f = v - i, a = MAGMA[i], b = MAGMA[i + 1]; return `rgb(${a.map((c, k) => Math.round(lerp(c, b[k], f))).join(',')})`; }
+const DOTS = (() => {
+  const r = rng(7), out = [];
+  for (let j = -24; j <= 24; j++) for (let i = -24; i <= 24; i++) {
+    const x = (i + (j & 1) * 0.5) * 14, y = j * 12.2, d = Math.hypot(x, y);
+    if (d < 300) out.push({ x, y, d, ang: Math.atan2(y, x), ph: r() * TAU, j: r() });
+  }
+  return out;
+})();
+const IR = (() => { const r = rng(11); return Array.from({ length: 900 }, () => ({ x: r() * W, y: r() * H, ph: r() * TAU, s: 0.5 + r() * 1.6 })); })();
+function lidar(t) {
+  const tm = T(t), cx = W / 2 - 150, cy = H / 2;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  // puntos infrarrojos dispersos
+  const irOn = sm(0.4, 1.2, t) * (1 - 0.7 * tm.ok);
+  for (const p of IR) {
+    const a = irOn * (0.08 + 0.12 * Math.max(0, Math.sin(t * 6 + p.ph)));
+    ctx.fillStyle = `rgba(255,40,60,${a})`; ctx.fillRect(p.x, p.y, p.s, p.s);
+  }
+  // barrido angular (radar)
+  const sweepA = -Math.PI / 2 + tm.prog * TAU, ia = tm.intro;
+  if (tm.prog > 0 && tm.ok < 1) {
+    ctx.save();
+    const cg = ctx.createConicGradient(sweepA - 0.9, cx, cy);
+    cg.addColorStop(0, 'rgba(251,155,6,0)'); cg.addColorStop(0.143, 'rgba(251,155,6,0.18)'); cg.addColorStop(0.1431, 'rgba(0,0,0,0)');
+    ctx.globalAlpha = 1 - tm.ok; ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(cx, cy, 330, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+  // malla de puntos con profundidad
+  let hist = new Array(24).fill(0);
+  for (const p of DOTS) {
+    let rel = ((p.ang - sweepA) % TAU + TAU) % TAU;             // ángulo por detrás del barrido
+    const passed = tm.prog >= 1 ? 1 : (rel > TAU * (1 - tm.prog) ? 1 : 0);
+    const appear = sm(p.d / 300 * 0.6, p.d / 300 * 0.6 + 0.4, t);
+    // profundidad: ondas radiales + interferencia, sin relación con un rostro
+    let z = 0.5 + 0.28 * Math.sin(p.d * 0.035 - t * 2.4) * Math.exp(-p.d / 380)
+      + 0.14 * Math.sin(p.x * 0.02 + t * 0.9) * Math.cos(p.y * 0.024 - t * 0.7) + 0.06 * Math.sin(p.ph + t * 3);
+    z = lerp(z, 0.62 + 0.25 * Math.cos(p.d * 0.02 - (t - 5.9) * 6) * Math.exp(-((p.d - 400 * tm.pulse) ** 2) / 4000), tm.ok * 0.55);
+    const fresh = rel < 0.5 && tm.prog < 1 ? 1 - rel / 0.5 : 0;
+    const scale = lerp(1.6, 1, ia);
+    const x = cx + p.x * scale, y = cy + p.y * scale;
+    if (passed || tm.ok > 0) {
+      hist[Math.min(23, Math.floor(clamp(z, 0, 0.999) * 24))]++;
+      ctx.fillStyle = magma(z + 0.25 * fresh);
+      const s = 3 + 2.5 * z + 2 * fresh;
+      ctx.globalAlpha = appear;
+      ctx.fillRect(x - s / 2, y - s / 2, s, s);
+    } else {
+      ctx.globalAlpha = appear * 0.35; ctx.fillStyle = '#5a2a3a'; ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+    }
+  }
+  ctx.globalAlpha = 1;
+  // anillos
+  ctx.save(); ctx.strokeStyle = 'rgba(252,255,164,0.35)'; ctx.lineWidth = 1.5; ctx.globalAlpha = ia;
+  ctx.beginPath(); ctx.arc(cx, cy, 340, 0, TAU); ctx.stroke();
+  ctx.setLineDash([2, 10]); ctx.beginPath(); ctx.arc(cx, cy, 372, t * 0.2, t * 0.2 + TAU); ctx.stroke(); ctx.setLineDash([]);
+  if (tm.prog > 0 && tm.prog < 1) {
+    ctx.strokeStyle = '#fb9b06'; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(sweepA) * 340, cy + Math.sin(sweepA) * 340); ctx.stroke();
+  }
+  ctx.strokeStyle = '#fcffa4'; ctx.lineWidth = 4; ctx.globalAlpha = ia;
+  ctx.beginPath(); ctx.arc(cx, cy, 340, -Math.PI / 2, -Math.PI / 2 + TAU * tm.prog); ctx.stroke();
+  if (tm.ok > 0) {
+    const sc = eo((t - 5.9) / 0.5);
+    ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.beginPath(); ctx.arc(cx, cy, 104 * sc, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#3dff9a'; ctx.shadowColor = '#3dff9a'; ctx.shadowBlur = 20; ctx.globalAlpha = tm.ok;
+    ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cx, cy, 104 * sc, 0, TAU); ctx.stroke();
+    ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; check(cx, cy + 6, 100, tm.chk);
+  }
+  ctx.restore();
+  // panel derecho
+  const px = 1290, a = sm(0.6, 1.3, t);
+  txt('MAPA DE PROFUNDIDAD', px, 300, { font: MONO, size: 20, color: '#fcffa4', ls: 4, a });
+  txt(num(30214 * tm.prog), px, 400, { size: 92, w: 700, color: '#fff', ls: -3, a });
+  txt('puntos proyectados', px, 444, { size: 26, w: 400, color: '#8a8a8a', a });
+  const hmax = Math.max(1, ...hist);
+  hist.forEach((v, i) => {
+    const h = 150 * v / hmax;
+    ctx.globalAlpha = a; ctx.fillStyle = magma(i / 24); ctx.fillRect(px + i * 17, 650 - h, 12, h);
+  });
+  ctx.globalAlpha = 1;
+  txt('CERCA', px, 684, { font: MONO, size: 14, color: '#8a8a8a', ls: 2, a });
+  txt('LEJOS', px + 24 * 17 - 5, 684, { font: MONO, size: 14, color: '#8a8a8a', ls: 2, align: 'right', a });
+  const st = tm.ok > 0.5 ? 'COINCIDENCIA 99,7 %' : 'PROYECTANDO' + '.'.repeat(1 + Math.floor(t * 3) % 3);
+  ctx.fillStyle = tm.ok > 0.5 ? '#3dff9a' : '#fb9b06'; ctx.globalAlpha = a;
+  ctx.beginPath(); ctx.arc(px + 7, 774, 7, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+  txt(st, px + 28, 781, { font: MONO, size: 20, color: '#fff', ls: 2, a });
+}
+
+// ───────────────────────── D · CONTROL DE ACCESO ─────────────────────────
+const NOISE = (() => {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const x = c.getContext('2d'), im = x.createImageData(512, 512), r = rng(3);
+  for (let i = 0; i < im.data.length; i += 4) { const v = r() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 14; }
+  x.putImageData(im, 0, 0); return c;
+})();
+function acceso(t) {
+  const tm = T(t), cx = 700, cy = H / 2 + 30, fw = 500, fh = 600;
+  const A = '#ffb020', G = '#2ee88a', C = tm.ok > 0.5 ? G : A;
+  ctx.fillStyle = '#0c0e10'; ctx.fillRect(0, 0, W, H);
+  const r = rng(Math.floor(t * 24) + 1);
+  ctx.drawImage(NOISE, -r() * 400, -r() * 400, 2400, 2400);
+  const vg = ctx.createRadialGradient(W / 2, H / 2, 300, W / 2, H / 2, 1200);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.75)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  // barra superior
+  ctx.fillStyle = '#ff3b30'; ctx.globalAlpha = Math.floor(t * 2) % 2 ? 1 : 0.35; ctx.beginPath(); ctx.arc(92, 82, 8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+  txt('REC   CAM-03 · ACCESO PRINCIPAL', 112, 89, { font: MONO, size: 20, color: '#d0d4d8', ls: 2 });
+  const s = 17 * 60 + 8 + Math.floor(t);
+  txt(`2026-10-10  08:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`, W - 90, 89, { font: MONO, size: 20, color: '#d0d4d8', align: 'right', ls: 2 });
+  // ventana de escaneo
+  const ia = tm.intro, k = lerp(1.15, 1, ia);
+  ctx.save(); ctx.globalAlpha = ia;
+  rr(cx - fw / 2 * k, cy - fh / 2 * k, fw * k, fh * k, 40); ctx.fillStyle = 'rgba(255,255,255,0.025)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.save(); rr(cx - fw / 2, cy - fh / 2, fw, fh, 40); ctx.clip();
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+  for (let x = cx - fw / 2; x <= cx + fw / 2; x += 50) { ctx.beginPath(); ctx.moveTo(x, cy - fh / 2); ctx.lineTo(x, cy + fh / 2); ctx.stroke(); }
+  for (let y = cy - fh / 2; y <= cy + fh / 2; y += 50) { ctx.beginPath(); ctx.moveTo(cx - fw / 2, y); ctx.lineTo(cx + fw / 2, y); ctx.stroke(); }
+  // láser
+  const by = cy - fh / 2 + 20 + beam(tm) * (fh - 40);
+  if (tm.scanOn > 0) {
+    const dir = tm.scan2 > 0 ? 1 : -1, lg = ctx.createLinearGradient(0, by, 0, by + dir * 180);
+    lg.addColorStop(0, rgba(A, 0.28 * tm.scanOn)); lg.addColorStop(1, rgba(A, 0));
+    ctx.fillStyle = lg; ctx.fillRect(cx - fw / 2, Math.min(by, by + dir * 180), fw, 180);
+    ctx.fillStyle = A; ctx.shadowColor = A; ctx.shadowBlur = 25; ctx.globalAlpha = tm.scanOn * ia;
+    ctx.fillRect(cx - fw / 2, by - 2, fw, 4);
+  }
+  ctx.restore();
+  ctx.strokeStyle = C; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.shadowColor = C; ctx.shadowBlur = 14 * tm.ok;
+  brackets(cx, cy, fw * k + 24, fh * k + 24, 64, 40, ia);
+  ctx.restore();
+  if (tm.ok > 0) {
+    ctx.save(); ctx.strokeStyle = G; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.5 * (1 - tm.pulse); ctx.lineWidth = 3; rr(cx - fw / 2 - 12 - 40 * tm.pulse, cy - fh / 2 - 12 - 40 * tm.pulse, fw + 24 + 80 * tm.pulse, fh + 24 + 80 * tm.pulse, 40 + 20 * tm.pulse); ctx.stroke();
+    ctx.globalAlpha = tm.ok; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, 110, 0, TAU); ctx.stroke();
+    ctx.lineWidth = 12; check(cx, cy + 6, 110, tm.chk); ctx.restore();
+  }
+  txt(tm.ok > 0.5 ? 'ROSTRO VERIFICADO' : 'ALINEE EL ROSTRO CON EL MARCO', cx, cy + fh / 2 + 80, { font: MONO, size: 20, color: C, align: 'center', ls: 3, a: ia });
+  // tarjeta de estado
+  const px = 1180, py = 260, pw = 600, ph = 560, a = sm(0.5, 1.2, t);
+  ctx.save(); ctx.globalAlpha = a;
+  rr(px, py, pw, ph, 28); ctx.fillStyle = 'rgba(28,31,35,0.92)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
+  txt('VERIFICACIÓN BIOMÉTRICA', px + 48, py + 74, { font: MONO, size: 18, color: '#8b949e', ls: 3, a });
+  const steps = [['Detección de presencia', 0.12], ['Prueba de vivacidad', 0.45], ['Mapa de profundidad 3D', 0.75], ['Coincidencia de plantilla', 1]];
+  steps.forEach(([lbl, at], i) => {
+    const y = py + 150 + i * 72, done = tm.prog >= at, act = !done && tm.prog >= (steps[i - 1]?.[1] ?? 0);
+    ctx.save(); ctx.globalAlpha = a;
+    ctx.strokeStyle = done ? G : act ? A : '#3a4048'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(px + 64, y - 8, 15, 0, TAU); ctx.stroke();
+    if (done) { ctx.lineWidth = 3.5; check(px + 64, y - 7, 16, 1); }
+    else if (act) { ctx.beginPath(); ctx.arc(px + 64, y - 8, 15, t * 6, t * 6 + 1.6); ctx.strokeStyle = '#fff'; ctx.stroke(); }
+    ctx.restore();
+    txt(lbl, px + 100, y, { size: 26, w: 500, color: done || act ? '#f0f3f6' : '#59616b', a });
+  });
+  ctx.save(); ctx.globalAlpha = a;
+  rr(px + 48, py + 440, pw - 96, 8, 4); ctx.fillStyle = '#2a2f36'; ctx.fill();
+  rr(px + 48, py + 440, (pw - 96) * tm.prog, 8, 4); ctx.fillStyle = C; ctx.fill();
+  ctx.restore();
+  txt(tm.ok > 0.5 ? 'ACCESO CONCEDIDO' : 'VERIFICANDO' + '.'.repeat(1 + Math.floor(t * 3) % 3), px + 48, py + 508, { size: 34, w: 700, color: C, ls: 1, a });
+  txt(num(100 * tm.prog) + '%', px + pw - 48, py + 508, { font: MONO, size: 22, color: '#8b949e', align: 'right', a });
+}
+
+const STYLES = { holo, minimal, lidar, acceso };
+window.renderFrame = (t, style = Q.get('style') || 'holo') => {
+  ctx.save(); ctx.clearRect(0, 0, W, H); STYLES[style](t); ctx.restore();
+};
+document.fonts.load('600 20px Inter').then(() => document.fonts.load('20px "DejaVu Sans Mono"')).then(() => {
+  window.renderFrame(+(Q.get('t') || 3));
+  window.READY = true;
+});
+</script>
+</body>
+</html>
