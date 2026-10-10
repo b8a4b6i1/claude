@@ -388,7 +388,25 @@ function acceso(t) {
   txt(num(100 * tm.prog) + '%', px + pw - 48, py + 508, { font: MONO, size: 22, color: '#8b949e', align: 'right', a });
 }
 
-const STYLES = { holo, minimal, lidar, acceso };
+// ───────────────────────── E · CHROMA (marco + línea, para recorte) ─────────────────────────
+// Solo colores sólidos (sin brillos ni transparencias) para que el chroma key no deje halos.
+function chroma(t) {
+  const BG = '#ff00ff', C = '#00f0ff', cx = W / 2, cy = H / 2, fw = 600, fh = 720;
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  const ia = eo(t / 0.8), k = lerp(1.15, 1, ia);
+  ctx.strokeStyle = C; ctx.lineWidth = 8; ctx.lineCap = 'round';
+  if (ia > 0.01) brackets(cx, cy, fw * k, fh * k, 80, 46, ia);
+  // barrido ida y vuelta: 1,8 s por pasada desde 0,8 s
+  const u = Math.max(0, t - 0.8) / 1.8, n = Math.floor(u), f = eio(u - n);
+  const pos = n % 2 === 0 ? f : 1 - f;
+  const by = cy - fh / 2 + 34 + pos * (fh - 68), on = sm(0.5, 0.9, t);
+  if (on > 0) {
+    const half = (fw / 2 - 26) * on;
+    ctx.fillStyle = C; ctx.beginPath(); ctx.roundRect(cx - half, by - 3, half * 2, 6, 3); ctx.fill();
+  }
+}
+
+const STYLES = { holo, minimal, lidar, acceso, chroma };
 window.renderFrame = (t, style = Q.get('style') || 'holo') => {
   ctx.save(); ctx.clearRect(0, 0, W, H); STYLES[style](t); ctx.restore();
 };
