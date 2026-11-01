@@ -99,6 +99,7 @@ export function createStage(scene, parts) {
       if (i === 0) { const ph = t % 5, fl = ph < 1 && choirW(t) < 0.15; cubes[0].root.rotation.x = fl ? TAU * smooth(ph) : 0; cubes[0].root.position.y = fl ? 1.1 * Math.sin(Math.PI * ph) : 0; cubes[0].shadow.visible = !fl; }
     });
     if (parts.cabin) { const sh = spellHit(t), hit = sh && sh.idx === 2 && sh.age < 0.8 ? sh.age : -1; parts.cabin.position.y = hit >= 0 ? 0.7 * Math.sin(Math.PI * hit / 0.8) : 0; parts.cabin.scale.y = hit >= 0 ? 1 + 0.04 * Math.sin(Math.PI * hit / 0.8) : (sh && sh.idx === 2 && sh.age < 1.1 ? 1 - 0.08 * Math.sin(Math.PI * (sh.age - 0.8) / 0.3) : 1); parts.cabin.rotation.z = hit >= 0 ? 0.08 * Math.sin(hit * 24) : 0; }
+    if (parts.updBooth) parts.updBooth(t);
 
     // visitor: walks in from the entry, looks at the wall screens, crosses the passage, sits at the desk, watches the burst, walks back out
     const vp = VISITOR(t), yaw = keyed(VISITOR_YAW, t); vis.root.position.set(vp.x, 0, vp.z); vis.root.rotation.y = yaw;

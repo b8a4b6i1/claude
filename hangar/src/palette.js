@@ -13,7 +13,7 @@ export const P = {
   teal: '#1fa3a0', teal2: '#157876', cyan: '#4cc4e6', cyan2: '#9be0f2',
   blue: '#2c63c9', blue2: '#5a8de0', navy: '#23367a',
   purple: '#7b3fb0', purple2: '#a572d6', magenta: '#c93a9a', pink: '#f28bb3', pink2: '#f9c2d8',
-  skin0: '#f1d0b0', skin1: '#d9a17a', skin2: '#a8714c', skin3: '#7a4a30',
+  skin0: '#f1d0b0', skin1: '#d9a17a', skin2: '#a8714c', skinL: '#e6b891',
   cloud1: '#b7e6fc', cloud2: '#87d6fc',
   stone0: '#b9a98f', stone1: '#8d7d66', stone2: '#5e5242',
   fish0: '#f6a07a', fish1: '#ee7a55',

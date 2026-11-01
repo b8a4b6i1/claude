@@ -66,6 +66,9 @@ export function createMagic(scene, ctx) {
     spec({ n: 8, P: LOOP, off: bandReturn(i), life: 0.9, size: 0.3, grav: -1, colors: ['yellow', 'lime', 'cyan'], mode: 'burst', gate: () => 1,
       origin: () => V(b.x, 0.3, b.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.4, 0.8 + r[0], Math.sin(a) * 1.4); } });
   });
+  // --- wish machine: sparkles where the prize bursts every 9 s (prize apex is 1.8 m in front of the booth, 3.4 m high)
+  spec({ n: 12, P: 9.0, off: 5.0, life: 1.0, size: 0.32, grav: -2, colors: ['pink', 'yellow', 'cyan', 'lime', 'magenta'], mode: 'burst', gate: () => 1,
+    origin: () => V(13.6, 3.3, 3.75), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.3, 0.8 + r[0] * 1.2, Math.sin(a) * 1.3); } });
   // --- summoning and dispersal puffs (once per loop)
   spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });

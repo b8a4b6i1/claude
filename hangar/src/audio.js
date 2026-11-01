@@ -97,6 +97,7 @@ export function createAudio() {
     if (crossed(a, b, BEAT.burst)) { sfx.roar(); setTimeout(() => sfx.confetti(), 250); }
     if (crossed(a, b, BEAT.burst + 0.6)) sfx.float();
     for (const [tk, rs] of [[65, 84], [68.5, 84.6], [72, 85.2], [75.5, 85.8], [79, 86.4]]) { if (crossed(a, b, tk)) sfx.chomp(); if (crossed(a, b, rs)) sfx.pop(); }
+    for (let c = 0; c < 10; c++) { const b0 = 9 * c; if (crossed(a, b, b0 + 0.9)) sfx.coin(); if (crossed(a, b, b0 + 3.0)) sfx.boing(); if (crossed(a, b, b0 + 5.0)) sfx.twirl(); }
     if (crossed(a, b, 52.6)) sfx.burn();
     if (crossed(a, b, 58.6)) sfx.reform();
     if (crossed(a, b, 77.5)) sfx.sleep();

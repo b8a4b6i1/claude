@@ -236,6 +236,32 @@ export function buildHangar(scene) {
   box(c1, 1.1, 0.8, 0.05, M('ink'), 0.35, 1.75, 1.2); box(c1, 1.2, 0.1, 0.07, M('wood5'), 0.35, 2.2, 1.21); box(c1, 1.2, 0.1, 0.07, M('wood5'), 0.35, 1.3, 1.21); box(c1, 0.1, 0.9, 0.07, M('wood5'), -0.25, 1.75, 1.21); box(c1, 0.1, 0.9, 0.07, M('wood5'), 0.95, 1.75, 1.21);
   for (let i = 0; i < 3; i++) { box(c1, 0.14, 0.6, 0.04, M('red'), -0.8 + i * 0.8, 0.75, 1.21, [0, 0, 0.3 * (i - 1)]); box(c1, 0.5, 0.1, 0.04, M('red'), -0.8 + i * 0.8, 0.38, 1.21); }
   sph(c1, 0.26, M('green'), -0.8, 1.9, 1.22, [1, 1.1, 0.2]); sph(c1, 0.11, M('skin0'), -0.8, 1.84, 1.27, [1, 1.1, 0.3]);
+  // ---- the booth is a WISH MACHINE (9 s cycle): a coin drops in the slot, the booth shakes and flashes, the hatch pops open and a prize (heart, star, gem, note) floats out, spins and bursts into sparkles
+  const signTex = canvasTex(160, 40, (c, w, h) => { c.fillStyle = P.ink; c.fillRect(0, 0, w, h); c.fillStyle = P.yellow; c.font = 'bold 30px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('DESEOS', w / 2, 31); c.fillStyle = P.red; for (let i = 0; i < 8; i++) c.fillRect(6 + i * 20, 2, 8, 3); });
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.48), new THREE.MeshBasicMaterial({ map: signTex, toneMapped: false })); sign.position.set(0, 3.15, 1.0); c1.add(sign);
+  box(c1, 2.0, 0.58, 0.08, M('wood5'), 0, 3.15, 0.95); box(c1, 0.08, 0.5, 0.08, M('wood5'), -0.9, 2.85, 0.95); box(c1, 0.08, 0.5, 0.08, M('wood5'), 0.9, 2.85, 0.95);
+  const bulbs = []; for (let k = 0; k < 11; k++) { const bm = new THREE.MeshBasicMaterial({ color: P.wood5, toneMapped: false }), b = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), bm); b.position.set(-1.1 + k * 0.22, 2.78, 1.25); c1.add(b); bulbs.push(bm); }
+  box(c1, 0.22, 0.34, 0.1, M('steel3'), 1.07, 1.0, 1.22); box(c1, 0.04, 0.2, 0.04, M('yellow'), 1.07, 1.0, 1.28);                     // coin slot
+  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 14), new THREE.MeshBasicMaterial({ color: P.yellow, toneMapped: false })); coin.rotation.x = Math.PI / 2; c1.add(coin);
+  box(c1, 0.96, 0.52, 0.04, M('ink'), 0, 0.58, 1.21);                                                                                      // prize hatch recess
+  const flapPivot = new THREE.Group(); flapPivot.position.set(0, 0.32, 1.25); c1.add(flapPivot); box(flapPivot, 0.9, 0.5, 0.05, M('wood4'), 0, 0.25, 0); box(flapPivot, 0.9, 0.05, 0.06, M('yellow'), 0, 0.5, 0.01);
+  const prizes = [
+    (() => { const g = new THREE.Group(), r = M('red', { emit: 0.6 }); sph(g, 0.14, r, -0.1, 0.08, 0); sph(g, 0.14, r, 0.1, 0.08, 0); cone(g, 0.2, 0.3, r, 0, -0.1, 0, [Math.PI, 0, 0], 4); return g; })(),
+    (() => { const g = new THREE.Group(); const o = new THREE.Mesh(new THREE.OctahedronGeometry(0.24, 0), M('yellow', { emit: 0.7 })); o.scale.set(1, 1.15, 0.5); g.add(o); return g; })(),
+    (() => { const g = new THREE.Group(); const o = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), M('cyan', { emit: 0.7 })); g.add(o); return g; })(),
+    (() => { const g = new THREE.Group(), m = M('pink', { emit: 0.5 }); box(g, 0.05, 0.34, 0.05, m, 0.1, 0.1, 0); sph(g, 0.1, m, 0, -0.08, 0, [1.2, 0.9, 1]); box(g, 0.2, 0.06, 0.05, m, 0.18, 0.27, 0, [0, 0, -0.4]); return g; })(),
+  ];
+  prizes.forEach((g) => { g.visible = false; c1.add(g); });
+  parts.updBooth = (t) => {
+    const cyc = 9.0, u = ((t % cyc) + cyc) % cyc, n = Math.floor(t / cyc) % 4;
+    coin.visible = u < 0.95; coin.position.set(1.07, 2.55 - 1.5 * smooth(u / 0.9), 1.33); coin.rotation.z = u * 12;
+    const shake = u > 1.0 && u < 2.9 ? 1 : 0; c1.rotation.z += shake * 0.04 * Math.sin(t * 70); c1.position.y += shake * 0.03 * Math.abs(Math.sin(t * 35));
+    const open = smooth((u - 2.9) / 0.5) * (1 - smooth((u - 5.0) / 0.6)); flapPivot.rotation.x = 1.25 * open;
+    const lit = shake ? hash(Math.floor(t * 18)) : 0;
+    bulbs.forEach((bm, k) => { const on = shake ? ((k + Math.floor(t * 18)) % 2 === 0) : ((k + Math.floor(t * 3)) % 4 === 0); bm.color.set(on ? (shake ? P.orange : P.yellow) : P.wood5); });
+    prizes.forEach((g, j) => { const show = j === n && u >= 3.2 && u < 5.0; g.visible = show; if (!show) return; const p = smooth((u - 3.2) / 1.8);
+      g.position.set(0, 0.7 + 2.6 * p, 1.35 + 0.45 * Math.sin(Math.PI * p)); g.scale.setScalar(0.35 + 0.85 * p); g.rotation.y = u * 6; g.rotation.z = 0.2 * Math.sin(u * 7); });
+  };
   c1.position.set(11.8, 0, 3.75); c1.rotation.y = Math.PI / 2; world.add(c1); parts.cabin = c1;
   const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(1.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
   // dividing wall with a brick-framed doorway, 3 m high so tall things behind it still read
