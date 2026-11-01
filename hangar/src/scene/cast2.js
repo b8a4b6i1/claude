@@ -89,6 +89,34 @@ export function createExtras(scene) {
     const u = TAU * t / LOOP, x = 10.5 + 2.5 * Math.sin(u), vx = Math.cos(u), dist = 2.5 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();
     p.root.position.set(x, 0, -3.5); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, dist * TAU / 2.2, 0.35, 0, 0.0); p.torso.rotation.x = 0.18; p.root.rotation.z = 0.05 * Math.sin(u * 2);
   });
+
+  // ---- five people rehearsing in the band corner (band group origin is world (-19, 0, 0); +x faces the entry)
+  const BX = -19.0;
+  const guitar = (parent, c, bass) => { const g = new THREE.Group(); box(g, 0.34, 0.46, 0.09, M(c), 0, 0, 0); sph(g, 0.17, M(c), 0, -0.16, 0, [1, 1, 0.3]); box(g, 0.07, bass ? 0.95 : 0.8, 0.05, M('wood1'), 0.34, 0.1, 0, [0, 0, -1.25]); box(g, 0.12, 0.14, 0.05, M('wood4'), 0.78, 0.3, 0, [0, 0, -1.25]); box(g, 0.2, 0.05, 0.1, M('steel1'), 0, -0.06, 0.05); g.position.set(0.02, 0.18, 0.2); g.rotation.set(0, Math.PI / 2 - 0.1, 0.35); parent.add(g); return g; };
+  const sticks = (p) => p.arms.forEach((a) => box(a.w, 0.025, 0.3, 0.025, M('wood6'), 0, -0.1, 0.12));
+  const seated = (p, k, y0) => { for (const l of p.legs) { l.hip.rotation.x = -1.45; l.kn.rotation.x = 1.4; l.an.rotation.x = 0.05; } p.root.position.y = y0 - 0.26 * k; };
+  // drummer: seated on the stool behind the kit, both arms hit on the beat (0.5 s), foot on the kick
+  { const p = makePerson('cyan', 'ink', { hair: 'ink', shoes: 'ink' }); sticks(p);
+    add({ root: p.root, ...p }, BX - 3.5, 0.0, FACE, (_, t) => { const w = TAU * t / 0.5, b = TAU * t / 1.0; poseWalk(p, 0, 0, 0.3 * Math.sin(t * 0.7), 0.05); seated(p, 1, 0.1);
+      p.arms[0].sh.rotation.set(-1.15 + 0.4 * Math.max(0, Math.sin(w)), 0, -0.45); p.arms[0].el.rotation.set(-1.0 - 0.5 * Math.max(0, Math.sin(w)), 0, 0);
+      p.arms[1].sh.rotation.set(-1.15 + 0.4 * Math.max(0, Math.sin(w + Math.PI)), 0, 0.45); p.arms[1].el.rotation.set(-1.0 - 0.5 * Math.max(0, Math.sin(w + Math.PI)), 0, 0);
+      p.legs[1].hip.rotation.x = -1.45 + 0.25 * Math.max(0, Math.sin(b)); p.torso.rotation.x = 0.1 + 0.05 * Math.sin(w); p.head.rotation.x = 0.1 * Math.sin(w * 0.5); }); }
+  // bass player: next to the bass stack, plays a long bass line, sways heavily
+  { const p = makePerson('purple', 'ink', { hair: 'wood5', shoes: 'ink' }); guitar(p.torso, 'red2', true);
+    add({ root: p.root, ...p }, BX - 2.4, 2.3, FACE, (_, t) => { const w = TAU * t / 2.0; poseWalk(p, 0, 0, 0.25 * Math.sin(t * 0.5), 0); p.torso.rotation.z = 0.07 * Math.sin(w); p.root.position.y = 0.025 * Math.abs(Math.sin(w));
+      p.arms[0].sh.rotation.set(-1.0, 0, -0.5); p.arms[0].el.rotation.set(-0.9, 0, 0); p.arms[1].sh.rotation.set(-0.5, 0, 0.1); p.arms[1].el.rotation.set(-1.1 + 0.12 * Math.sin(w * 4), 0, 0); p.legs[0].hip.rotation.x = -0.2; p.head.rotation.x = 0.12 + 0.1 * Math.sin(w); }); }
+  // guitarist: beside the pedalboard, strums, steps to the pedal on the downbeat, rocks forward
+  { const p = makePerson('lime', 'navy', { hair: 'wood0', shoes: 'wall0' }); guitar(p.torso, 'cyan', false);
+    add({ root: p.root, ...p }, BX - 0.5, 1.3, FACE, (_, t) => { const w = TAU * t / 1.0; poseWalk(p, 0, 0, 0.3 * Math.sin(t * 0.6), 0); const hit = Math.max(0, Math.sin(TAU * t / 4.0)); p.torso.rotation.x = 0.12 + 0.12 * hit; p.root.position.y = 0.03 * Math.abs(Math.sin(w * 2));
+      p.arms[0].sh.rotation.set(-1.0, 0, -0.5); p.arms[0].el.rotation.set(-0.9, 0, 0); p.arms[1].sh.rotation.set(-0.55, 0, 0.1); p.arms[1].el.rotation.set(-1.1 + 0.3 * Math.sin(w * 4), 0, 0); p.legs[1].hip.rotation.x = -0.15 - 0.4 * hit; p.legs[1].kn.rotation.x = 0.1 + 0.4 * hit; }); }
+  // keyboardist: seated at the stool behind the keyboard, both hands on the keys, nods to the beat
+  { const p = makePerson('orange', 'ink', { hair: 'wood3', shoes: 'ink' });
+    add({ root: p.root, ...p }, BX - 1.3, -2.2, FACE, (_, t) => { const w = TAU * t / 1.0; poseWalk(p, 0, 0, 0.2 * Math.sin(t * 0.5), 0.1); seated(p, 1, 0.0);
+      p.arms[0].sh.rotation.set(-1.0, 0, -0.1); p.arms[0].el.rotation.set(-0.9 + 0.2 * Math.sin(w * 2), 0, 0); p.arms[1].sh.rotation.set(-1.0, 0, 0.1); p.arms[1].el.rotation.set(-0.9 + 0.2 * Math.sin(w * 2 + 2), 0, 0); p.torso.rotation.x = 0.08 + 0.05 * Math.sin(w); p.head.rotation.x = 0.1 * Math.sin(w); }); }
+  // singer: at the microphone, one hand on it, the other conducting; leans in on the downbeat
+  { const p = makePerson('magenta', 'ink', { hair: 'wood2', shoes: 'ink' });
+    add({ root: p.root, ...p }, BX + 0.6, 0.0, FACE, (_, t) => { const w = TAU * t / 2.0; poseWalk(p, 0, 0, 0.2 * Math.sin(t * 0.4), -0.1 * Math.sin(w)); p.torso.rotation.x = 0.1 * Math.max(0, Math.sin(w)); p.root.position.y = 0.02 * Math.abs(Math.sin(w * 2));
+      p.arms[1].sh.rotation.set(-1.7, 0, -0.1); p.arms[1].el.rotation.set(-1.5, 0, 0); p.arms[0].sh.rotation.set(-0.7 + 0.5 * Math.sin(w), 0, -0.5 - 0.2 * Math.sin(w * 0.5)); p.arms[0].el.rotation.set(-0.7, 0, 0); }); }
   for (const e of list) { const p = e.o; if (p.root && !p.shadow && !p.root.children.some((c) => c.isMesh && c.material && c.material.map === undefined && false)) noShadow(p); }
   return { list, named, update(t) { for (const e of list) e.upd(e.o, t); } };
 }

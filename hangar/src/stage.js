@@ -11,12 +11,12 @@ const lerpAngle = (a, b, k) => { let d = ((b - a + Math.PI) % TAU + TAU) % TAU -
 const ease = (u) => lerp(u, smooth(u), 0.5);
 
 /** Piecewise path: keys [t, x, z]. Returns position, heading, moving flag and travelled distance. */
-function makePath(keys) {
+function makePath(keys, lin = false) {
   const cum = [0]; for (let i = 1; i < keys.length; i++) cum.push(cum[i - 1] + Math.hypot(keys[i][1] - keys[i - 1][1], keys[i][2] - keys[i - 1][2]));
   return (t) => {
     t = clamp(t, keys[0][0], keys[keys.length - 1][0]); let i = 0;
     while (i < keys.length - 2 && t > keys[i + 1][0]) i++;
-    const a = keys[i], b = keys[i + 1], span = b[0] - a[0], u = span > 0 ? clamp((t - a[0]) / span, 0, 1) : 1, e = ease(u);
+    const a = keys[i], b = keys[i + 1], span = b[0] - a[0], u = span > 0 ? clamp((t - a[0]) / span, 0, 1) : 1, e = lin ? u : ease(u);
     const len = cum[i + 1] - cum[i];
     return { x: lerp(a[1], b[1], e), z: lerp(a[2], b[2], e), moving: len > 0.01, u, dist: cum[i] + len * e, heading: len > 0.01 ? Math.atan2(b[1] - a[1], b[2] - a[2]) : null };
   };
@@ -28,8 +28,8 @@ const keyed = (keys, t) => { // angle keys [t, yaw], shortest-arc interpolation
 
 const VISITOR = makePath([[0, 17, 0.5], [3.5, 12.6, -0.3], [16, 12.6, -0.3], [30, -3, 2.2], [32, -6.5, 2.2], [38, -12.75, -2.4], [39, -12.75, -2.95], [52, -12.75, -2.95], [53, -12.75, -2.4], [58.5, -6.5, 2.2], [60.5, -3, 2.2], [74.5, 12.6, -0.3], [78, 17, 0.5], [90, 17, 0.5]]);
 const VISITOR_YAW = [[0, -1.571], [3.5, -1.571], [9.8, 3.14], [15.4, 3.14], [16.6, -1.75], [30, -1.75], [31, -1.571], [32, -1.571], [33, -2.2], [37.5, -2.2], [39, 3.14], [52, 3.14], [52.8, 0.94], [58, 0.94], [59, 1.571], [90, 1.571]];
-const DEVIL_AT = [10.2, -0.5], DEVIL_HOP = [8.8, -1.2]; // the red devil stands in the long hall, near the entry
-const DEVIL = makePath([[0, DEVIL_AT[0], DEVIL_AT[1]], [30, DEVIL_AT[0], DEVIL_AT[1]], [33, DEVIL_HOP[0], DEVIL_HOP[1]], [52, DEVIL_HOP[0], DEVIL_HOP[1]], [56, DEVIL_AT[0], DEVIL_AT[1]], [90, DEVIL_AT[0], DEVIL_AT[1]]]);
+const DEVIL_AT = [10.2, -0.5], DEVIL_HOP = [-11.0, 1.5]; // sleeps by the entry, then patrols the whole hangar: long hall, through the passage, to the spiral in the mask hall and back
+const DEVIL = makePath([[0, 10.2, -0.5], [12, 10.2, -0.5], [18, 4, -2.5], [25, -1, 1.6], [28, -3.2, 2.2], [31, -7, 2.2], [36, -11, 1.5], [53, -11, 1.5], [57, -7, 2.2], [60, -3.2, 2.2], [68, 4, -2.5], [76, 10.2, -0.5], [90, 10.2, -0.5]], true);
 const CUBE_A = { x0: 5, a: 2.2, z: -0.6, w: 1, ph: 0 }, CUBE_B = { x0: 0, a: 1.5, z: 3.7, w: 1, ph: 2.1 };
 const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; return a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))) - a * (2 * Math.floor(ph / Math.PI) + 0); };
 
@@ -61,12 +61,12 @@ export function createStage(scene, parts) {
     parts.spiral.userData.recolor(t, burstE * 1.2); parts.eclipse.emissiveIntensity = 0.6 + 1.6 * burstE + 0.2 * Math.sin(t * 3); mouthGlow(parts.glow, t); burst.update(t);
 
     // devil: dance energy, arms-up + flames at the burst, hop-walk between marks, head follows the fish
-    const dp = DEVIL(t); const walkAmt = dp.moving ? smooth(dp.u / 0.12) * (1 - smooth((dp.u - 0.88) / 0.12)) : 0;
+    const dp = DEVIL(t); const dpa = DEVIL(t - 0.6), dpb = DEVIL(t + 0.6), dvx = dpb.x - dpa.x, dvz = dpb.z - dpa.z, dsp = Math.hypot(dvx, dvz) / 1.2, walkAmt = smooth(clamp(dsp / 0.35, 0, 1));
     const k = 0.75 + 0.45 * bell(t, 32, 34, 40, 42) + 0.55 * bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 2, BEAT.burstEnd), up = bell(t, BEAT.burst - 0.4, BEAT.burst + 0.8, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1), flame = bell(t, BEAT.burst + 0.4, BEAT.burst + 1.2, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1.5);
     const sl = sleepK(t), cp = t % 4.5, cast = (t < 13.0 || t > 72.4) ? 0 : (cp > 3.9 ? (cp - 3.9) / 0.6 : (cp < 0.35 ? 1 - cp / 0.35 : 0));
     poseDevil(devil, t, k * (1 - walkAmt * 0.4) * (1 - 0.95 * sl), Math.max(up, 0.85 * cast) * (1 - sl), Math.max(flame, cast) * (1 - sl), { phase: dp.dist * TAU / 1.0, amt: walkAmt });
     devil.head.rotation.x += 0.75 * sl; devil.torso.rotation.x += 0.45 * sl; devil.root.scale.y = 1.4 * (1 + 0.012 * Math.sin(t * 1.6) * sl);
-    devil.root.position.set(dp.x, levAt(t) + 0.35 * Math.sin(Math.PI * clamp((t - 10.4) / 0.7, 0, 1)), dp.z); devil.root.rotation.y = Math.PI / 4 + 0.2 * Math.sin(t * 0.8) - walkAmt * 0.3;
+    devil.root.position.set(dp.x, levAt(t) + 0.35 * Math.sin(Math.PI * clamp((t - 10.4) / 0.7, 0, 1)), dp.z); devil.root.rotation.y = lerpAngle(Math.PI / 4 + 0.2 * Math.sin(t * 0.8), Math.atan2(dvx, dvz), walkAmt);
     fishPos.copy(fishAt(t)); const dd = Math.hypot(fishPos.x - dp.x, fishPos.z - dp.z), near = smooth(1 - dd / 6);
     const toFish = Math.atan2(fishPos.x - dp.x, fishPos.z - dp.z) - devil.root.rotation.y;
     devil.head.rotation.y += clamp(Math.atan2(Math.sin(toFish), Math.cos(toFish)), -0.9, 0.9) * near; devil.head.rotation.x -= 0.35 * near; devil.torso.rotation.x -= 0.12 * near;
