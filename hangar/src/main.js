@@ -30,14 +30,14 @@ const params = new URLSearchParams(location.search);
 let frozen = params.has('t') ? parseFloat(params.get('t')) : null; const startAt = params.has('from') ? parseFloat(params.get('from')) : 0;
 if (params.get('dither') === '0') post.uniforms.uDither.value = 0;
 const audio = createAudio(); audio.setEnabled(false);                          // starts MUTED: browsers do not let a page play sound before a click, so the player turns it on
-const sndBtn = document.getElementById('snd'), sndWrap = document.getElementById('sndwrap'), sndLbl = document.getElementById('sndlbl'), on = document.getElementById('snd-on'), off = document.getElementById('snd-off');
-const showSnd = () => { const live = audio.enabled && audio.running; on.setAttribute('display', live ? 'inline' : 'none'); off.setAttribute('display', live ? 'none' : 'inline'); sndBtn.classList.toggle('muted', !live); sndLbl.hidden = live; sndBtn.setAttribute('aria-label', live ? 'Silenciar' : 'Activar sonido'); };
+const sndBtn = document.getElementById('snd'), sndWrap = document.getElementById('sndwrap'), on = document.getElementById('snd-on'), off = document.getElementById('snd-off');
+const showSnd = () => { const live = audio.enabled && audio.running; on.setAttribute('display', live ? 'inline' : 'none'); off.setAttribute('display', live ? 'none' : 'inline'); sndBtn.classList.toggle('muted', !live); sndBtn.setAttribute('aria-label', live ? 'Silenciar' : 'Activar sonido'); };
 showSnd();
 sndBtn.addEventListener('click', (e) => { e.stopPropagation(); if (audio.enabled && audio.running) audio.setEnabled(false); else { audio.unlock(); audio.setEnabled(true); } setTimeout(showSnd, 60); showSnd(); });
 setInterval(showSnd, 300);
 // the button sits next to the diorama: just below-right of the slab's nearest corner, tracked through the camera
-const placeSnd = () => { const v = new THREE.Vector3(X1, -SLAB.h, HZ).project(camera), r = canvas.getBoundingClientRect(), sx = r.left + (v.x * 0.5 + 0.5) * r.width, sy = r.top + (-v.y * 0.5 + 0.5) * r.height, w = sndWrap.offsetWidth || 130, h = sndWrap.offsetHeight || 100;
-  sndWrap.style.left = Math.max(8, Math.min(innerWidth - w - 10, sx + 26)) + 'px'; sndWrap.style.top = Math.max(8, Math.min(innerHeight - h - 10, sy - 6)) + 'px'; };
+const placeSnd = () => { const v = new THREE.Vector3(X1, -SLAB.h, HZ).project(camera), r = canvas.getBoundingClientRect(), sx = r.left + (v.x * 0.5 + 0.5) * r.width, sy = r.top + (-v.y * 0.5 + 0.5) * r.height, w = sndWrap.offsetWidth || 46, h = sndWrap.offsetHeight || 46;
+  sndWrap.style.left = Math.max(8, Math.min(innerWidth - w - 10, sx + 10)) + 'px'; sndWrap.style.top = Math.max(8, Math.min(innerHeight - h - 10, sy + 12)) + 'px'; };
 const draw = (t) => { stage.update(t); post.uniforms.uTime.value = t; post.uniforms.uLoop.value = LOOP; post.render(scene, camera); };
 let t0 = performance.now(), ready = false;
 function loop(now) { const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
