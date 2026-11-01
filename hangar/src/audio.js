@@ -1,4 +1,5 @@
 import { LOOP, BEAT, TAU, hash } from './config.js';
+import SONG from './song.js';
 import { spellHit } from './config.js';
 
 /**
@@ -7,13 +8,9 @@ import { spellHit } from './config.js';
  * and the soundtrack always matches what is on screen.
  */
 const MIDI = (m) => 440 * Math.pow(2, (m - 69) / 12);
-const CHORD_ROOT = [45, 41, 48, 43];            // Am F C G, one bar = 2 s
-const CHORD_IV = [[0, 3, 7, 12], [0, 4, 7, 12], [0, 4, 7, 12], [0, 4, 7, 12]];
-const PENTA = [0, 3, 5, 7, 10];                // minor pentatonic for the melody
-const STEP = 0.25;                              // 8th note at 120 bpm
 
 export function createAudio() {
-  let ctx = null, master = null, noiseBuf = null, enabled = true, last = 0, unlocked = false;
+  let ctx = null, master = null, sfxBus = null, noiseBuf = null, enabled = true, last = 0, unlocked = false;
   const waves = {};
   const pulseWave = (d) => {
     if (waves[d]) return waves[d];
@@ -24,7 +21,7 @@ export function createAudio() {
   function init() {
     if (ctx) return;
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.22; master.connect(ctx.destination);
+    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.22; master.connect(ctx.destination); sfxBus = ctx.createGain(); sfxBus.gain.value = 0.4; sfxBus.connect(master); // effects sit well below the song
     const len = ctx.sampleRate * 1.5; noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate); const d = noiseBuf.getChannelData(0);
     let v = 0; for (let i = 0; i < len; i++) { if (i % 3 === 0) v = Math.random() * 2 - 1; d[i] = Math.round(v * 8) / 8; } // sample-and-hold, 3-bit crush
   }
@@ -34,12 +31,12 @@ export function createAudio() {
     o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * Math.pow(2, slide)), t0 + dur);
     if (vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 6; lg.gain.value = freq * vib; l.connect(lg); lg.connect(o.frequency); l.start(t0); l.stop(t0 + dur + rel); }
     g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + attack); g.gain.setValueAtTime(vol, t0 + Math.max(attack, dur - rel)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + rel);
-    o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur + rel + 0.02);
+    o.connect(g); g.connect(sfxBus); o.start(t0); o.stop(t0 + dur + rel + 0.02);
   };
   const noise = (dur, { vol = 0.4, hp = 2000, lp = 9000, slide = 0, at = 0 } = {}) => {
     if (!ctx || !enabled) return; const t0 = ctx.currentTime + at, s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter();
     s.buffer = noiseBuf; s.loop = true; f.type = 'highpass'; f.frequency.value = hp; f2.type = 'lowpass'; f2.frequency.setValueAtTime(lp, t0); if (slide) f2.frequency.exponentialRampToValueAtTime(Math.max(80, lp * Math.pow(2, slide)), t0 + dur);
-    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(f2); f2.connect(g); g.connect(master); s.start(t0); s.stop(t0 + dur + 0.02);
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(f2); f2.connect(g); g.connect(sfxBus); s.start(t0); s.stop(t0 + dur + 0.02);
   };
   // ---------------------------------------------------------------- sound effects
   const sfx = {
@@ -61,30 +58,20 @@ export function createAudio() {
     choir: (i) => { const m = 60 + [0, 3, 5, 7, 10][i % 5] + (i > 4 ? 12 : 0); tone(MIDI(m + 12), 0.5, { duty: 0.25, vol: 0.32, vib: 0.012, rel: 0.2 }); tone(MIDI(m), 0.5, { type: 'triangle', vol: 0.3, rel: 0.2 }); },
     tick: () => noise(0.025, { vol: 0.22, hp: 6000 }),
   };
-  // ---------------------------------------------------------------- music
-  const stepNote = (s) => {
-    const t = s * STEP, bar = Math.floor(s / 8), pos = s % 8, ci = bar % 4, root = CHORD_ROOT[ci], iv = CHORD_IV[ci];
-    const awake = t >= 10.5 && t < 77, choir = t >= 17 && t < 40, roar = t >= 42 && t < 50, calm = t >= 52 && t < 77, outro = t >= 77 && t < 88;
-    // bass (triangle)
-    if (t >= 4 && t < 88 && [0, 3, 4, 6].includes(pos)) tone(MIDI(root + (pos === 4 ? 7 : pos === 6 ? 12 : 0)), STEP * 0.9, { type: 'triangle', vol: roar ? 0.7 : 0.55 });
-    // arpeggio (pulse 25 %)
-    if (t >= 2 && t < 88) tone(MIDI(root + 24 + iv[pos % 4]), STEP * 0.8, { duty: 0.25, vol: (choir || roar ? 0.2 : 0.12) * (outro ? 0.7 : 1), rel: 0.03 });
-    // melody (pulse 50 %)
-    if ((choir || roar || calm) && pos % 2 === 0) {
-      const h = hash(s * 1.7 + 3.1), idx = Math.floor(h * 5), up = hash(s * 0.9) > 0.55 ? 12 : 0;
-      if (hash(s * 4.3) > 0.2) tone(MIDI(root + 36 + PENTA[idx] + up - (ci === 1 ? 1 : 0)), STEP * 1.6, { duty: 0.5, vol: roar ? 0.26 : 0.22, vib: 0.008, rel: 0.1 });
-    }
-    // drums
-    const drums = choir || roar || calm;
-    if (drums && (pos === 0 || pos === 4)) { tone(MIDI(36), 0.12, { type: 'sine', vol: 0.8, slide: -2, rel: 0.02 }); }
-    if (drums && (pos === 2 || pos === 6)) noise(0.12, { vol: roar ? 0.45 : 0.32, hp: 1200, lp: 7000 });
-    if ((choir && t >= 22) || roar) if (pos % 2 === 1 || roar) noise(0.03, { vol: 0.12, hp: 7000 });
-  };
+  // ---------------------------------------------------------------- soundtrack: the user's song, converted to real 8-bit PCM (11.025 kHz mono) and looped over the 90 s story
+  let songBuf = null, songSrc = null, songGain = null, lastT = 0;
+  async function loadSong() {
+    if (!SONG || songBuf || !ctx) return;
+    try { const ab = await (await fetch(SONG)).arrayBuffer(); songBuf = await ctx.decodeAudioData(ab); startSong(); } catch (e) { /* no song: effects only */ }
+  }
+  function startSong() {
+    if (!ctx || !songBuf || songSrc || !enabled) return;
+    songSrc = ctx.createBufferSource(); songSrc.buffer = songBuf; songSrc.loop = true; songGain = ctx.createGain(); songGain.gain.value = 0.9;
+    songSrc.connect(songGain); songGain.connect(master); songSrc.start(0, ((lastT % songBuf.duration) + songBuf.duration) % songBuf.duration);
+  }
   // ---------------------------------------------------------------- event schedule (loop time -> sound)
   const crossed = (a, b, x) => x > a && x <= b;
   function fire(a, b) {
-    // music steps
-    for (let s = Math.floor(a / STEP) + 1; s <= Math.floor(b / STEP); s++) stepNote(s);
     // one-shot and periodic effects
     if (crossed(a, b, 10.5)) sfx.wake();
     if (crossed(a, b, 16.2)) sfx.summon();
@@ -99,11 +86,12 @@ export function createAudio() {
     for (let t = 40.0; t < 52; t += 0.35 + 0.15 * hash(t * 7)) if (crossed(a, b, t)) sfx.key();
   }
   function update(t) {
+    lastT = t;
     if (!ctx || !enabled || ctx.state !== 'running') { last = t; return; }
     if (t < last - 1) { last = t; return; }               // loop wrap: fire the (tiny) part of the new loop next frame
     if (t - last > 0.5 || t === last) { last = t; return; } // freeze / seek / tab was hidden
     fire(last, t); last = t;
   }
-  function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); unlocked = true; }
-  return { update, unlock, setEnabled(v) { enabled = v; if (ctx) { if (v && ctx.state === 'suspended') ctx.resume(); master.gain.value = v ? 0.22 : 0; } }, get enabled() { return enabled; }, get unlocked() { return unlocked; } };
+  function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); unlocked = true; loadSong(); }
+  return { update, unlock, setEnabled(v) { enabled = v; if (ctx) { if (v && ctx.state === 'suspended') ctx.resume(); master.gain.value = v ? 0.22 : 0; if (v) { loadSong(); startSong(); } } }, get enabled() { return enabled; }, get unlocked() { return unlocked; } };
 }

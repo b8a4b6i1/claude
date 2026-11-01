@@ -1,9 +1,15 @@
 import { build } from 'esbuild';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 const minify = process.argv.includes('--minify');
 
 await mkdir('dist', { recursive: true });
+// the soundtrack (user-supplied song, 8-bit) is embedded only if audio/presente-loop-8bit.wav exists locally
+if (existsSync('audio/presente-loop-8bit.wav')) {
+  const b64 = (await readFile('audio/presente-loop-8bit.wav')).toString('base64');
+  await writeFile('src/song.js', `export default 'data:audio/wav;base64,${b64}';\n`);
+} else await writeFile('src/song.js', 'export default null;\n');
 
 await build({
   entryPoints: ['src/main.js'],
