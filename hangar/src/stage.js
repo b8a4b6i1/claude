@@ -34,6 +34,7 @@ const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(
 export function createStage(scene, parts) {
   const devil = new URLSearchParams(location.search).get('devil') === 'diablada' ? makeDiablo() : makeDevil(), fish = makeFish(), sent = [makeSentinel(), makeSentinel()], cubes = [makeCube('red'), makeCube('blue')], vis = makeVisitor();
   for (const o of [devil.root, fish.root, ...sent.map((s) => s.root), ...cubes.map((c) => c.root), vis.root]) scene.add(o);
+  cubes[1].root.visible = false; // the purple blocky figure stood on the open side
   scene.add(fish.shadow); fish.shadow.visible = true; const extras = createExtras(scene);
   const burst = makeBurst(scene), motes = makeMotes(scene, LOOP);
   const fishPos = new THREE.Vector3(); const stool = parts.stool;
