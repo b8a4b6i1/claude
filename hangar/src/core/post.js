@@ -31,18 +31,22 @@ float vnoise(vec2 p, float px) {
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 float fbm(vec2 p, float px) { float v = 0.0, a = 0.5; for (int o = 0; o < 4; o++) { v += a * vnoise(p, px); p *= 2.0; px *= 2.0; a *= 0.5; } return v; }
+// Pixel-art sky: clouds are built from square cells (240 across, like the palette-snapped hangar), flat tones, hard stepped edges.
+float cloudD(vec2 cell, float scale, float px, float shiftCells) { return fbm(vec2(cell.x + shiftCells, cell.y) / scale, px); }
 vec3 skyAt(vec2 uv) {
   float ph = uTime / uLoop;
-  vec3 top = vec3(0.608, 0.878, 0.949), low = vec3(0.831, 0.929, 0.973);       // sky entries of the palette
-  vec3 c = top;
-  vec2 q = vec2(uv.x * 4.0 * 1.6, uv.y * 3.0);
-  float d1 = fbm(q + vec2(ph * 8.0 * 1.0, 0.0), 8.0), d1b = fbm(q + vec2(ph * 8.0, 0.05), 8.0);
-  vec2 r = vec2(uv.x * 6.0, uv.y * 4.0 + 7.0);
-  float d2 = fbm(r + vec2(ph * 12.0 * 2.0 + 3.0, 0.0), 12.0);
-  float k1 = smoothstep(0.57, 0.60, d1), k2 = smoothstep(0.60, 0.63, d2);
-  vec3 shade = vec3(0.706, 0.863, 0.933), body = vec3(0.933, 0.973, 0.988), hi = vec3(1.0);
-  vec3 cl = d1b < d1 - 0.03 ? hi : (d1b > d1 + 0.04 ? shade : body);
-  c = mix(c, low, k2); c = mix(c, cl, k1);
+  float cs = uResolution.x / 240.0;
+  vec2 cell = floor(uv * uResolution / cs);
+  vec3 sky = vec3(0.608, 0.878, 0.949), far = vec3(0.831, 0.929, 0.973), body = vec3(0.933, 0.973, 0.988), hi = vec3(1.0), shade = vec3(0.706, 0.863, 0.933);
+  float sh1 = floor(ph * 240.0), sh2 = floor(ph * 480.0);      // whole-cell drift: one and two screen widths per loop (noise period = 240 cells)
+  vec3 c = sky;
+  if (cloudD(cell + vec2(0.0, 55.0), 20.0, 12.0, sh2) > 0.58) c = far;
+  float thr = 0.56;
+  if (cloudD(cell, 30.0, 8.0, sh1) > thr) {
+    c = body;
+    if (cloudD(cell + vec2(0.0, 2.0), 30.0, 8.0, sh1) < thr) c = hi;
+    else if (cloudD(cell + vec2(0.0, -3.0), 30.0, 8.0, sh1) < thr) c = shade;
+  }
   return c;
 }
 
