@@ -42,6 +42,44 @@ export function makeDevil() {
   return { root, pelvis, torso, head, arms, legs, tail, shadow };
 }
 
+// ---------------------------------------------------------------- diablada dancer (Andean carnival devil)
+export function makeDiablo() {
+  const root = new THREE.Group(); const RED = M('red'), RED2 = M('red2'), OR = M('orange'), WH = M('white'), BK = M('black'), SK = M('orange2');
+  const pelvis = J(root, 0, 0.82, 0); sph(pelvis, 0.2, WH, 0, -0.04, 0, [1.2, 0.8, 0.95]);
+  for (const s of [-1, 1]) { // embroidered apron panels with gold trim
+    box(pelvis, 0.2, 0.62, 0.04, RED, s * 0.12, -0.3, 0.2); box(pelvis, 0.026, 0.62, 0.05, OR, s * 0.12 - 0.1, -0.3, 0.2); box(pelvis, 0.026, 0.62, 0.05, OR, s * 0.12 + 0.1, -0.3, 0.2); box(pelvis, 0.22, 0.04, 0.05, OR, s * 0.12, -0.61, 0.2);
+    sph(pelvis, 0.07, BK, s * 0.12, -0.2, 0.225, [0.9, 1.4, 0.3]); sph(pelvis, 0.04, M('wall0'), s * 0.12, -0.38, 0.225, [1, 1, 0.3]); sph(pelvis, 0.06, BK, s * 0.12, -0.5, 0.225, [0.9, 1.3, 0.3]);
+  }
+  const torso = J(pelvis, 0, 0.06, 0);
+  box(torso, 0.72, 0.22, 0.34, WH, 0, 0.62, 0); box(torso, 0.6, 0.72, 0.34, RED, 0, 0.34, 0.01); box(torso, 0.62, 0.05, 0.36, OR, 0, -0.01, 0.01); box(torso, 0.62, 0.05, 0.36, OR, 0, 0.2, 0.01); // white shoulders, vest, gold bands
+  box(torso, 0.3, 0.38, 0.02, BK, 0, 0.4, 0.2); sph(torso, 0.07, SK, -0.12, 0.45, 0.215, [1, 1, 0.3]); sph(torso, 0.07, SK, 0.12, 0.45, 0.215, [1, 1, 0.3]); for (let i = 0; i < 3; i++) sph(torso, 0.03, M(['wall0', 'orange2', 'red3'][i]), -0.08 + i * 0.08, 0.64, 0.19, [1, 1, 0.4]); // chest ornament + pins
+  const cape = J(torso, 0, 0.62, -0.2); box(cape, 1.0, 0.9, 0.03, RED, 0, -0.45, 0); box(cape, 1.0, 0.06, 0.04, OR, 0, -0.9, 0); box(cape, 0.4, 0.5, 0.035, BK, 0, -0.45, -0.01);
+  const head = J(torso, 0, 0.76, 0.02); sph(head, 0.22, SK, 0, 0.12, 0, [1, 1.1, 0.95]); sph(head, 0.15, BK, 0, 0.2, 0.1, [1, 1.2, 0.7]); box(head, 0.2, 0.06, 0.05, OR, 0, -0.02, 0.2); box(head, 0.16, 0.025, 0.05, RED2, 0, -0.02, 0.225);
+  for (const s of [-1, 1]) { // bulging eyes on the sides
+    sph(head, 0.13, M('yellow2'), s * 0.23, 0.17, 0.1, [1, 1, 0.7]); sph(head, 0.095, M('yellow'), s * 0.24, 0.17, 0.15, [1, 1, 0.5]); sph(head, 0.05, BK, s * 0.245, 0.17, 0.2, [1, 1, 0.5]);
+    cone(head, 0.17, 0.62, M('yellow'), s * 0.3, 0.8, 0, [0, 0, -s * 0.55], 6); cone(head, 0.12, 0.5, M('lime'), s * 0.2, 0.78, 0.04, [0, 0, -s * 0.22], 6); cone(head, 0.1, 0.42, OR, s * 0.4, 0.66, 0, [0, 0, -s * 0.9], 6); // crest wings
+    beam(head, [s * 0.1, 0.3, 0], [s * 0.42, 0.95, 0], 0.045, M('wood5')); beam(head, [s * 0.42, 0.95, 0], [s * 0.5, 1.22, 0], 0.03, M('wood4')); // long tall horns
+    beam(head, [s * 0.2, 0.22, 0], [s * 0.62, 0.34, 0], 0.04, M('wood4')); beam(head, [s * 0.62, 0.34, 0], [s * 0.82, 0.22, 0], 0.03, OR); // lower curling horns
+  }
+  cone(head, 0.09, 0.8, M('pink'), 0, 0.72, 0.02, null, 6); cone(head, 0.08, 0.45, M('green'), 0, 1.05, 0.02, null, 6); cone(head, 0.07, 0.35, M('yellow'), 0, 1.25, 0.02, null, 6); sph(head, 0.09, M('pink2'), 0, 0.5, 0.08, [1, 1.6, 0.6]); // central dragon crest
+  const arms = [-1, 1].map((s) => {
+    const sh = J(torso, s * 0.38, 0.55, 0); sph(sh, 0.11, WH, 0, 0, 0); limb(sh, 0.34, 0.085, WH);
+    const el = J(sh, 0, -0.34, 0); sph(el, 0.08, WH, 0, 0, 0); limb(el, 0.3, 0.075, WH); box(el, 0.07, 0.2, 0.02, RED, 0, -0.15, 0.08); box(el, 0.05, 0.08, 0.02, RED, 0, -0.04, 0.08, [0, 0, 0.5]);
+    const hand = J(el, 0, -0.3, 0); sph(hand, 0.09, WH, 0, 0, 0, [1, 1.15, 0.8]); box(hand, 0.17, 0.05, 0.12, OR, 0, 0.07, 0);
+    const flame = new THREE.Group(); hand.add(flame); flame.position.y = 0.05;
+    cone(flame, 0.11, 0.4, M('orange', { emit: 0.8 }), 0, 0.22, 0, null, 8); cone(flame, 0.07, 0.3, M('yellow', { emit: 0.9 }), 0, 0.2, 0.02, null, 8); cone(flame, 0.04, 0.2, M('yellow2', { emit: 1 }), 0, 0.18, 0.03, null, 8); flame.visible = false;
+    return { sh, el, hand, flame };
+  });
+  const legs = [-1, 1].map((s) => {
+    const hip = J(pelvis, s * 0.14, -0.08, 0); limb(hip, 0.4, 0.1, WH);
+    const kn = J(hip, 0, -0.4, 0); sph(kn, 0.085, WH, 0, 0, 0); limb(kn, 0.38, 0.085, WH); box(kn, 0.1, 0.22, 0.02, RED, 0, -0.2, 0.09); box(kn, 0.07, 0.1, 0.02, RED, 0, -0.06, 0.09, [0, 0, 0.4]);
+    const an = J(kn, 0, -0.38, 0); box(an, 0.15, 0.08, 0.3, M('wood4'), 0, -0.03, 0.07);
+    return { hip, kn, an };
+  });
+  const shadow = contactShadow(0.6); root.add(shadow); root.scale.setScalar(1.3);
+  return { root, pelvis, torso, head, arms, legs, tail: [], cape, shadow };
+}
+
 /** k: dance energy, up: arms raised 0..1, flame 0..1, walk: {phase, amt} when hopping between marks. */
 export function poseDevil(d, t, k, up, flame, walk) {
   const w = 3.4 * t, bob = Math.abs(Math.sin(w)), s1 = Math.sin(w), s2 = Math.sin(w * 0.5);
@@ -64,6 +102,7 @@ export function poseDevil(d, t, k, up, flame, walk) {
     const hip = lerp(dance.hip, walkP.hip, walk.amt), kn = lerp(dance.kn, walkP.kn, walk.amt);
     rot(l.hip, hip, 0, (i ? -1 : 1) * -0.12); rot(l.kn, kn, 0, 0); rot(l.an, -kn * 0.5 - hip * 0.4, 0, 0);
   });
+  if (d.cape) rot(d.cape, 0.14 + 0.1 * Math.sin(w * 0.5) + 0.3 * up + 0.12 * (walk.amt || 0), 0, 0.04 * Math.sin(w));
   d.tail.forEach((seg, i) => rot(seg, 0.12 + 0.05 * i, 0.35 * Math.sin(w * 0.5 - i * 0.7) * (0.5 + i * 0.25), 0));
 }
 
