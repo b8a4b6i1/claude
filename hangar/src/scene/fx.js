@@ -49,8 +49,8 @@ export function mouthGlow(glow, t) {
 
 /** Ambient dust motes, periodic over the loop. */
 export function makeMotes(scene, loop) {
-  const N = 42; const g = new THREE.Group(); const motes = [];
-  for (let i = 0; i < N; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), M('wall0', { emit: 0.15 })); g.add(m); motes.push({ m, x: -11 + hash(i) * 22, y: 1 + hash(i + 3) * 4.5, z: -7 + hash(i + 7) * 14, ph: hash(i + 11) * TAU, k: 1 + Math.floor(hash(i + 13) * 2) }); }
+  const N = 90; const g = new THREE.Group(); const motes = [];
+  for (let i = 0; i < N; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), M('wall0', { emit: 0.15 })); g.add(m); motes.push({ m, x: -23 + hash(i) * 46, y: 1 + hash(i + 3) * 4.5, z: -4 + hash(i + 7) * 8, ph: hash(i + 11) * TAU, k: 1 + Math.floor(hash(i + 13) * 2) }); }
   scene.add(g);
   return { g, update(t) { const w = TAU * t / loop; for (const o of motes) o.m.position.set(o.x + Math.sin(w * o.k + o.ph) * 0.8, o.y + Math.sin(w * 2 * o.k + o.ph) * 0.35, o.z + Math.cos(w * o.k + o.ph) * 0.8); } };
 }

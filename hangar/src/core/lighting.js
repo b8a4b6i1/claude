@@ -10,12 +10,12 @@ export function createLighting(renderer, scene) {
   sun.target.position.set(0, -0.4, 0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -17;
-  sun.shadow.camera.right = 17;
-  sun.shadow.camera.top = 17;
-  sun.shadow.camera.bottom = -17;
+  sun.shadow.camera.left = -30;
+  sun.shadow.camera.right = 30;
+  sun.shadow.camera.top = 30;
+  sun.shadow.camera.bottom = -30;
   sun.shadow.camera.near = 4;
-  sun.shadow.camera.far = 80;
+  sun.shadow.camera.far = 140;
   sun.shadow.bias = -0.00022;
   sun.shadow.normalBias = 0.025;
   sun.shadow.radius = 1.0;

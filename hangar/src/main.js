@@ -11,7 +11,7 @@ const canvas = document.getElementById('stage'), frameEl = document.getElementBy
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.outputColorSpace = THREE.LinearSRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
 const scene = new THREE.Scene(); scene.userData.aquatic = false;
-const post = new PixelPost(renderer, 2000, 1.25);
+const post = new PixelPost(renderer, 2600, 1.5);
 const FIT = [-1, 1].flatMap((sx) => [-1, 1].flatMap((sz) => [new THREE.Vector3(sx * HX, 0, sz * HZ), new THREE.Vector3(sx * HX, -SLAB.h, sz * HZ)]))
   .concat([new THREE.Vector3(-HX, WALL_H + 1.4, -HZ), new THREE.Vector3(HX, WALL_H, -HZ), new THREE.Vector3(-HX, WALL_H, HZ)]);
 const camera = createCamera(1.5, FIT);
