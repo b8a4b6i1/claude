@@ -35,7 +35,10 @@ const showSnd = () => { on.setAttribute('display', audio.enabled ? 'inline' : 'n
 if (params.has('mute')) audio.setEnabled(false);
 showSnd();
 const unlock = () => audio.unlock();
-['pointerdown', 'keydown', 'touchstart'].forEach((ev) => window.addEventListener(ev, unlock, { once: false, passive: true }));
+unlock();                                                                       // try to start the sound as soon as the page loads (works when the browser allows autoplay)
+['pointerdown', 'pointerup', 'keydown', 'touchstart', 'touchend', 'wheel', 'click'].forEach((ev) => window.addEventListener(ev, unlock, { passive: true })); // otherwise the first gesture does it
+document.addEventListener('visibilitychange', () => { if (!document.hidden) unlock(); });
+setInterval(() => { on.setAttribute('display', audio.enabled && audio.running ? 'inline' : 'none'); off.setAttribute('display', audio.enabled && audio.running ? 'none' : 'inline'); }, 400);
 sndBtn.addEventListener('click', (e) => { e.stopPropagation(); audio.unlock(); audio.setEnabled(!audio.enabled); showSnd(); });
 const draw = (t) => { stage.update(t); post.uniforms.uTime.value = t; post.uniforms.uLoop.value = LOOP; post.render(scene, camera); };
 let t0 = performance.now(), ready = false;

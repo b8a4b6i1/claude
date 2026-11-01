@@ -183,14 +183,26 @@ export function buildHangar(scene) {
   for (let i = 0; i < 7; i++) box(world, 6.0, 0.03, 0.3, M(['red', 'orange', 'yellow', 'lime', 'cyan', 'blue', 'purple'][i]), -17.0, 0.035, 0.6 + i * 0.36, [0, 0.12, 0]); // rainbow stripes toward the band
   for (let i = 0; i < 10; i++) for (let j = 0; j < 1; j++) box(world, 0.9, 0.03, 0.9, M(['yellow', 'cyan', 'pink', 'lime', 'ink', 'orange'][(i + j * 2) % 6]), -20.0 + i * 0.75 + j * 0.35, 0.04, 2.3 + j * 0.75, [0, 0.4, 0]); // harlequin tiles
   const sp = spiral(); world.add(sp); parts.spiral = sp; world.add(fanCarpet());
-  const band = new THREE.Group(); band.position.set(-19.8, 0, -1.8); world.add(band); parts.band = band;
-  box(band, 6.2, 0.03, 4.6, M('teal2'), 0, 0.02, 0.1); box(band, 5.8, 0.035, 4.2, M('green2'), 0, 0.025, 0.1); // green floral rug
-  box(band, 4.8, 0.04, 3.2, M('red2'), -0.2, 0.035, -0.4); box(band, 4.4, 0.045, 2.8, M('red'), -0.2, 0.04, -0.4); box(band, 3.2, 0.05, 1.6, M('navy'), -0.2, 0.045, -0.4); cyl(band, 0.55, 0.55, 0.055, M('wood6'), -0.2, 0.05, -0.4, null, 18); // red rug, blue field, medallion
-  const amp = (x, z, ry) => { const a = new THREE.Group(); box(a, 0.9, 0.7, 0.4, M('wood6'), 0, 0.35, 0); box(a, 0.78, 0.5, 0.04, M('wood2'), 0, 0.35, 0.21); a.position.set(x, 0.05, z); a.rotation.y = ry; band.add(a); };
-  amp(-2.0, -1.4, 0.25); amp(-1.1, -1.5, 0.1);
-  box(band, 0.7, 1.7, 0.6, M('black'), 0.4, 0.9, -1.6); box(band, 0.7, 0.3, 0.5, M('steel3'), 0.4, 1.9, -1.6); box(band, 0.5, 0.5, 0.04, M('steel2'), 0.4, 1.0, -1.28); // bass stack
-  box(band, 1.5, 0.08, 0.5, M('orange2'), 0.2, 0.85, 0.7); for (let i = 0; i < 14; i++) box(band, 0.07, 0.03, 0.3, M('white'), -0.45 + i * 0.1, 0.9, 0.78); beam(band, [-0.5, 0.05, 0.6], [-0.2, 0.82, 0.7], 0.04, M('steel2')); beam(band, [0.9, 0.05, 0.6], [0.6, 0.82, 0.7], 0.04, M('steel2')); // keyboard on a stand
-  for (const [gx, gc] of [[-1.5, 'cyan'], [-0.6, 'wall0']]) { box(band, 0.34, 0.5, 0.08, M(gc), gx, 0.5, 0.2, [0, 0, 0.08]); box(band, 0.07, 0.8, 0.05, M('wood1'), gx + 0.03, 1.15, 0.2, [0, 0, 0.08]); box(band, 0.12, 0.14, 0.05, M('wood4'), gx + 0.06, 1.62, 0.2); } // guitars
+  // ---- rehearsal room: the band set up in a semicircle facing the entry, on layered rugs in front of the stone mask
+  const band = new THREE.Group(); band.position.set(-19.0, 0, 0); world.add(band); parts.band = band; // local +x = toward the entry, -x = toward the mask wall
+  box(band, 8.2, 0.03, 5.6, M('teal2'), 0.2, 0.02, 0.0); box(band, 7.8, 0.035, 5.2, M('green2'), 0.2, 0.025, 0.0);   // green floral rug under everything
+  box(band, 5.8, 0.04, 3.8, M('red2'), -0.3, 0.035, 0.0); box(band, 5.4, 0.045, 3.4, M('red'), -0.3, 0.04, 0.0); box(band, 3.6, 0.05, 1.8, M('navy'), -0.3, 0.045, 0.0); cyl(band, 0.6, 0.6, 0.055, M('wood6'), -0.3, 0.05, 0.0, null, 20); // red rug, blue field, gold medallion
+  const faceX = (g) => { g.rotation.y = Math.PI / 2; return g; };                                   // builders below face local +z; this turns them toward +x (the audience)
+  const ampStack = (x, z) => { const a = new THREE.Group(); box(a, 0.9, 1.25, 0.6, M('black'), 0, 0.63, 0); box(a, 0.9, 0.3, 0.5, M('steel3'), 0, 1.4, 0); for (const sy of [0.4, 0.9]) cyl(a, 0.22, 0.22, 0.05, M('con4'), 0, sy, 0.31, [Math.PI / 2, 0, 0], 16); for (let k = 0; k < 5; k++) sph(a, 0.035, M('wall0'), -0.3 + k * 0.15, 1.4, 0.26); a.position.set(x, 0.04, z); band.add(faceX(a)); };
+  const combo = (x, z, c, ry = 0) => { const a = new THREE.Group(); box(a, 0.85, 0.65, 0.4, M(c), 0, 0.35, 0); box(a, 0.7, 0.5, 0.04, M('wood2'), 0, 0.34, 0.21); for (let k = 0; k < 4; k++) sph(a, 0.03, M('yellow2'), -0.25 + k * 0.17, 0.62, 0.2); a.position.set(x, 0.04, z); a.rotation.y = Math.PI / 2 + ry; band.add(a); };
+  const guitarOnStand = (x, z, c) => { const g = new THREE.Group(); for (const a of [0, 2.1, 4.2]) beam(g, [0, 0.05, 0], [Math.cos(a) * 0.3, 0.02, Math.sin(a) * 0.3], 0.03, M('steel2')); box(g, 0.34, 0.5, 0.08, M(c), 0, 0.62, 0, [0, 0, 0.1]); box(g, 0.07, 0.8, 0.05, M('wood1'), 0.05, 1.3, 0, [0, 0, 0.1]); box(g, 0.12, 0.14, 0.05, M('wood4'), 0.09, 1.76, 0); g.position.set(x, 0.04, z); g.rotation.y = Math.PI / 2; band.add(g); };
+  const mic = (x, z) => { const m = new THREE.Group(); cyl(m, 0.3, 0.3, 0.03, M('steel3'), 0, 0.02, 0, null, 12); cyl(m, 0.02, 0.02, 1.4, M('steel2'), 0, 0.72, 0); beam(m, [0, 1.4, 0], [0.4, 1.55, 0], 0.025, M('steel2')); sph(m, 0.07, M('steel1'), 0.43, 1.56, 0); m.position.set(x, 0.04, z); band.add(m); };
+  const wedge = (x, z) => { const w = new THREE.Group(); box(w, 0.7, 0.28, 0.45, M('black'), 0, 0.15, 0, [0, 0, -0.4]); box(w, 0.5, 0.04, 0.3, M('con3'), 0.12, 0.2, 0, [0, 0, -0.4]); w.position.set(x, 0.04, z); w.rotation.y = Math.PI / 2; band.add(w); };
+  const keys = (x, z) => { const k = new THREE.Group(); for (const sx of [-0.55, 0.55]) beam(k, [sx, 0.04, -0.2], [sx * 0.2, 0.82, 0.2], 0.04, M('steel2')); box(k, 1.5, 0.08, 0.5, M('orange2'), 0, 0.86, 0); for (let i = 0; i < 14; i++) box(k, 0.07, 0.03, 0.3, M('white'), -0.47 + i * 0.072, 0.92, 0.07); for (let i = 0; i < 8; i++) box(k, 0.04, 0.025, 0.17, M('ink'), -0.4 + i * 0.1, 0.93, -0.01); k.position.set(x, 0.04, z); k.rotation.y = Math.PI / 2; band.add(k); };
+  // drummer at the back, drum riser rug; bass stack behind-left, guitar combos flanking, keys front-right, singer's mic centre-front
+  box(band, 2.6, 0.05, 2.3, M('wood4'), -2.6, 0.065, 0.0);                                         // drum riser
+  const dk = drumKit(); dk.position.set(-2.6, 0.1, 0.0); parts.band.add(dk); cyl(band, 0.2, 0.2, 0.06, M('con4'), -3.5, 0.5, 0.0, null, 12); cyl(band, 0.03, 0.03, 0.4, M('steel2'), -3.5, 0.28, 0.0);  // kit + drum stool behind
+  ampStack(-3.6, 2.5); combo(-3.1, -2.4, 'wood6'); combo(-3.0, 3.35 - 0.0, 'wall0');            // bass stack left-back, guitar combos either side of the drummer
+  guitarOnStand(-2.2, 1.9, 'cyan'); guitarOnStand(-2.2, -1.9, 'wall0');                          // guitar and bass on stands next to their amps
+  keys(-0.5, -2.2); cyl(band, 0.2, 0.2, 0.05, M('con4'), 0.5, 0.55, -2.2, null, 12); cyl(band, 0.03, 0.03, 0.45, M('steel2'), 0.5, 0.3, -2.2);  // keyboard and its stool
+  mic(1.0, 0.0); wedge(1.8, 0.8); wedge(1.8, -0.8);                                              // singer's mic with two floor monitors
+  for (const [x1, z1, x2, z2] of [[1.0, 0.0, -2.0, 0.6], [-0.3, -2.0, -2.8, -2.1], [-2.2, 1.8, -3.4, 2.4]]) beam(band, [x1, 0.06, z1], [x2, 0.06, z2], 0.03, M('ink')); // cables on the floor
+  box(band, 0.5, 0.05, 0.3, M('wood1'), 0.2, 0.07, 1.6); box(band, 0.14, 0.05, 0.1, M('red'), 0.1, 0.12, 1.6); box(band, 0.14, 0.05, 0.1, M('lime'), 0.3, 0.12, 1.6);   // pedalboard
 
   // Walkthrough frame: the camera walks from the entry (+X end) toward the mask (-X end), u = 24 - x. Right-hand wall = back wall (-Z); left-hand wall is the cut-away side (+Z).
   const rightShots = [
@@ -243,7 +255,6 @@ export function buildHangar(scene) {
   const desk = deskSet(parts); desk.position.set(MARK.desk[0], 0, MARK.desk[1]); world.add(desk);
   const st = desk.userData.stool.clone().add(new THREE.Vector3(MARK.desk[0], 0, MARK.desk[1]));
   parts.stool = st;
-  const dk = drumKit(); dk.position.set(-1.7, 0.05, -1.2); dk.rotation.y = -0.4; parts.band.add(dk);
   // speaker stack and crates near the right back
   const sp1 = new THREE.Group(); box(sp1, 1.0, 1.4, 0.8, M('steel3'), 0, 0.7, 0); cyl(sp1, 0.32, 0.32, 0.05, M('con4'), 0, 0.5, 0.42, [Math.PI / 2, 0, 0], 16); cyl(sp1, 0.22, 0.22, 0.05, M('con4'), 0, 1.05, 0.42, [Math.PI / 2, 0, 0], 16);
   box(sp1, 1.0, 0.9, 0.8, M('steel2'), 0, 1.85, 0); cyl(sp1, 0.28, 0.28, 0.05, M('con4'), 0, 1.85, 0.42, [Math.PI / 2, 0, 0], 16);

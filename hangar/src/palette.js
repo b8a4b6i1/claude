@@ -1,8 +1,8 @@
 // 64-entry palette for the hangar. Warm rust/wood/concrete base, graffiti hues, glow.
 export const P = {
-  white: '#ffffff', sky2: '#d4edf8',
+  white: '#ffffff', sky2: '#e6f6fd',
   wall0: '#e8e4da', wall1: '#d4cfc2', wall2: '#bdb7a8',
-  con0: '#c9c6c0', con1: '#a6a29b', con2: '#8a8780', con3: '#6b6963', con4: '#4a4843', dark: '#2c2a28', ink: '#1a1816',
+  con0: '#c9c6c0', con1: '#a6a29b', con2: '#8a8780', con3: '#6b6963', con4: '#4a4843', cloud3: '#e2f6fe', ink: '#1a1816',
   wood6: '#e6d3ad', wood0: '#d3b88a', wood1: '#b8955f', wood2: '#9a7345', wood3: '#7b5834', wood4: '#5e4227', wood5: '#43301d',
   grey0: '#8d8579', grey1: '#6f685e', grey2: '#54504a',
   rust0: '#c4713f', rust1: '#a2542b', rust2: '#7d3d1f',
@@ -14,7 +14,7 @@ export const P = {
   blue: '#2c63c9', blue2: '#5a8de0', navy: '#23367a',
   purple: '#7b3fb0', purple2: '#a572d6', magenta: '#c93a9a', pink: '#f28bb3', pink2: '#f9c2d8',
   skin0: '#f1d0b0', skin1: '#d9a17a', skin2: '#a8714c', skin3: '#7a4a30',
-  cloud1: '#eef8fc', cloud2: '#b4dcee',
+  cloud1: '#b7e6fc', cloud2: '#87d6fc',
   stone0: '#b9a98f', stone1: '#8d7d66', stone2: '#5e5242',
   fish0: '#f6a07a', fish1: '#ee7a55',
   black: '#16141a', cloth: '#26232b',

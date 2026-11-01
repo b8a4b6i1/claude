@@ -13,7 +13,7 @@ const PENTA = [0, 3, 5, 7, 10];                // minor pentatonic for the melod
 const STEP = 0.25;                              // 8th note at 120 bpm
 
 export function createAudio() {
-  let ctx = null, master = null, noiseBuf = null, enabled = true, last = 0, unlocked = false;
+  let ctx = null, master = null, sfxBus = null, musicMode = false, noiseBuf = null, enabled = true, last = 0, unlocked = false;
   const waves = {};
   const pulseWave = (d) => {
     if (waves[d]) return waves[d];
@@ -24,7 +24,7 @@ export function createAudio() {
   function init() {
     if (ctx) return;
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
-    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.22; master.connect(ctx.destination);
+    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.22; master.connect(ctx.destination); sfxBus = ctx.createGain(); sfxBus.gain.value = 0.38; sfxBus.connect(master); // sound effects mix well below the music
     const len = ctx.sampleRate * 1.5; noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate); const d = noiseBuf.getChannelData(0);
     let v = 0; for (let i = 0; i < len; i++) { if (i % 3 === 0) v = Math.random() * 2 - 1; d[i] = Math.round(v * 8) / 8; } // sample-and-hold, 3-bit crush
   }
@@ -34,12 +34,12 @@ export function createAudio() {
     o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq * Math.pow(2, slide)), t0 + dur);
     if (vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 6; lg.gain.value = freq * vib; l.connect(lg); lg.connect(o.frequency); l.start(t0); l.stop(t0 + dur + rel); }
     g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + attack); g.gain.setValueAtTime(vol, t0 + Math.max(attack, dur - rel)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + rel);
-    o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur + rel + 0.02);
+    o.connect(g); g.connect(musicMode ? master : sfxBus); o.start(t0); o.stop(t0 + dur + rel + 0.02);
   };
   const noise = (dur, { vol = 0.4, hp = 2000, lp = 9000, slide = 0, at = 0 } = {}) => {
     if (!ctx || !enabled) return; const t0 = ctx.currentTime + at, s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter(), f2 = ctx.createBiquadFilter();
     s.buffer = noiseBuf; s.loop = true; f.type = 'highpass'; f.frequency.value = hp; f2.type = 'lowpass'; f2.frequency.setValueAtTime(lp, t0); if (slide) f2.frequency.exponentialRampToValueAtTime(Math.max(80, lp * Math.pow(2, slide)), t0 + dur);
-    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(f2); f2.connect(g); g.connect(master); s.start(t0); s.stop(t0 + dur + 0.02);
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); s.connect(f); f.connect(f2); f2.connect(g); g.connect(musicMode ? master : sfxBus); s.start(t0); s.stop(t0 + dur + 0.02);
   };
   // ---------------------------------------------------------------- sound effects
   const sfx = {
@@ -84,7 +84,7 @@ export function createAudio() {
   const crossed = (a, b, x) => x > a && x <= b;
   function fire(a, b) {
     // music steps
-    for (let s = Math.floor(a / STEP) + 1; s <= Math.floor(b / STEP); s++) stepNote(s);
+    musicMode = true; for (let s = Math.floor(a / STEP) + 1; s <= Math.floor(b / STEP); s++) stepNote(s); musicMode = false;
     // one-shot and periodic effects
     if (crossed(a, b, 10.5)) sfx.wake();
     if (crossed(a, b, 16.2)) sfx.summon();
@@ -104,6 +104,6 @@ export function createAudio() {
     if (t - last > 0.5 || t === last) { last = t; return; } // freeze / seek / tab was hidden
     fire(last, t); last = t;
   }
-  function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume(); unlocked = true; }
-  return { update, unlock, setEnabled(v) { enabled = v; if (ctx) { if (v && ctx.state === 'suspended') ctx.resume(); master.gain.value = v ? 0.22 : 0; } }, get enabled() { return enabled; }, get unlocked() { return unlocked; } };
+  function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}); unlocked = true; }
+  return { update, unlock, setEnabled(v) { enabled = v; if (ctx) { if (v && ctx.state === 'suspended') ctx.resume(); master.gain.value = v ? 0.22 : 0; } }, get enabled() { return enabled; }, get running() { return !!ctx && ctx.state === 'running'; }, get unlocked() { return unlocked; } };
 }

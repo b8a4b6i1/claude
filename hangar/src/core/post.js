@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PALETTE_RGB } from '../palette.js';
+import { CLOUD } from './cloud-sprite.js';
 
 const VERT = /* glsl */ `
 out vec2 vUv;
@@ -31,21 +32,33 @@ float vnoise(vec2 p, float px) {
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 float fbm(vec2 p, float px) { float v = 0.0, a = 0.5; for (int o = 0; o < 4; o++) { v += a * vnoise(p, px); p *= 2.0; px *= 2.0; a *= 0.5; } return v; }
-// Pixel-art sky: clouds are built from square cells (240 across, like the palette-snapped hangar), flat tones, hard stepped edges.
-float cloudD(vec2 cell, float scale, float px, float shiftCells) { return fbm(vec2(cell.x + shiftCells, cell.y) / scale, px); }
+// Sky: pale blue with the user's pixel clouds (sprite sheet traced cell by cell from the reference image), drifting one full wrap per loop.
+uniform sampler2D tSprite;
+uniform vec4 uBox[3];
+uniform vec2 uSheet;
+int spriteAt(int t, vec2 p) {
+  vec4 b = uBox[t];
+  if (p.x < 0.0 || p.y < 0.0 || p.x >= b.z || p.y >= b.w) return 0;
+  float v = texelFetch(tSprite, ivec2(int(b.x + p.x), int(b.y + (b.w - 1.0 - p.y))), 0).r;
+  return int(v * 255.0 / 80.0 + 0.5);
+}
+// x0, y fraction, sprite, wrap length
+const vec4 CLOUDS[32] = vec4[32](vec4(66., 0.38, 1., 700.), vec4(162., 0.73, 2., 700.), vec4(291., 0.17, 0., 700.), vec4(376., 0.52, 0., 700.), vec4(530., 0.86, 0., 700.), vec4(586., 0.30, 0., 700.), vec4(12., 0.65, 2., 480.), vec4(51., 0.09, 0., 480.), vec4(98., 0.43, 2., 480.), vec4(171., 0.78, 0., 480.), vec4(209., 0.22, 0., 480.), vec4(241., 0.57, 2., 480.), vec4(289., 0.91, 0., 480.), vec4(344., 0.35, 0., 480.), vec4(400., 0.70, 0., 480.), vec4(448., 0.14, 1., 480.), vec4(1., 0.48, 1., 380.), vec4(33., 0.83, 1., 380.), vec4(49., 0.27, 2., 380.), vec4(79., 0.62, 0., 380.), vec4(98., 0.06, 1., 380.), vec4(125., 0.40, 1., 380.), vec4(149., 0.75, 2., 380.), vec4(171., 0.19, 2., 380.), vec4(201., 0.53, 1., 380.), vec4(215., 0.88, 1., 380.), vec4(245., 0.32, 2., 380.), vec4(272., 0.67, 2., 380.), vec4(294., 0.11, 2., 380.), vec4(310., 0.45, 0., 380.), vec4(335., 0.80, 2., 380.), vec4(358., 0.24, 2., 380.));
 vec3 skyAt(vec2 uv) {
   float ph = uTime / uLoop;
-  float cs = uResolution.x / 240.0;
+  float cs = uResolution.x / 240.0, Hc = 240.0 * uResolution.y / uResolution.x;
   vec2 cell = floor(uv * uResolution / cs);
-  vec3 sky = vec3(0.608, 0.878, 0.949), far = vec3(0.831, 0.929, 0.973), body = vec3(0.933, 0.973, 0.988), hi = vec3(1.0), shade = vec3(0.706, 0.863, 0.933);
-  float sh1 = floor(ph * 240.0), sh2 = floor(ph * 480.0);      // whole-cell drift: one and two screen widths per loop (noise period = 240 cells)
-  vec3 c = sky;
-  if (cloudD(cell + vec2(0.0, 55.0), 20.0, 12.0, sh2) > 0.58) c = far;
-  float thr = 0.56;
-  if (cloudD(cell, 30.0, 8.0, sh1) > thr) {
-    c = body;
-    if (cloudD(cell + vec2(0.0, 2.0), 30.0, 8.0, sh1) < thr) c = hi;
-    else if (cloudD(cell + vec2(0.0, -3.0), 30.0, 8.0, sh1) < thr) c = shade;
+  vec3 c = vec3(0.902, 0.965, 0.992), dark = vec3(0.529, 0.839, 0.988), body = vec3(0.718, 0.902, 0.988), hi = vec3(0.886, 0.965, 0.996);
+  for (int i = 0; i < 32; i++) {
+    vec4 q = CLOUDS[i]; int t = int(q.z + 0.5);
+    float sc = q.w >= 600.0 ? 2.0 : (q.w >= 450.0 ? 1.0 : 0.5);          // near clouds are drawn 2x, intermediate 1x (exact sprite), far 0.5x
+    float speed = q.w;                                                        // cells per loop: near clouds drift faster, far ones slower
+    float ox = mod(q.x + floor(ph * speed), q.w) - 64.0 * sc;
+    vec2 p = floor((cell - vec2(ox, floor(q.y * Hc))) / sc);
+    int k = spriteAt(t, p);
+    if (k == 0) continue;
+    if (sc < 1.0) { c = (k == 3) ? hi : body; }                               // far clouds: flat and pale
+    else if (k == 1) c = dark; else if (k == 2) c = body; else c = hi;
   }
   return c;
 }
@@ -153,6 +166,11 @@ void main() {
 }
 `;
 
+function spriteTexture() {
+  const d = new Uint8Array(CLOUD.data.length); for (let i = 0; i < d.length; i++) d[i] = CLOUD.data[i] * 80;
+  const t = new THREE.DataTexture(d, CLOUD.w, CLOUD.h, THREE.RedFormat, THREE.UnsignedByteType); t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t;
+}
+
 export class PixelPost {
   constructor(renderer, maxDim = 1600, renderScale = 1) {
     this.renderer = renderer;
@@ -177,6 +195,9 @@ export class PixelPost {
       uPalette: { value: PALETTE_RGB.map((c) => new THREE.Vector3(c[0], c[1], c[2])) },
       uDither: { value: 1.0 },
       uTime: { value: 0.0 },
+      tSprite: { value: spriteTexture() },
+      uBox: { value: CLOUD.boxes.map((b) => new THREE.Vector4(b[0], b[1], b[2], b[3])) },
+      uSheet: { value: new THREE.Vector2(CLOUD.w, CLOUD.h) },
       uLoop: { value: 90.0 },
     };
 
