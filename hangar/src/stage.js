@@ -1,5 +1,7 @@
 import * as THREE from 'three';
-import { HX, HZ, X0, X1, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash, spellHit, sleepK } from './config.js';
+import { P } from './palette.js';
+import { M } from './scene/common.js';
+import { HX, HZ, X0, X1, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash, spellHit, sleepK, devilBody, ashPile } from './config.js';
 import { makeDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
 import { createExtras } from './scene/cast2.js';
 import { createMagic } from './scene/magic.js';
@@ -29,7 +31,7 @@ const keyed = (keys, t) => { // angle keys [t, yaw], shortest-arc interpolation
 const VISITOR = makePath([[0, 17, 0.5], [3.5, 12.6, -0.3], [16, 12.6, -0.3], [30, -3, 2.2], [32, -6.5, 2.2], [38, -12.75, -2.4], [39, -12.75, -2.95], [52, -12.75, -2.95], [53, -12.75, -2.4], [58.5, -6.5, 2.2], [60.5, -3, 2.2], [74.5, 12.6, -0.3], [78, 17, 0.5], [90, 17, 0.5]]);
 const VISITOR_YAW = [[0, -1.571], [3.5, -1.571], [9.8, 3.14], [15.4, 3.14], [16.6, -1.75], [30, -1.75], [31, -1.571], [32, -1.571], [33, -2.2], [37.5, -2.2], [39, 3.14], [52, 3.14], [52.8, 0.94], [58, 0.94], [59, 1.571], [90, 1.571]];
 const DEVIL_AT = [10.2, -0.5], DEVIL_HOP = [-11.0, 1.5]; // sleeps by the entry, then patrols the whole hangar: long hall, through the passage, to the spiral in the mask hall and back
-const DEVIL = makePath([[0, 10.2, -0.5], [12, 10.2, -0.5], [18, 4, -2.5], [25, -1, 1.6], [28, -3.2, 2.2], [31, -7, 2.2], [36, -11, 1.5], [53, -11, 1.5], [57, -7, 2.2], [60, -3.2, 2.2], [68, 4, -2.5], [76, 10.2, -0.5], [90, 10.2, -0.5]], true);
+const DEVIL = makePath([[0, 10.2, -0.5], [12, 10.2, -0.5], [18, 4, -2.5], [25, -1, 1.6], [28, -3.2, 2.2], [31, -7, 2.2], [36, -11, 1.5], [61, -11, 1.5], [63.5, -7, 2.2], [66, -3.2, 2.2], [72, 4, -2.5], [76, 10.2, -0.5], [90, 10.2, -0.5]], true);
 const CUBE_A = { x0: 5, a: 2.2, z: -0.6, w: 1, ph: 0 }, CUBE_B = { x0: 0, a: 1.5, z: 3.7, w: 1, ph: 2.1 };
 const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; return a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))) - a * (2 * Math.floor(ph / Math.PI) + 0); };
 
@@ -39,6 +41,9 @@ export function createStage(scene, parts) {
   cubes[1].root.visible = false; // the purple blocky figure stood on the open side
   scene.add(fish.shadow); fish.shadow.visible = true; const extras = createExtras(scene);
   const burst = makeBurst(scene);
+  const pile = new THREE.Group(); { const dark = ['con4', 'con3', 'ink', 'grey2'].map((n) => M(n)); for (let i = 0; i < 16; i++) { const a = i * 2.4, r = 0.15 + 0.5 * hash(i + 3), m = new THREE.Mesh(new THREE.SphereGeometry(0.18 + 0.15 * hash(i + 9), 8, 6), dark[i % 4]); m.scale.set(1, 0.38, 1); m.position.set(Math.cos(a) * r, 0.05 + 0.08 * (1 - r), Math.sin(a) * r); pile.add(m); }
+    for (let i = 0; i < 5; i++) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 5), new THREE.MeshBasicMaterial({ color: P.orange })); e.position.set(Math.cos(i * 1.3) * 0.3, 0.12, Math.sin(i * 1.3) * 0.3); e.userData.i = i; pile.add(e); } }
+  pile.position.set(DEVIL_HOP[0], 0.02, DEVIL_HOP[1]); pile.visible = false; scene.add(pile);
   const levAt = (t) => 0.9 * bell(t, 38, 40, 50, 52) + 0.06 * Math.sin(t * 2.5) * bell(t, 38, 40, 50, 52);
   const sentStep = (t) => bell(t, BEAT.burst - 0.5, BEAT.burst + 1.2, BEAT.burstEnd - 1.5, BEAT.burstEnd + 0.5);
   const sentPos = (sg, t) => ({ x: X0 + 0.95 + sentStep(t), y: 0.7 * bell(t, BEAT.burst + 0.5, BEAT.burst + 2, BEAT.burstEnd - 2, BEAT.burstEnd) * (1 + 0.2 * Math.sin(t * 3)), z: sg * 2.7 });
@@ -63,10 +68,10 @@ export function createStage(scene, parts) {
     // devil: dance energy, arms-up + flames at the burst, hop-walk between marks, head follows the fish
     const dp = DEVIL(t); const dpa = DEVIL(t - 0.6), dpb = DEVIL(t + 0.6), dvx = dpb.x - dpa.x, dvz = dpb.z - dpa.z, dsp = Math.hypot(dvx, dvz) / 1.2, walkAmt = smooth(clamp(dsp / 0.35, 0, 1));
     const k = 0.75 + 0.45 * bell(t, 32, 34, 40, 42) + 0.55 * bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 2, BEAT.burstEnd), up = bell(t, BEAT.burst - 0.4, BEAT.burst + 0.8, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1), flame = bell(t, BEAT.burst + 0.4, BEAT.burst + 1.2, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1.5);
-    const sl = sleepK(t), cp = t % 4.5, cast = (t < 13.0 || t > 72.4) ? 0 : (cp > 3.9 ? (cp - 3.9) / 0.6 : (cp < 0.35 ? 1 - cp / 0.35 : 0));
-    poseDevil(devil, t, k * (1 - walkAmt * 0.4) * (1 - 0.95 * sl), Math.max(up, 0.85 * cast) * (1 - sl), Math.max(flame, cast) * (1 - sl), { phase: dp.dist * TAU / 1.0, amt: walkAmt });
-    devil.head.rotation.x += 0.75 * sl; devil.torso.rotation.x += 0.45 * sl; devil.root.scale.y = 1.4 * (1 + 0.012 * Math.sin(t * 1.6) * sl);
-    devil.root.position.set(dp.x, levAt(t) + 0.35 * Math.sin(Math.PI * clamp((t - 10.4) / 0.7, 0, 1)), dp.z); devil.root.rotation.y = lerpAngle(Math.PI / 4 + 0.2 * Math.sin(t * 0.8), Math.atan2(dvx, dvz), walkAmt);
+    const sl = sleepK(t), cp = t % 4.5, cast = (t < 13.0 || t > 72.4 || (t > 52.8 && t < 61.2)) ? 0 : (cp > 3.9 ? (cp - 3.9) / 0.6 : (cp < 0.35 ? 1 - cp / 0.35 : 0));
+    poseDevil(devil, t, k * (1 - walkAmt * 0.4) * (1 - 0.95 * sl), Math.max(up, 0.85 * cast, bell(t, 52.3, 52.7, 54.2, 54.8)) * (1 - sl), Math.max(flame, cast, bell(t, 52.3, 52.6, 54.3, 54.9)) * (1 - sl), { phase: dp.dist * TAU / 1.0, amt: walkAmt });
+    devil.head.rotation.x += 0.75 * sl; devil.torso.rotation.x += 0.45 * sl; const body = devilBody(t); devil.root.scale.set(1.4 * (0.45 + 0.55 * body), 1.4 * body * (1 + 0.012 * Math.sin(t * 1.6) * sl), 1.4 * (0.45 + 0.55 * body)); devil.root.visible = body > 0.01;
+    devil.root.position.set(dp.x, levAt(t) + 0.35 * Math.sin(Math.PI * clamp((t - 10.4) / 0.7, 0, 1)), dp.z); if (t > 52.4 && t < 54.6) { devil.root.position.x += 0.06 * Math.sin(t * 55); devil.root.position.z += 0.05 * Math.cos(t * 47); } devil.root.rotation.y = lerpAngle(Math.PI / 4 + 0.2 * Math.sin(t * 0.8), Math.atan2(dvx, dvz), walkAmt);
     fishPos.copy(fishAt(t)); const dd = Math.hypot(fishPos.x - dp.x, fishPos.z - dp.z), near = smooth(1 - dd / 6);
     const toFish = Math.atan2(fishPos.x - dp.x, fishPos.z - dp.z) - devil.root.rotation.y;
     devil.head.rotation.y += clamp(Math.atan2(Math.sin(toFish), Math.cos(toFish)), -0.9, 0.9) * near; devil.head.rotation.x -= 0.35 * near; devil.torso.rotation.x -= 0.12 * near;
@@ -107,7 +112,8 @@ export function createStage(scene, parts) {
     else { poseWalk(vis, 0, 0, 0, 0); vis.root.position.y = 0; }
     vis.shadow.position.y = 0.02 - vis.root.position.y;
     choir.update(t); magic.update(t);
-    devil.shadow.position.y = (0.02 - devil.root.position.y) / devil.root.scale.y; devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
+    { const pk = ashPile(t); pile.visible = pk > 0.01; pile.scale.set(pk, pk, pk); pile.children.forEach((c) => { if (c.userData.i !== undefined) { c.visible = Math.sin(t * 9 + c.userData.i * 2.3) > -0.2; c.scale.setScalar(0.6 + 0.4 * Math.sin(t * 13 + c.userData.i)); } }); }
+    devil.shadow.position.y = (0.02 - devil.root.position.y) / Math.max(0.05, devil.root.scale.y); devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
   }
   return { update, actors: { devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
 }

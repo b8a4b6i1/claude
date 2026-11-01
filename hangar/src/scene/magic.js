@@ -47,13 +47,18 @@ export function createMagic(scene, ctx) {
   spec({ n: 4, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime', 'purple2'], sway: 0.14, gate: (t) => (ctx.choirW(t) > 0.8 ? 1 : 0),
     origin: (tb, r, k) => { const s = ctx.choirSlots[ctx.choirActive(tb)]; return V(s.x, 1.9, s.z); }, vel: (r) => V((r[0] - 0.5) * 0.3, 0.8 + 0.3 * r[1], (r[2] - 0.5) * 0.3) });
   // --- devil spell impact: sparks where each bolt lands
-  spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 14 && t < 73.5 ? 1 : 0),
+  spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 14 && t < 73.5 && !(t > 53.4 && t < 61.4) ? 1 : 0),
     origin: (tb) => { const p = ctx.spellTarget(Math.floor((tb - 0.9) / 4.5 + 1e-6) % 3); return V(p.x, p.y, p.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1 + 2 * r[0]), 1.2 + 2 * r[1], Math.sin(a) * (1 + 2 * r[0])); } });
   // --- the devil sleeps: slow Z's rise; wakes with a ring of stars
   spec({ n: 3, P: 2.0, life: 2.0, size: 0.34, grav: 0, colors: ['blue2', 'cyan'], sway: 0.25, gate: (t) => (ctx.sleepK(t) > 0.5 ? 1 : 0),
     origin: (tb) => { const d = ctx.devilPos(tb); return V(d.x, 2.7, d.z); }, vel: (r) => V(0.3, 0.5, (r[0] - 0.5) * 0.2) });
   spec({ n: 12, P: LOOP, off: 10.5, life: 1.0, size: 0.34, grav: -1, colors: ['yellow', 'orange', 'red3'], mode: 'burst', gate: () => 1,
     origin: (tb) => { const d = ctx.devilPos(tb); return V(d.x, 2.0, d.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 2.2, 0.8 + r[0], Math.sin(a) * 2.2); } });
+  // --- the devil burns to ash: embers and soot rise as he crumbles, then sparks converge on the pile when he re-forms
+  spec({ n: 26, P: LOOP, off: 53.6, life: 2.4, size: 0.34, grav: 0.5, colors: ['con4', 'orange', 'ink', 'yellow', 'con3', 'red3'], mode: 'burst', gate: () => 1,
+    origin: (tb, r) => { const d = ctx.devilPos(tb); return V(d.x + (r[0] - 0.5) * 0.8, 0.4 + r[1] * 1.6, d.z + (r[2] - 0.5) * 0.8); }, vel: (r) => V((r[0] - 0.5) * 1.6, 0.8 + r[1] * 1.6, (r[2] - 0.5) * 1.6) });
+  spec({ n: 22, P: LOOP, off: 58.4, life: 1.8, size: 0.34, grav: 0, colors: ['orange', 'yellow', 'red3', 'orange2'], mode: 'burst', gate: () => 1,
+    origin: (tb, r) => { const d = ctx.devilPos(tb), a = r[0] * TAU; return V(d.x + Math.cos(a) * 2.0, 0.2 + r[1] * 1.8, d.z + Math.sin(a) * 2.0); }, vel: (r, k, n) => { const a = r[0] * TAU; return V(-Math.cos(a) * 1.05, 0.2 + 0.2 * r[1], -Math.sin(a) * 1.05); } });
   // --- summoning and dispersal puffs (once per loop)
   spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });
@@ -89,7 +94,7 @@ export function createMagic(scene, ctx) {
         if (p.y < 0.05) p.y = 0.05;
         const f = clamp(1 - age / life, 0, 1), sc = sp.size * Math.pow(f, 0.6) * Math.min(1, age * 8) * Math.min(1, g * 2);
         s.set(sc, sc * 1.3, sc); e.set(age * 2 + r3[1] * 6, age * 3 + r3[2] * 6, 0); q.setFromEuler(e); m4.compose(p, q, s); mesh.setMatrixAt(i, m4);
-        if (!colourSet) mesh.setColorAt(i, cc(sp.colors[(k + batch) % sp.colors.length]));
+        mesh.setColorAt(i, cc(sp.colors[((k + batch) % sp.colors.length + sp.colors.length) % sp.colors.length]));
       }
     }
     // orbiting orbs around the devil and around the singer in red
@@ -99,7 +104,7 @@ export function createMagic(scene, ctx) {
       const c = oi === 0 ? ctx.devilPos(t) : { x: -9.6, z: -2.3 }, a = t * (oi ? 2.2 : 1.6) + (k / 4) * TAU, rr = oi ? 0.9 : 1.5;
       p.set(c.x + Math.cos(a) * rr, (oi ? 1.3 : 1.4) + (oi === 0 ? ctx.lev(t) : 0.6 * bell(t, 41, 43, 49, 51)) + 0.35 * Math.sin(a * 2 + k), c.z + Math.sin(a) * rr);
       const sc = 0.3 * g; s.set(sc, sc * 1.3, sc); e.set(a, a * 1.3, 0); q.setFromEuler(e); m4.compose(p, q, s); mesh.setMatrixAt(i, m4);
-      if (!colourSet) mesh.setColorAt(i, cc(['cyan', 'yellow', 'magenta', 'lime', 'orange', 'white', 'pink'][k]));
+      mesh.setColorAt(i, cc(['cyan', 'yellow', 'magenta', 'lime'][k]));
     }
     colourSet = true;
     mesh.instanceMatrix.needsUpdate = true; if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;

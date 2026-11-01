@@ -19,7 +19,11 @@ export const BEAT = { burst: 42.0, burstEnd: 50.0, fishIn: 20.0, fishOut: 80.0 }
 export const MARK = { spiral: [-11.0, 1.5], mask: [X0 + 0.5, 0], desk: [-12.5, -3.9] };
 
 /** The devil casts every 4.5 s; the bolt lands 0.9 s later on a rotating target (0 cat, 1 deer man, 2 booth). Returns null before the first cast. */
-export function spellHit(t) { if (t < 14.4 || t > 74.6) return null; const s = t - 0.9; return { idx: Math.floor(s / 4.5) % 3, age: s % 4.5 }; }
+export function spellHit(t) { if (t < 14.4 || t > 74.6 || (t > 53.4 && t < 61.4)) return null; const s = t - 0.9; return { idx: Math.floor(s / 4.5) % 3, age: s % 4.5 }; }
 
 /** 1 while the devil sleeps (start and end of the loop), 0 while he is awake (10.8 s to 76 s). */
 export function sleepK(t) { if (t < 50) return 1 - smooth((t - 10.2) / 0.8); return smooth((t - 76) / 5); }
+
+/** The devil burns up at 52.4-54.6 s, lies as ash until 58.4 s and re-forms from the ash by 60.8 s. Returns body scale 0..1 (1 = whole). */
+export function devilBody(t) { if (t < 54.0 || t >= 60.8) return 1; if (t < 55.4) return 1 - smooth((t - 54.0) / 1.4); if (t < 58.4) return 0; return smooth((t - 58.4) / 2.4); }
+export const ashPile = (t) => smooth((t - 54.4) / 1.2) * (1 - smooth((t - 58.4) / 2.4));

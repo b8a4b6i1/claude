@@ -55,6 +55,8 @@ export function createAudio() {
     sit: () => { tone(MIDI(40), 0.08, { type: 'triangle', vol: 0.6 }); noise(0.06, { vol: 0.2, hp: 500, lp: 2500 }); },
     key: () => noise(0.03, { vol: 0.22, hp: 3500, lp: 8000 }),
     roar: () => { noise(1.6, { vol: 0.6, hp: 80, lp: 1200, slide: -1.5 }); tone(MIDI(28), 1.4, { type: 'sawtooth', vol: 0.4, slide: -0.6, vib: 0.02 }); tone(MIDI(40), 1.0, { duty: 0.125, vol: 0.3, slide: -0.4, at: 0.05 }); },
+    burn: () => { noise(1.6, { vol: 0.5, hp: 300, lp: 6000, slide: -2.2 }); tone(MIDI(64), 1.4, { duty: 0.125, vol: 0.3, slide: -1.6, vib: 0.03 }); },
+    reform: () => { [48, 52, 55, 60, 64, 67, 72, 76].forEach((m, i) => tone(MIDI(m), 0.18, { duty: 0.25, vol: 0.3, at: i * 0.2 })); noise(0.6, { vol: 0.15, hp: 5000, at: 1.3 }); },
     confetti: () => [76, 79, 83, 88, 91, 95].forEach((m, i) => tone(MIDI(m), 0.09, { duty: 0.125, vol: 0.25, at: i * 0.06 })),
     float: () => tone(MIDI(69), 1.2, { type: 'triangle', vol: 0.35, slide: 0.5, vib: 0.02 }),
     sleep: () => [69, 65, 62, 57].forEach((m, i) => tone(MIDI(m), 0.35, { type: 'triangle', vol: 0.45, at: i * 0.42 })),
@@ -92,8 +94,10 @@ export function createAudio() {
     if (crossed(a, b, 38.6)) sfx.sit();
     if (crossed(a, b, BEAT.burst)) { sfx.roar(); setTimeout(() => sfx.confetti(), 250); }
     if (crossed(a, b, BEAT.burst + 0.6)) sfx.float();
+    if (crossed(a, b, 52.6)) sfx.burn();
+    if (crossed(a, b, 58.6)) sfx.reform();
     if (crossed(a, b, 77.5)) sfx.sleep();
-    for (let n = 0; n <= 13; n++) { const tc = 13.5 + 4.5 * n; if (crossed(a, b, tc)) sfx.cast(); if (crossed(a, b, tc + 0.9)) { sfx.hit(); const idx = n % 3; if (idx === 0) sfx.twirl(); else if (idx === 1) sfx.ouch(); else sfx.boing(); } }
+    for (let n = 0; n <= 13; n++) { const tc = 13.5 + 4.5 * n; if (tc > 52.8 && tc < 61.4) continue; if (crossed(a, b, tc)) sfx.cast(); if (crossed(a, b, tc + 0.9)) { sfx.hit(); const idx = n % 3; if (idx === 0) sfx.twirl(); else if (idx === 1) sfx.ouch(); else sfx.boing(); } }
     for (let k = 3; k < 45; k++) { const tc = 0.5 + 2 * k; if (tc > 6 && crossed(a, b, tc)) sfx.coin(); }
     for (let k = 0; k < 10; k++) { const tc = 22 + 1.5 * k; if (tc < 36 && crossed(a, b, tc)) { sfx.choir(Math.floor(Math.max(0, tc - 22 + 0.4) / 1.5) % 5); sfx.tick(); } }
     for (let t = 40.0; t < 52; t += 0.35 + 0.15 * hash(t * 7)) if (crossed(a, b, t)) sfx.key();
