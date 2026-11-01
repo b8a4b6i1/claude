@@ -255,7 +255,9 @@ export function buildHangar(scene) {
   ];
   prizes.forEach((g) => { g.visible = false; c1.add(g); });
   // protest banner painted on the booth's side wall (the one facing the open edge, towards the camera)
-  const banTex = canvasTex(128, 64, (c, w, h) => { c.fillStyle = P.white; c.fillRect(0, 0, w, h); c.fillStyle = P.red; c.fillRect(0, 0, w, 6); c.fillRect(0, h - 6, w, 6); c.fillStyle = P.ink; c.font = 'bold 30px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('NO AL', w / 2, 29); c.fillStyle = P.red; c.font = 'bold 21px Impact, Arial Black, sans-serif'; c.fillText('FASCISMO', w / 2, 55); });
+  const banTex = canvasTex(128, 64, (c, w, h) => { c.fillStyle = P.white; c.fillRect(0, 0, w, h); c.fillStyle = P.red; c.fillRect(0, 0, w, 5); c.fillRect(0, h - 5, w, 5);
+    c.save(); c.translate(w / 2, h / 2); c.strokeStyle = P.ink; c.lineWidth = 5; c.lineCap = 'butt'; c.lineJoin = 'miter'; for (let k = 0; k < 4; k++) { c.save(); c.rotate(k * Math.PI / 2); c.beginPath(); c.moveTo(0, 0); c.lineTo(15, 0); c.lineTo(15, 11); c.stroke(); c.restore(); } c.restore();      // a swastika, crossed out
+    c.strokeStyle = P.red; c.lineWidth = 6; c.beginPath(); c.arc(w / 2, h / 2, 26, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.moveTo(w / 2 - 18.4, h / 2 - 18.4); c.lineTo(w / 2 + 18.4, h / 2 + 18.4); c.stroke(); });
   const banner = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.05), new THREE.MeshBasicMaterial({ map: banTex, toneMapped: false })); banner.position.set(-1.235, 1.45, 0); banner.rotation.y = -Math.PI / 2; c1.add(banner);
   box(c1, 0.04, 1.14, 2.2, M('wood5'), -1.2, 1.45, 0);
   // rotating police-style beacon on the roof (red/blue) that spins all the time and flashes during the shake
