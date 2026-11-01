@@ -42,7 +42,7 @@ export function createStage(scene, parts) {
     // screens, monitor, floor, mouth
     parts.screens.forEach((s) => drawScreen(s, t)); drawMonitor(parts.monitor, t);
     const burstE = bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 1, BEAT.burstEnd + 1);
-    parts.spiral.userData.recolor(t, burstE * 1.2); mouthGlow(parts.glow, t); burst.update(t); motes.update(t);
+    parts.spiral.userData.recolor(t, burstE * 1.2); parts.eclipse.emissiveIntensity = 0.6 + 1.6 * burstE + 0.2 * Math.sin(t * 3); mouthGlow(parts.glow, t); burst.update(t); motes.update(t);
 
     // devil: dance energy, arms-up + flames at the burst, hop-walk between marks, head follows the fish
     const dp = DEVIL(t); const walkAmt = dp.moving ? smooth(dp.u / 0.12) * (1 - smooth((dp.u - 0.88) / 0.12)) : 0;

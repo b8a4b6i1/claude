@@ -36,30 +36,39 @@ function buildWall(len, seed, shots) {
     const x = -len / 2 + (i + 0.5) * (len / n); const h = 3.55 + r() * 0.12;
     box(g, len / n - 0.02, h, 0.16, M(planks[Math.floor(r() * planks.length)]), x, h / 2, 0.0);
   }
-  for (let i = 0; i < n; i++) { // upper whitewashed tin
+  const upper = ['wall1', 'steel0', 'wall2', 'wall1', 'steel0'];
+  for (let i = 0; i < n; i++) { // upper half-timbered infill: weathered vertical boards
     const x = -len / 2 + (i + 0.5) * (len / n); const h = WALL_H - 3.6;
-    box(g, len / n - 0.01, h, 0.1, M(i % 3 === 0 ? 'wall1' : 'wall0'), x, 3.6 + h / 2, -0.03);
-    if (r() < 0.07) box(g, len / n - 0.01, 0.7 + r() * 0.8, 0.012, M('rust0'), x, 3.9 + r() * 1.2, 0.03); // rust streak
+    box(g, len / n - 0.015, h, 0.1, M(upper[Math.floor(r() * upper.length)]), x, 3.6 + h / 2, -0.05);
   }
+  for (let bx = -len / 2; bx < len / 2 - 0.1; bx += len / 4) { // K-braces in every bay, as in the scan
+    const x0 = bx + 0.25, x1 = bx + len / 4 - 0.25, xm = (x0 + x1) / 2;
+    beam(g, [x0, 3.7, 0.3], [xm, 4.9, 0.3], 0.2, M('wood4')); beam(g, [x1, 3.7, 0.3], [xm, 4.9, 0.3], 0.2, M('wood4'));
+    beam(g, [x0, WALL_H - 0.1, 0.3], [xm, 4.9, 0.3], 0.2, M('wood4')); beam(g, [x1, WALL_H - 0.1, 0.3], [xm, 4.9, 0.3], 0.2, M('wood4'));
+  }
+  box(g, len, 0.14, 0.22, M('wood4'), 0, 4.9, 0.14); box(g, len, 0.16, 0.24, M('wood5'), 0, WALL_H - 0.08, 0.14);
   for (const y of [0.15, 1.3, 2.7, 3.62]) box(g, len, 0.12, 0.2, M('wood5'), 0, y, 0.12); // girts
   for (let x = -len / 2; x <= len / 2 + 0.1; x += len / 4) { // posts + braces
     box(g, 0.46, WALL_H, 0.46, M('wood5'), x, WALL_H / 2, 0.2);
     box(g, 0.6, 0.18, 0.6, M('wood4'), x, 0.09, 0.2);
     if (x < len / 2 - 0.1) { beam(g, [x + 0.2, 0.2, 0.34], [x + len / 8, 3.62, 0.34], 0.2, M('wood4')); beam(g, [x + len / 4 - 0.2, 0.2, 0.34], [x + len / 8, 3.62, 0.34], 0.2, M('wood4')); }
   }
-  // framed wall screens
-  for (const s of shots) {
-    box(g, s.w + 0.4, s.h + 0.4, 0.24, M('wood5'), s.x, s.y, 0.2);
-    box(g, s.w + 0.1, s.h + 0.1, 0.3, M('ink'), s.x, s.y, 0.2);
-    const tex = canvasTex(96, Math.round(96 * s.h / s.w), () => {});
-    const mat = new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(s.w, s.h), mat); m.position.set(s.x, s.y, 0.36); g.add(m);
-    s.mesh = m; s.tex = tex; s.group = g;
+  // big timber doorways with the screen set into the opening (as in the scan)
+  for (const sc of shots) {
+    const top = sc.y + sc.h / 2 + 0.3, bot = sc.y - sc.h / 2;
+    box(g, sc.w + 0.9, top, 0.1, M('wood5'), sc.x, top / 2, 0.19); // dark recess
+    for (const sx of [-1, 1]) box(g, 0.3, top, 0.34, M('wood4'), sc.x + sx * (sc.w / 2 + 0.3), top / 2, 0.24); // jambs
+    box(g, sc.w + 0.9, 0.34, 0.38, M('wood5'), sc.x, top + 0.17, 0.25); // lintel
+    for (const sx of [-1, 1]) { box(g, sc.w / 2 + 0.05, bot, 0.1, M('wood3'), sc.x + sx * (sc.w / 4 + 0.02), bot / 2, 0.27); for (let k = 1; k < 4; k++) box(g, 0.03, bot, 0.02, M('wood5'), sc.x + sx * (k * sc.w / 8), bot / 2, 0.33); } // double leaf
+    box(g, sc.w + 0.1, 0.12, 0.14, M('wood5'), sc.x, bot - 0.02, 0.3); // sill rail
+    const tex = canvasTex(96, Math.round(96 * sc.h / sc.w), () => {});
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(sc.w, sc.h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); m.position.set(sc.x, sc.y, 0.34); g.add(m);
+    sc.mesh = m; sc.tex = tex; sc.group = g;
   }
   // graffiti panels on the plank band
   for (let i = 0; i < Math.floor(len / 2.6); i++) {
     const gw = 1.6 + r() * 1.2, gh = 1.0 + r() * 0.8, x = -len / 2 + 1.4 + i * 2.6 + r() * 0.5;
-    if (shots.some((s) => Math.abs(s.x - x) < (s.w + gw) / 2 + 0.3 && s.y < 3.6)) continue;
+    if (shots.some((s) => Math.abs(s.x - x) < (s.w + gw) / 2 + 0.9)) continue;
     const mat = new THREE.MeshStandardMaterial({ map: graffitiTex(seed * 100 + i), roughness: 1 });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(gw, gh), mat);
     m.position.set(x, 1.1 + gh / 2 + r() * 0.4, 0.105); m.receiveShadow = true; g.add(m);
@@ -115,7 +124,7 @@ function stoneMask(parts) {
   const bore = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.42, 0.5, 20, 1, true), M('ink', { side: THREE.DoubleSide })); bore.rotation.x = Math.PI / 2; bore.scale.set(1.15, 1, 0.95); bore.position.set(0, -0.62, 0.3); g.add(bore);
   const glow = new THREE.Mesh(new THREE.CircleGeometry(0.46, 20), new THREE.MeshBasicMaterial({ color: P.ink, toneMapped: false })); glow.scale.set(1.15, 0.95, 1); glow.position.set(0, -0.62, 0.14); g.add(glow);
   for (let i = 0; i < 6; i++) { box(g, 0.1, 0.16, 0.08, M('wall0'), -0.42 + i * 0.168, -0.3, 0.55); box(g, 0.1, 0.14, 0.08, M('wall0'), -0.38 + i * 0.152, -0.95, 0.5); }
-  for (const sx of [-1, 1]) { sph(g, 0.24, S1, sx * 1.28, 0.05, 0.05, [0.5, 1.1, 0.7]); } // ears
+  for (const sx of [-1, 1]) { cyl(g, 0.62, 0.62, 0.26, S, sx * 1.05, 1.18, -0.05, [Math.PI / 2, 0, 0], 22); cyl(g, 0.46, 0.46, 0.06, S1, sx * 1.05, 1.18, 0.1, [Math.PI / 2, 0, 0], 20); sph(g, 0.2, M('green2'), sx * 1.05, 1.62, -0.05, [1.4, 0.5, 1]); } // round mouse ears with moss
   for (let i = 0; i < 9; i++) sph(g, 0.17, M(i % 2 ? 'green2' : 'green'), -0.9 + i * 0.225, 1.28 + Math.sin(i * 1.7) * 0.07, 0.1, [1.3, 0.8, 1]); // moss crown
   for (let i = 0; i < 5; i++) cone(g, 0.12, 0.7, S2, -0.8 + i * 0.4, -1.45, 0.2, [0, 0, Math.PI]); // chin beard spikes
   parts.glow = glow;
@@ -169,10 +178,18 @@ export function buildHangar(scene) {
     m.rotation.z = r() * Math.PI; m.position.set(-8 + r() * 14, 0.03, -3 + r() * 8); world.add(m);
   }
   const sp = spiral(); world.add(sp); parts.spiral = sp; world.add(fanCarpet());
-  box(world, 3.2, 0.04, 2.2, M('red2'), 9.2, 0.025, -3.0, [0, 0.25, 0]); box(world, 2.8, 0.045, 1.8, M('red3'), 9.2, 0.03, -3.0, [0, 0.25, 0]); // red rug + inner field
+  const band = new THREE.Group(); band.position.set(-7.6, 0, -3.2); world.add(band); parts.band = band;
+  box(band, 6.2, 0.03, 4.6, M('teal2'), 0, 0.02, 0.1); box(band, 5.8, 0.035, 4.2, M('green2'), 0, 0.025, 0.1); // green floral rug
+  box(band, 4.8, 0.04, 3.2, M('red2'), -0.2, 0.035, -0.4); box(band, 4.4, 0.045, 2.8, M('red'), -0.2, 0.04, -0.4); box(band, 3.2, 0.05, 1.6, M('navy'), -0.2, 0.045, -0.4); cyl(band, 0.55, 0.55, 0.055, M('wood6'), -0.2, 0.05, -0.4, null, 18); // red rug, blue field, medallion
+  const amp = (x, z, ry) => { const a = new THREE.Group(); box(a, 0.9, 0.7, 0.4, M('wood6'), 0, 0.35, 0); box(a, 0.78, 0.5, 0.04, M('wood2'), 0, 0.35, 0.21); a.position.set(x, 0.05, z); a.rotation.y = ry; band.add(a); };
+  amp(-2.0, -1.4, 0.25); amp(-1.1, -1.5, 0.1);
+  box(band, 0.7, 1.7, 0.6, M('black'), 0.4, 0.9, -1.6); box(band, 0.7, 0.3, 0.5, M('steel3'), 0.4, 1.9, -1.6); box(band, 0.5, 0.5, 0.04, M('steel2'), 0.4, 1.0, -1.28); // bass stack
+  box(band, 1.5, 0.08, 0.5, M('orange2'), 0.2, 0.85, 0.7); for (let i = 0; i < 14; i++) box(band, 0.07, 0.03, 0.3, M('white'), -0.45 + i * 0.1, 0.9, 0.78); beam(band, [-0.5, 0.05, 0.6], [-0.2, 0.82, 0.7], 0.04, M('steel2')); beam(band, [0.9, 0.05, 0.6], [0.6, 0.82, 0.7], 0.04, M('steel2')); // keyboard on a stand
+  for (const [gx, gc] of [[-1.5, 'cyan'], [-0.6, 'wall0']]) { box(band, 0.34, 0.5, 0.08, M(gc), gx, 0.5, 0.2, [0, 0, 0.08]); box(band, 0.07, 0.8, 0.05, M('wood1'), gx + 0.03, 1.15, 0.2, [0, 0, 0.08]); box(band, 0.12, 0.14, 0.05, M('wood4'), gx + 0.06, 1.62, 0.2); } // guitars
+  box(band, 0.5, 1.9, 0.5, M('wood2'), -2.6, 1.0, -1.7); for (let i = 0; i < 8; i++) for (let j = 0; j < 6; j++) box(band, 0.04, 0.04, 0.03, M('ink'), -2.8 + i * 0.056, 0.4 + j * 0.2, -1.43); // synth tower with knobs
 
   // back walls: -Z wall (right on screen) and -X wall (left on screen)
-  const zShots = [{ x: -6.5, y: 2.1, w: 3.4, h: 2.1 }, { x: -1.0, y: 2.1, w: 3.0, h: 1.9 }, { x: 8.5, y: 2.1, w: 3.2, h: 2.0 }];
+  const zShots = [{ x: -6.5, y: 2.2, w: 3.4, h: 2.0 }, { x: -1.0, y: 2.2, w: 3.0, h: 1.9 }, { x: 8.5, y: 2.2, w: 3.2, h: 2.0 }];
   const wz = buildWall(SLAB.w, 3, zShots); wz.position.set(0, 0, -HZ); world.add(wz);
   const xShots = [{ x: -3.5, y: 2.2, w: 3.0, h: 2.0 }, { x: 4.6, y: 2.2, w: 3.4, h: 2.1 }];
   const wx = buildWall(SLAB.d, 5, xShots); wx.rotation.y = Math.PI / 2; wx.position.set(-HX, 0, 0); world.add(wx);
@@ -182,13 +199,13 @@ export function buildHangar(scene) {
   const roof = new THREE.Group(); world.add(roof);
   for (const x of [-7, 0, 7]) {
     const y0 = WALL_H, y1 = WALL_H + 1.3;
-    box(roof, 0.16, 0.16, SLAB.d, M('wood5'), x, y0, 0);
+    box(roof, 0.22, 0.22, SLAB.d, M('grey0'), x, y0, 0);
     for (const z of [-HZ + 0.4, HZ - 0.4]) box(roof, 0.34, 0.34, 0.34, M('wood4'), x, y0, z); // end blocks on the wall plates
   }
   for (const [x, z] of [[-5, -1.5], [3.5, -1.8], [-6, 5.5]]) { // interior posts with knee braces
-    box(world, 0.5, WALL_H, 0.5, M('wood5'), x, WALL_H / 2, z); box(world, 0.8, 0.22, 0.8, M('wood4'), x, 0.11, z);
-    box(world, 0.7, 0.22, 0.7, M('wood4'), x, WALL_H - 0.2, z);
-    beam(world, [x, WALL_H - 0.4, z], [x, WALL_H, z + 1.5], 0.2, M('wood4')); beam(world, [x, WALL_H - 0.4, z], [x, WALL_H, z - 1.5], 0.2, M('wood4'));
+    box(world, 0.46, WALL_H, 0.46, M('con0'), x, WALL_H / 2, z); box(world, 0.52, 1.1, 0.52, M('con4'), x, 0.55, z); box(world, 0.8, 0.22, 0.8, M('con2'), x, 0.11, z);
+    box(world, 0.7, 0.22, 0.7, M('grey0'), x, WALL_H - 0.2, z);
+    for (const sx of [-1, 1]) { beam(world, [x, WALL_H - 1.6, z], [x, WALL_H, z + sx * 2.0], 0.22, M('grey0')); beam(world, [x, WALL_H - 1.6, z], [sx * 2.0 + x, WALL_H, z], 0.22, M('grey0')); }
     parts.posts.push([x, z]);
   }
 
@@ -197,11 +214,22 @@ export function buildHangar(scene) {
   box(world, 4.2, 4.6, 0.12, M('wood5'), MARK.mask[0], 3.2, -HZ + 0.36); // dark recess behind it
   parts.maskPos = new THREE.Vector3(MARK.mask[0], 3.3, -HZ + 1.3);
 
+  // whitewashed cabin with window recesses and a door, as in the scan; abstract red marks only
+  const wp = new THREE.Group(); box(wp, 4.6, 3.1, 3.2, M('wall0'), 0, 1.55, 0); box(wp, 4.7, 0.16, 3.3, M('wall2'), 0, 3.15, 0); box(wp, 4.7, 0.22, 3.3, M('con2'), 0, 0.11, 0);
+  for (const wx of [-1.5, 0.2, 1.5]) box(wp, 0.7, 1.4, 0.1, M('steel3'), wx, 1.7, 1.62);
+  box(wp, 0.9, 2.1, 0.1, M('wood5'), 1.9, 1.05, 1.62);
+  for (let i = 0; i < 2; i++) { box(wp, 0.16, 0.9, 0.04, M('red'), -1.7 + i * 0.5, 0.9, 1.63, [0, 0, 0.3 * (i ? 1 : -1)]); }
+  wp.position.set(7.0, 0, -3.6); wp.rotation.y = -0.15; world.add(wp);
+  // eclipse doorway on the -X wall: black opening with an ember ring that flares at the burst
+  box(world, 0.12, 3.4, 2.5, M('ink'), -HX + 0.3, 1.7, -0.4); box(world, 0.3, 0.3, 2.9, M('wood5'), -HX + 0.32, 3.55, -0.4);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.07, 10, 36), new THREE.MeshStandardMaterial({ color: P.orange, emissive: P.orange, emissiveIntensity: 0.7 })); ring.rotation.y = Math.PI / 2; ring.position.set(-HX + 0.42, 2.2, -0.4); world.add(ring); parts.eclipse = ring.material;
+  const lt = canvasTex(256, 48, (c, w, h2) => { c.clearRect(0, 0, w, h2); c.fillStyle = P.red; c.font = 'bold 40px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('JIRAFA ARDIENDO', w / 2, 38); });
+  const lm = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 0.98), new THREE.MeshBasicMaterial({ map: lt, transparent: true, alphaTest: 0.4, toneMapped: false })); lm.position.set(-HX + 0.2, 1.3, 5.2); lm.rotation.y = Math.PI / 2; world.add(lm);
   // desk + monitor, facing +X
   const desk = deskSet(parts); desk.position.set(MARK.desk[0], 0, MARK.desk[1]); desk.rotation.y = Math.PI / 2; world.add(desk);
   const st = desk.userData.stool.clone().applyEuler(new THREE.Euler(0, Math.PI / 2, 0)).add(new THREE.Vector3(MARK.desk[0], 0, MARK.desk[1]));
   parts.stool = st;
-  const dk = drumKit(); dk.position.set(-HX + 2.4, 0, -3.2); dk.rotation.y = Math.PI / 2; world.add(dk);
+  const dk = drumKit(); dk.position.set(2.1, 0.05, -0.2); dk.rotation.y = 0.5; parts.band.add(dk);
   // speaker stack and crates near the right back
   const sp1 = new THREE.Group(); box(sp1, 1.0, 1.4, 0.8, M('steel3'), 0, 0.7, 0); cyl(sp1, 0.32, 0.32, 0.05, M('con4'), 0, 0.5, 0.42, [Math.PI / 2, 0, 0], 16); cyl(sp1, 0.22, 0.22, 0.05, M('con4'), 0, 1.05, 0.42, [Math.PI / 2, 0, 0], 16);
   box(sp1, 1.0, 0.9, 0.8, M('steel2'), 0, 1.85, 0); cyl(sp1, 0.28, 0.28, 0.05, M('con4'), 0, 1.85, 0.42, [Math.PI / 2, 0, 0], 16);
