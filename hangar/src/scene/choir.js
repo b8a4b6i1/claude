@@ -4,8 +4,8 @@ import { poseWalk } from './actors.js';
 import { TAU, LOOP, clamp, lerp, smooth, win, bell } from '../config.js';
 
 const lerpAngle = (a, b, k) => { const d = ((b - a + Math.PI) % TAU + TAU) % TAU - Math.PI; return a + d * k; };
-export const CHOIR = { C: { x: 6.5, z: -0.8 }, summon: 17.0, formed: 22.0, singEnd: 36.0, gone: 40.0 };
-const pos = (t) => ({ x: 6 + 5 * Math.sin(TAU * t / 45), z: -0.5 + 1.6 * Math.sin(TAU * t / 30 + 1) });
+export const CHOIR = { C: { x: 5.0, z: -0.8 }, summon: 17.0, formed: 22.0, singEnd: 36.0, gone: 40.0 };
+const pos = (t) => ({ x: 5.5 + 4 * Math.sin(TAU * t / 45), z: -0.5 + 1.6 * Math.sin(TAU * t / 30 + 1) });
 /** 0 = everyone at home, 1 = in the choir; smooth ramps in and out. */
 export const choirW = (t) => smooth((t - CHOIR.summon) / (CHOIR.formed - CHOIR.summon)) * (1 - smooth((t - CHOIR.singEnd) / (CHOIR.gone - CHOIR.singEnd)));
 export const BEAT_P = 1.5;

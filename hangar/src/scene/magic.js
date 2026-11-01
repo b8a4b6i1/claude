@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { P } from '../palette.js';
-import { LOOP, TAU, BEAT, clamp, smooth, bell, hash } from '../config.js';
+import { LOOP, TAU, BEAT, clamp, smooth, bell, hash, X0, X1 } from '../config.js';
 
 const col = (n) => new THREE.Color(P[n]);
 
@@ -16,23 +16,23 @@ export function createMagic(scene, ctx) {
 
   // --- goldfish: rainbow sparkle trail
   spec({ n: 24, P: 1.8, life: 1.8, size: 0.34, grav: -0.4, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'magenta'],
-    gate: (t) => { const f = ctx.fishAt(t); return Math.abs(f.x) < 23.5 ? 1 : 0; },
+    gate: (t) => { const f = ctx.fishAt(t); return f.x > X0 + 1 && f.x < X1 - 1 ? 1 : 0; },
     origin: (tb, r) => ctx.fishAt(tb).add(V((r[0] - 0.5) * 0.5, (r[1] - 0.5) * 0.5, (r[2] - 0.5) * 0.5)), vel: (r) => V((r[0] - 0.5) * 0.6, 0.2 + r[1] * 0.5, (r[2] - 0.5) * 0.6) });
   // --- singer: music notes drift up
   spec({ n: 8, P: 0.9, life: 0.9 * 2.8, lifeMax: 2.6, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime'], sway: 0.18,
     gate: () => 1, origin: () => V(0.5, 1.75, -3.7), vel: (r) => V(0.3 + 0.3 * r[0], 0.7 + 0.2 * r[1], (r[2] - 0.5) * 0.3) });
   // --- boulder coins when the deer man digs
   spec({ n: 10, P: 2.0, off: 0.5, life: 1.5, size: 0.3, grav: -9, colors: ['yellow', 'orange2', 'orange'], mode: 'burst',
-    gate: (t) => (t > 6 ? 1 : 0), origin: () => V(10.0, 0.7, -2.4), vel: (r) => V((r[0] - 0.5) * 2.4, 3.6 + r[1] * 1.6, (r[2] - 0.5) * 2.4) });
+    gate: (t) => (t > 6 ? 1 : 0), origin: () => V(7.3, 0.7, -2.4), vel: (r) => V((r[0] - 0.5) * 2.4, 3.6 + r[1] * 1.6, (r[2] - 0.5) * 2.4) });
   // --- swordsman slashes: ring of cold sparks
   spec({ n: 8, P: 2.5, off: 0.3, life: 0.9, size: 0.3, grav: -1, colors: ['cyan', 'blue2', 'purple2'], mode: 'burst', gate: () => 1,
     origin: (tb) => { const c = ctx.cubeA(tb); return V(c.x, 1.0, c.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 2.6, 0.4 + r[0] * 0.8, Math.sin(a) * 2.6); } });
   // --- cabin: stars pour out of the hatch, dust ring when it lands
   spec({ n: 6, P: 3.0, life: 3.0, size: 0.3, grav: -0.1, colors: ['yellow', 'pink', 'cyan'], gate: () => 1,
-    origin: () => V(18.4, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
+    origin: () => V(13.2, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
   // --- roller skater leaves a rainbow trail on the floor
   spec({ n: 36, P: 3.0, life: 3.0, size: 0.3, grav: 0, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2'],
-    gate: () => 1, origin: (tb) => V(18 + 4 * Math.sin(TAU * tb / LOOP), 0.08, -3.5), vel: () => V(0, 0, 0) });
+    gate: () => 1, origin: (tb) => V(10.5 + 2.5 * Math.sin(TAU * tb / LOOP), 0.08, -3.5), vel: () => V(0, 0, 0) });
   // --- computer glyphs while the visitor sits
   spec({ n: 14, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['green', 'lime', 'cyan'],
     gate: (t) => bell(t, 39.5, 41, 51, 52.5), origin: () => V(-12.8, 1.15, -3.55), vel: (r) => V((r[0] - 0.5) * 0.5, 0.8, 0.5 + 0.3 * r[1]) });
@@ -47,8 +47,13 @@ export function createMagic(scene, ctx) {
   spec({ n: 4, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime', 'purple2'], sway: 0.14, gate: (t) => (ctx.choirW(t) > 0.8 ? 1 : 0),
     origin: (tb, r, k) => { const s = ctx.choirSlots[ctx.choirActive(tb)]; return V(s.x, 1.9, s.z); }, vel: (r) => V((r[0] - 0.5) * 0.3, 0.8 + 0.3 * r[1], (r[2] - 0.5) * 0.3) });
   // --- devil spell impact: sparks where each bolt lands
-  spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 4 ? 1 : 0),
+  spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 14 && t < 73.5 ? 1 : 0),
     origin: (tb) => { const p = ctx.spellTarget(Math.floor((tb - 0.9) / 4.5 + 1e-6) % 3); return V(p.x, p.y, p.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1 + 2 * r[0]), 1.2 + 2 * r[1], Math.sin(a) * (1 + 2 * r[0])); } });
+  // --- the devil sleeps: slow Z's rise; wakes with a ring of stars
+  spec({ n: 3, P: 2.0, life: 2.0, size: 0.34, grav: 0, colors: ['blue2', 'cyan'], sway: 0.25, gate: (t) => (ctx.sleepK(t) > 0.5 ? 1 : 0),
+    origin: (tb) => { const d = ctx.devilPos(tb); return V(d.x, 2.7, d.z); }, vel: (r) => V(0.3, 0.5, (r[0] - 0.5) * 0.2) });
+  spec({ n: 12, P: LOOP, off: 10.5, life: 1.0, size: 0.34, grav: -1, colors: ['yellow', 'orange', 'red3'], mode: 'burst', gate: () => 1,
+    origin: (tb) => { const d = ctx.devilPos(tb); return V(d.x, 2.0, d.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 2.2, 0.8 + r[0], Math.sin(a) * 2.2); } });
   // --- summoning and dispersal puffs (once per loop)
   spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });

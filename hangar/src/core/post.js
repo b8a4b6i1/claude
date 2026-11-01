@@ -19,6 +19,32 @@ uniform sampler2D tScene;
 uniform vec2 uResolution;
 uniform vec3 uPalette[64];
 uniform float uDither;
+uniform float uTime;
+uniform float uLoop;
+
+float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+// value noise that wraps in x with integer period px, so a cloud layer can drift one whole period per loop
+float vnoise(vec2 p, float px) {
+  vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  float a = h21(vec2(mod(i.x, px), i.y)), b = h21(vec2(mod(i.x + 1.0, px), i.y));
+  float c = h21(vec2(mod(i.x, px), i.y + 1.0)), d = h21(vec2(mod(i.x + 1.0, px), i.y + 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+float fbm(vec2 p, float px) { float v = 0.0, a = 0.5; for (int o = 0; o < 4; o++) { v += a * vnoise(p, px); p *= 2.0; px *= 2.0; a *= 0.5; } return v; }
+vec3 skyAt(vec2 uv) {
+  float ph = uTime / uLoop;
+  vec3 top = vec3(0.608, 0.878, 0.949), low = vec3(0.831, 0.929, 0.973);       // sky entries of the palette
+  vec3 c = top;
+  vec2 q = vec2(uv.x * 4.0 * 1.6, uv.y * 3.0);
+  float d1 = fbm(q + vec2(ph * 8.0 * 1.0, 0.0), 8.0), d1b = fbm(q + vec2(ph * 8.0, 0.05), 8.0);
+  vec2 r = vec2(uv.x * 6.0, uv.y * 4.0 + 7.0);
+  float d2 = fbm(r + vec2(ph * 12.0 * 2.0 + 3.0, 0.0), 12.0);
+  float k1 = smoothstep(0.57, 0.60, d1), k2 = smoothstep(0.60, 0.63, d2);
+  vec3 shade = vec3(0.706, 0.863, 0.933), body = vec3(0.933, 0.973, 0.988), hi = vec3(1.0);
+  vec3 cl = d1b < d1 - 0.03 ? hi : (d1b > d1 + 0.04 ? shade : body);
+  c = mix(c, low, k2); c = mix(c, cl, k1);
+  return c;
+}
 
 float bayer2(vec2 a) {
   a = floor(a);
@@ -68,7 +94,8 @@ void main() {
   vec3 c = mix(gathered, centre.rgb, smoothstep(0.62, 0.92, centreCov));
 
   // Composite the model onto paper white before grading.
-  c = mix(vec3(1.0), c, smoothstep(0.26, 0.72, cov));
+  vec3 sky = skyAt(vUv);
+  c = mix(pow(sky, vec3(2.2)), c, smoothstep(0.26, 0.72, cov));
 
   // Linear render target -> display sRGB.
   c = pow(max(c, vec3(0.0)), vec3(1.0 / 2.2));
@@ -96,6 +123,7 @@ void main() {
   float gate = smoothstep(0.004, 0.055, edge);
   c += (d * (0.0012 + 0.019 * gate) + sparkle * 0.0012) * uDither;
 
+  vec3 bgSnap = sky; { float bd0 = 1e9; for (int j = 0; j < 64; j++) { vec3 pj = uPalette[j]; vec3 dj = (sky - pj) * vec3(1.0, 1.12, 0.93); float dd = dot(dj, dj); if (dd < bd0) { bd0 = dd; bgSnap = pj; } } }
   vec3 best = uPalette[0];
   float bestD = 1e9;
   for (int i = 0; i < 64; i++) {
@@ -113,9 +141,9 @@ void main() {
   float rim = 1.0 - smoothstep(0.78, 0.995, cov);
   float threshold = bayer4(gl_FragCoord.xy * 1.0) * 0.92 + 0.018;
   if (rim > 0.002 && cov < threshold) {
-    c = vec3(1.0);
+    c = bgSnap;
   }
-  if (cov < 0.02) c = vec3(1.0);
+  if (cov < 0.02) c = bgSnap;
 
   fragColor = vec4(c, 1.0);
 }
@@ -144,6 +172,8 @@ export class PixelPost {
       uResolution: { value: new THREE.Vector2(2, 2) },
       uPalette: { value: PALETTE_RGB.map((c) => new THREE.Vector3(c[0], c[1], c[2])) },
       uDither: { value: 1.0 },
+      uTime: { value: 0.0 },
+      uLoop: { value: 90.0 },
     };
 
     this.material = new THREE.ShaderMaterial({

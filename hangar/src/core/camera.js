@@ -9,7 +9,7 @@ export const CAMERA = {
   fov: 20.5,
   azimuth: (45.0 * Math.PI) / 180,
   elevation: (33.0 * Math.PI) / 180,
-  target: new THREE.Vector3(0, -0.15, 0),
+  target: new THREE.Vector3(-5, -0.15, 0),
   fillX: 0.95,
   fillY: 0.94,
   // Post-fit camera multiplier. Keep 1.0 for the fitted size; 0.70 makes the

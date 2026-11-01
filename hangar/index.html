@@ -15,30 +15,33 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: #ffffff;
+    background: #9be0f2;
   }
   body { -webkit-tap-highlight-color: transparent; }
   #frame {
     position: fixed;
     left: 50%;
     top: 50%;
-    width: 94vw;
-    height: 92vh;
+    width: 100vw;
+    height: 100vh;
     transform: translate(-50%, -50%);
-    background: #ffffff;
+    background: #9be0f2;
   }
   @media (max-width: 620px) {
-    #frame { width: 94vw; height: 94vh; }
+    #frame { width: 100vw; height: 100vh; }
   }
   #stage {
     display: block;
     width: 100%;
     height: 100%;
-    background: #ffffff;
+    background: #9be0f2;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     outline: none;
   }
+  #snd { position: fixed; right: 14px; bottom: 14px; width: 40px; height: 40px; border: 2px solid #1a1816; background: #fff; border-radius: 4px; padding: 6px; cursor: pointer; opacity: 0.55; }
+  #snd:hover, #snd:focus-visible { opacity: 1; outline: none; }
+  #snd svg { width: 100%; height: 100%; display: block; }
   #fallback {
     position: fixed;
     inset: 0;
@@ -56,6 +59,7 @@
 </head>
 <body>
 <div id="frame"><canvas id="stage" aria-label="A real-time rendered miniature hangar diorama" tabindex="-1"></canvas></div>
+<button id="snd" type="button" aria-label="Sonido" title="Sonido"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="#1a1816" d="M2 6h3l3-3v10l-3-3H2z"/><path id="snd-on" fill="#1a1816" d="M10 6h1v4h-1zM12 4h1v8h-1z"/><path id="snd-off" fill="#d93a2b" d="M10 5h1v1h-1zM11 6h1v1h-1zM12 7h1v1h-1zM13 8h1v1h-1zM10 9h1v1h-1zM13 5h1v1h-1zM12 6h1v1h-1zM11 8h1v1h-1zM10 7h1v1h-1z" display="none"/></svg></button>
 <div id="fallback" hidden>This diorama needs a browser with WebGL2 enabled.</div>
 <script src="./dist/app.js"></script>
 </body>

@@ -6,8 +6,8 @@ export function createLighting(renderer, scene) {
   scene.add(hemi);
 
   const sun = new THREE.DirectionalLight(0xfff8ee, 3.3);
-  sun.position.set(-15, 19.5, 17);
-  sun.target.position.set(0, -0.4, 0);
+  sun.position.set(-20, 19.5, 17);
+  sun.target.position.set(-5, -0.4, 0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.left = -30;
@@ -24,8 +24,8 @@ export function createLighting(renderer, scene) {
   scene.add(sun.target);
 
   const fill = new THREE.DirectionalLight(0xa9cbe2, 0.46);
-  fill.position.set(19, 13, -15);
-  fill.target.position.set(0, -0.5, 0);
+  fill.position.set(14, 13, -15);
+  fill.target.position.set(-5, -0.5, 0);
   scene.add(fill);
   scene.add(fill.target);
 
