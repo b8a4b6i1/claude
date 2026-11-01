@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { M, box, cyl, sph, cone, limb, beam, canvasTex, contactShadow } from './common.js';
 import { makePerson, poseWalk, makeCube, poseCube } from './actors.js';
-import { TAU, clamp, smooth, hash, LOOP, bell } from '../config.js';
+import { TAU, clamp, smooth, hash, LOOP, bell, spellHit } from '../config.js';
 import { P } from '../palette.js';
 
 const J = (parent, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); return g; };
@@ -81,9 +81,9 @@ export function createExtras(scene) {
   const FACE = Math.PI / 2; // facing the entry, +X
   add(tankWoman(), -9.6, -2.3, FACE, (p, t) => { p.root.position.y = 0.6 * bell(t, 41, 43, 49, 51) + 0.04 * Math.sin(t * 2) * bell(t, 41, 43, 49, 51); poseWalk(p, 0, 0, 0.2 * Math.sin(0.5 * t), 0); for (const [i, s] of [[0, 1], [1, -1]]) { p.arms[i].sh.rotation.set(0.3, 0, s * 0.65); p.arms[i].el.rotation.set(-1.7, 0, 0); } p.root.rotation.z = 0.015 * Math.sin(0.7 * t); });
   named.singer = add(singer(), 0.5, -3.7, FACE, (p, t) => { const w = TAU * t / 1.8; poseWalk(p, 0, 0, 0.2 * Math.sin(0.8 * t), 0.05 * Math.sin(w)); p.arms[1].sh.rotation.set(-1.7, 0, -0.1); p.arms[1].el.rotation.set(-1.7, 0, 0); p.arms[0].sh.rotation.set(0.15 * Math.sin(w), 0, -0.3); p.pel.position.y = 0.86 + 0.015 * Math.abs(Math.sin(w)); });
-  named.deer = add(deerMan(), 11.0, -2.8, FACE, (p, t) => { const w = TAU * t / 2.0, d = Math.max(0, Math.sin(w)); poseWalk(p, 0, 0, 0.2 * Math.sin(0.6 * t), 0); p.arms[1].sh.rotation.set(-0.5 - 0.7 * d, 0, 0.1); p.arms[1].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.arms[0].sh.rotation.set(-0.5 - 0.7 * d, 0, -0.1); p.arms[0].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.torso.rotation.x = 0.15 + 0.3 * d; p.legs[0].hip.rotation.x = -0.25; p.flames.forEach((f, i) => f.scale.set(1, 1 + 0.35 * Math.sin(t * 17 + i * 1.7), 1)); });
+  named.deer = add(deerMan(), 11.0, -2.8, FACE, (p, t) => { const w = TAU * t / 2.0, d = Math.max(0, Math.sin(w)); poseWalk(p, 0, 0, 0.2 * Math.sin(0.6 * t), 0); p.arms[1].sh.rotation.set(-0.5 - 0.7 * d, 0, 0.1); p.arms[1].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.arms[0].sh.rotation.set(-0.5 - 0.7 * d, 0, -0.1); p.arms[0].el.rotation.set(-0.7 - 0.5 * d, 0, 0); const sh = spellHit(t), hit = sh && sh.idx === 1 && sh.age < 1.6 ? sh.age : -1, kb = hit >= 0 ? Math.exp(-hit * 2.6) : 0; p.root.rotation.z = -0.5 * kb * Math.cos(hit * 9); p.root.position.y = hit >= 0 && hit < 0.5 ? 0.5 * Math.sin(Math.PI * hit / 0.5) : 0; p.torso.rotation.x = 0.15 + 0.3 * d + 0.5 * kb; p.legs[0].hip.rotation.x = -0.25; p.flames.forEach((f, i) => f.scale.set(1, 1 + 0.35 * Math.sin(t * 17 + i * 1.7), 1)); });
   const b = boulder(); b.position.set(10.0, 0, -2.4); scene.add(b); list.push({ o: { root: b }, upd: (o, t) => { b.rotation.z = 0.04 * Math.sin(t * 2.2); b.scale.y = 1 + 0.03 * Math.sin(t * 4.4); } });
-  named.cat = add(catStandee(), 2.0, 1.2, FACE, (c, t) => { c.body.rotation.z = 0.06 * Math.sin(t * 1.3); const ph = t % 9; if (ph < 1) c.body.rotation.y = TAU * smooth(ph); else c.body.rotation.y = 0; });
+  named.cat = add(catStandee(), 2.0, 1.2, FACE, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1; c.body.rotation.z = 0.06 * Math.sin(t * 1.3); c.body.rotation.y = a >= 0 ? TAU * smooth(a / 0.9) : 0; c.root.position.y = a >= 0 ? 0.6 * Math.sin(Math.PI * a / 0.9) : 0; });
   // pink roller skater with a horse head glides along the right-hand side near the entry
   named.roller = add(roller(), 18, -3.5, 0, (p, t) => {
     const u = TAU * t / LOOP, x = 18 + 4 * Math.sin(u), vx = Math.cos(u), dist = 4 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();

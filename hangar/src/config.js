@@ -16,3 +16,6 @@ export const TAU = Math.PI * 2;
 export const BEAT = { burst: 42.0, burstEnd: 50.0, fishIn: 20.0, fishOut: 80.0 };
 // Landmarks in world space (x, z).
 export const MARK = { spiral: [-11.0, 1.5], mask: [-HX + 0.5, 0], desk: [-12.5, -3.9] };
+
+/** The devil casts every 4.5 s; the bolt lands 0.9 s later on a rotating target (0 cat, 1 deer man, 2 booth). Returns null before the first cast. */
+export function spellHit(t) { if (t < 5.4) return null; const s = t - 0.9; return { idx: Math.floor(s / 4.5) % 3, age: s % 4.5 }; }

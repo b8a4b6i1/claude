@@ -48,7 +48,7 @@ export function mouthGlow(glow, t) {
 }
 
 /** Ambient dust motes, periodic over the loop. */
-export function makeMotes(scene, loop) {
+export function makeMotes(scene, loop) { // no longer used: the white specks made the cast hard to read
   const N = 90; const g = new THREE.Group(); const motes = [];
   for (let i = 0; i < N; i++) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), M('wall0', { emit: 0.15 })); g.add(m); motes.push({ m, x: -23 + hash(i) * 46, y: 1 + hash(i + 3) * 4.5, z: -4 + hash(i + 7) * 8, ph: hash(i + 11) * TAU, k: 1 + Math.floor(hash(i + 13) * 2) }); }
   scene.add(g);

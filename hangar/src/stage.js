@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import { HX, HZ, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash } from './config.js';
+import { HX, HZ, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash, spellHit } from './config.js';
 import { makeDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
 import { createExtras } from './scene/cast2.js';
 import { createMagic } from './scene/magic.js';
-import { createRays } from './scene/rays.js';
-import { createChoir, choirW, SLOTS, CHOIR } from './scene/choir.js';
+import { createChoir, choirW, choirActive, SLOTS, CHOIR } from './scene/choir.js';
 import { drawScreen, drawMonitor } from './scene/screens.js';
 import { makeBurst, mouthGlow, makeMotes } from './scene/fx.js';
 
@@ -39,15 +38,15 @@ export function createStage(scene, parts) {
   for (const o of [devil.root, fish.root, ...sent.map((s) => s.root), ...cubes.map((c) => c.root), vis.root]) scene.add(o);
   cubes[1].root.visible = false; // the purple blocky figure stood on the open side
   scene.add(fish.shadow); fish.shadow.visible = true; const extras = createExtras(scene);
-  const burst = makeBurst(scene), motes = makeMotes(scene, LOOP);
+  const burst = makeBurst(scene);
   const levAt = (t) => 0.9 * bell(t, 38, 40, 50, 52) + 0.06 * Math.sin(t * 2.5) * bell(t, 38, 40, 50, 52);
   const sentStep = (t) => bell(t, BEAT.burst - 0.5, BEAT.burst + 1.2, BEAT.burstEnd - 1.5, BEAT.burstEnd + 0.5);
   const sentPos = (sg, t) => ({ x: -HX + 0.95 + sentStep(t), y: 0.7 * bell(t, BEAT.burst + 0.5, BEAT.burst + 2, BEAT.burstEnd - 2, BEAT.burstEnd) * (1 + 0.2 * Math.sin(t * 3)), z: sg * 2.7 });
-  const SPELL_TARGETS = [[2.0, 1.4, 1.2], [11.0, 1.2, -2.8], [17.0, 1.4, 2.7]];
+  const SPELL_TARGETS = [[2.0, 1.4, 1.2], [11.0, 1.2, -2.8], [17.0, 1.4, 3.75]];
   const ctx = { HX, fishAt: (t) => fishAt(t), cubeA: (t) => ({ x: CUBE_A.x0 + CUBE_A.a * Math.sin(TAU * t / LOOP + CUBE_A.ph), z: CUBE_A.z }), devilPos: (t) => { const d = DEVIL(t); return { x: d.x, z: d.z }; }, lev: levAt,
-    choirW, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
+    choirW, choirActive, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
   ctx.spellTarget = (i) => { const p = SPELL_TARGETS[((i % 3) + 3) % 3]; return new THREE.Vector3(p[0], p[1], p[2]); };
-  const magic = createMagic(scene, ctx), rays = createRays(scene, ctx);
+  const magic = createMagic(scene, ctx);
   const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat }, { o: nm.deer }, { o: nm.singer }, { o: nm.roller, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
   const fishPos = new THREE.Vector3(); const stool = parts.stool;
   const fishAt = (t) => { const u = clamp((t - BEAT.fishIn) / (BEAT.fishOut - BEAT.fishIn), 0, 1); return new THREE.Vector3(lerp(26, -26, u), 3.5 + 0.6 * Math.sin(u * TAU * 3.5) + 0.7 * bell(u, 0.25, 0.4, 0.6, 0.75), 0.5 + 3.0 * Math.sin(u * TAU * 2.2)); };
@@ -58,12 +57,13 @@ export function createStage(scene, parts) {
     // screens, monitor, floor, mouth
     parts.screens.forEach((s) => drawScreen(s, t)); drawMonitor(parts.monitor, t);
     const burstE = bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 1, BEAT.burstEnd + 1);
-    parts.spiral.userData.recolor(t, burstE * 1.2); parts.eclipse.emissiveIntensity = 0.6 + 1.6 * burstE + 0.2 * Math.sin(t * 3); mouthGlow(parts.glow, t); burst.update(t); motes.update(t);
+    parts.spiral.userData.recolor(t, burstE * 1.2); parts.eclipse.emissiveIntensity = 0.6 + 1.6 * burstE + 0.2 * Math.sin(t * 3); mouthGlow(parts.glow, t); burst.update(t);
 
     // devil: dance energy, arms-up + flames at the burst, hop-walk between marks, head follows the fish
     const dp = DEVIL(t); const walkAmt = dp.moving ? smooth(dp.u / 0.12) * (1 - smooth((dp.u - 0.88) / 0.12)) : 0;
     const k = 0.75 + 0.45 * bell(t, 32, 34, 40, 42) + 0.55 * bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 2, BEAT.burstEnd), up = bell(t, BEAT.burst - 0.4, BEAT.burst + 0.8, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1), flame = bell(t, BEAT.burst + 0.4, BEAT.burst + 1.2, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1.5);
-    poseDevil(devil, t, k * (1 - walkAmt * 0.4), up, flame, { phase: dp.dist * TAU / 1.0, amt: walkAmt });
+    const cp = t % 4.5, cast = t < 3.6 ? 0 : (cp > 3.9 ? (cp - 3.9) / 0.6 : (cp < 0.35 ? 1 - cp / 0.35 : 0));
+    poseDevil(devil, t, k * (1 - walkAmt * 0.4), Math.max(up, 0.85 * cast), Math.max(flame, cast), { phase: dp.dist * TAU / 1.0, amt: walkAmt });
     devil.root.position.set(dp.x, levAt(t), dp.z); devil.root.rotation.y = Math.PI / 4 + 0.2 * Math.sin(t * 0.8) - walkAmt * 0.3;
     fishPos.copy(fishAt(t)); const dd = Math.hypot(fishPos.x - dp.x, fishPos.z - dp.z), near = smooth(1 - dd / 6);
     const toFish = Math.atan2(fishPos.x - dp.x, fishPos.z - dp.z) - devil.root.rotation.y;
@@ -88,7 +88,7 @@ export function createStage(scene, parts) {
       poseCube(cubes[i], pacerPhase(c, t), 0.5 * Math.sin(t * 0.5 + i * 2) * (1 - Math.abs(vx)));
       if (i === 0) { const ph = t % 5, fl = ph < 1 && choirW(t) < 0.15; cubes[0].root.rotation.x = fl ? TAU * smooth(ph) : 0; cubes[0].root.position.y = fl ? 1.1 * Math.sin(Math.PI * ph) : 0; cubes[0].shadow.visible = !fl; }
     });
-    if (parts.cabin) { const ph = t % 6, hop = ph < 0.8 ? 0.7 * Math.sin(Math.PI * ph / 0.8) : 0; parts.cabin.position.y = hop; parts.cabin.scale.y = ph < 0.8 ? 1 + 0.03 * Math.sin(Math.PI * ph / 0.8) : (ph < 1.1 ? 1 - 0.08 * Math.sin(Math.PI * (ph - 0.8) / 0.3) : 1); }
+    if (parts.cabin) { const sh = spellHit(t), hit = sh && sh.idx === 2 && sh.age < 0.8 ? sh.age : -1; parts.cabin.position.y = hit >= 0 ? 0.7 * Math.sin(Math.PI * hit / 0.8) : 0; parts.cabin.scale.y = hit >= 0 ? 1 + 0.04 * Math.sin(Math.PI * hit / 0.8) : (sh && sh.idx === 2 && sh.age < 1.1 ? 1 - 0.08 * Math.sin(Math.PI * (sh.age - 0.8) / 0.3) : 1); parts.cabin.rotation.z = hit >= 0 ? 0.08 * Math.sin(hit * 24) : 0; }
 
     // visitor: walks in from the entry, looks at the wall screens, crosses the passage, sits at the desk, watches the burst, walks back out
     const vp = VISITOR(t), yaw = keyed(VISITOR_YAW, t); vis.root.position.set(vp.x, 0, vp.z); vis.root.rotation.y = yaw;
@@ -104,7 +104,7 @@ export function createStage(scene, parts) {
     else if (vp.moving) { poseWalk(vis, phase, 1, 0, 0); vis.root.position.y = 0; }
     else { poseWalk(vis, 0, 0, 0, 0); vis.root.position.y = 0; }
     vis.shadow.position.y = 0.02 - vis.root.position.y;
-    choir.update(t); magic.update(t); rays.update(t);
+    choir.update(t); magic.update(t);
     devil.shadow.position.y = (0.02 - devil.root.position.y) / devil.root.scale.y; devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
   }
   return { update, actors: { devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };

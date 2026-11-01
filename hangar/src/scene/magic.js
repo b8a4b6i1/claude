@@ -15,23 +15,21 @@ export function createMagic(scene, ctx) {
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
   // --- goldfish: rainbow sparkle trail
-  spec({ n: 60, P: 1.8, life: 1.8, size: 0.34, grav: -0.4, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'magenta'],
+  spec({ n: 24, P: 1.8, life: 1.8, size: 0.34, grav: -0.4, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'magenta'],
     gate: (t) => { const f = ctx.fishAt(t); return Math.abs(f.x) < 23.5 ? 1 : 0; },
     origin: (tb, r) => ctx.fishAt(tb).add(V((r[0] - 0.5) * 0.5, (r[1] - 0.5) * 0.5, (r[2] - 0.5) * 0.5)), vel: (r) => V((r[0] - 0.5) * 0.6, 0.2 + r[1] * 0.5, (r[2] - 0.5) * 0.6) });
   // --- singer: music notes drift up
-  spec({ n: 8, P: 0.9, life: 0.9 * 2.8, lifeMax: 2.6, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow2', 'lime'], sway: 0.18,
+  spec({ n: 8, P: 0.9, life: 0.9 * 2.8, lifeMax: 2.6, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime'], sway: 0.18,
     gate: () => 1, origin: () => V(0.5, 1.75, -3.7), vel: (r) => V(0.3 + 0.3 * r[0], 0.7 + 0.2 * r[1], (r[2] - 0.5) * 0.3) });
   // --- boulder coins when the deer man digs
-  spec({ n: 10, P: 2.0, off: 0.5, life: 1.5, size: 0.3, grav: -9, colors: ['yellow', 'yellow2', 'orange2'], mode: 'burst',
+  spec({ n: 10, P: 2.0, off: 0.5, life: 1.5, size: 0.3, grav: -9, colors: ['yellow', 'orange2', 'orange'], mode: 'burst',
     gate: (t) => (t > 6 ? 1 : 0), origin: () => V(10.0, 0.7, -2.4), vel: (r) => V((r[0] - 0.5) * 2.4, 3.6 + r[1] * 1.6, (r[2] - 0.5) * 2.4) });
   // --- swordsman slashes: ring of cold sparks
-  spec({ n: 16, P: 2.5, off: 0.3, life: 0.9, size: 0.3, grav: -1, colors: ['white', 'cyan2', 'blue2'], mode: 'burst', gate: () => 1,
+  spec({ n: 8, P: 2.5, off: 0.3, life: 0.9, size: 0.3, grav: -1, colors: ['cyan', 'blue2', 'purple2'], mode: 'burst', gate: () => 1,
     origin: (tb) => { const c = ctx.cubeA(tb); return V(c.x, 1.0, c.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 2.6, 0.4 + r[0] * 0.8, Math.sin(a) * 2.6); } });
   // --- cabin: stars pour out of the hatch, dust ring when it lands
-  spec({ n: 16, P: 3.0, life: 3.0, size: 0.32, grav: -0.1, colors: ['yellow', 'white', 'pink2', 'cyan2'], gate: () => 1,
-    origin: () => V(18.4, 1.9, 2.7), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
-  spec({ n: 12, P: 6.0, off: 0.85, life: 0.8, size: 0.3, grav: -2, colors: ['wall0', 'con0'], mode: 'burst', gate: () => 1,
-    origin: () => V(17.0, 0.15, 2.7), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.9, 0.5, Math.sin(a) * 1.9); } });
+  spec({ n: 6, P: 3.0, life: 3.0, size: 0.3, grav: -0.1, colors: ['yellow', 'pink', 'cyan'], gate: () => 1,
+    origin: () => V(18.4, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
   // --- roller skater leaves a rainbow trail on the floor
   spec({ n: 36, P: 3.0, life: 3.0, size: 0.3, grav: 0, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2'],
     gate: () => 1, origin: (tb) => V(18 + 4 * Math.sin(TAU * tb / LOOP), 0.08, -3.5), vel: () => V(0, 0, 0) });
@@ -39,22 +37,22 @@ export function createMagic(scene, ctx) {
   spec({ n: 14, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['green', 'lime', 'cyan'],
     gate: (t) => bell(t, 39.5, 41, 51, 52.5), origin: () => V(-12.8, 1.15, -3.55), vel: (r) => V((r[0] - 0.5) * 0.5, 0.8, 0.5 + 0.3 * r[1]) });
   // --- eclipse embers
-  spec({ n: 16, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['orange', 'orange2', 'yellow'],
+  spec({ n: 8, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['orange', 'red3', 'yellow'],
     gate: (t) => 0.45 + 0.55 * bell(t, BEAT.burst - 0.4, BEAT.burst + 0.8, BEAT.burstEnd - 1, BEAT.burstEnd + 1),
     origin: () => V(-3.6, 2.2, -4.55), vel: (r) => V((r[0] - 0.5) * 0.9, 0.7, 0.3 + 0.2 * r[1]) });
   // --- devil: swirling sparks while he levitates, plus one summoning ring
-  spec({ n: 36, P: 1.8, life: 1.8, size: 0.34, grav: -0.2, colors: ['red3', 'orange', 'magenta', 'yellow'], gate: (t) => bell(t, 36, 39, 51, 54),
+  spec({ n: 18, P: 1.8, life: 1.8, size: 0.34, grav: -0.2, colors: ['red3', 'orange', 'magenta', 'yellow'], gate: (t) => bell(t, 36, 39, 51, 54),
     origin: (tb, r) => { const d = ctx.devilPos(tb), a = r[0] * TAU; return V(d.x + Math.cos(a) * 0.9, 0.3 + ctx.lev(tb), d.z + Math.sin(a) * 0.9); }, vel: (r) => V((r[1] - 0.5) * 0.6, 1.3 + r[2] * 0.8, (r[2] - 0.5) * 0.6) });
   // --- choir: notes rise over each singer
-  spec({ n: 15, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow2', 'lime', 'purple2'], sway: 0.14, gate: (t) => (ctx.choirW(t) > 0.8 ? 1 : 0),
-    origin: (tb, r, k) => { const s = ctx.choirSlots[k % ctx.choirSlots.length]; return V(s.x, 1.9, s.z); }, vel: (r) => V((r[0] - 0.5) * 0.3, 0.8 + 0.3 * r[1], (r[2] - 0.5) * 0.3) });
+  spec({ n: 4, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime', 'purple2'], sway: 0.14, gate: (t) => (ctx.choirW(t) > 0.8 ? 1 : 0),
+    origin: (tb, r, k) => { const s = ctx.choirSlots[ctx.choirActive(tb)]; return V(s.x, 1.9, s.z); }, vel: (r) => V((r[0] - 0.5) * 0.3, 0.8 + 0.3 * r[1], (r[2] - 0.5) * 0.3) });
   // --- devil spell impact: sparks where each bolt lands
-  spec({ n: 22, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan2', 'white', 'purple2'], mode: 'burst', gate: (t) => (t > 4 ? 1 : 0),
+  spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 4 ? 1 : 0),
     origin: (tb) => { const p = ctx.spellTarget(Math.floor((tb - 0.9) / 4.5 + 1e-6) % 3); return V(p.x, p.y, p.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1 + 2 * r[0]), 1.2 + 2 * r[1], Math.sin(a) * (1 + 2 * r[0])); } });
   // --- summoning and dispersal puffs (once per loop)
-  spec({ n: 40, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'white', 'purple2', 'pink', 'yellow2'], mode: 'burst', gate: () => 1,
+  spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });
-  spec({ n: 60, P: LOOP, off: 36.0, life: 1.8, size: 0.36, grav: -2, colors: ['red', 'yellow', 'lime', 'cyan', 'magenta', 'white'], mode: 'burst', gate: () => 1,
+  spec({ n: 25, P: LOOP, off: 36.0, life: 1.8, size: 0.36, grav: -2, colors: ['red', 'yellow', 'lime', 'cyan', 'magenta'], mode: 'burst', gate: () => 1,
     origin: (tb, r, k) => { const s = ctx.choirSlots[k % ctx.choirSlots.length]; return V(s.x, 1.0, s.z); }, vel: (r, k, n) => { const a = r[0] * TAU; return V(Math.cos(a) * (1 + 3 * r[1]), 1.5 + 2 * r[2], Math.sin(a) * (1 + 3 * r[1])); } });
 
   const total = specs.reduce((s, sp) => s + sp.n, 0) + 7 * 2;
@@ -90,10 +88,10 @@ export function createMagic(scene, ctx) {
       }
     }
     // orbiting orbs around the devil and around the singer in red
-    for (const [oi, who] of [[0, 'devil'], [1, 'woman']]) for (let k = 0; k < 7; k++, i++) {
+    for (const [oi, who] of [[0, 'devil'], [1, 'woman']]) for (let k = 0; k < 4; k++, i++) {
       const g = oi === 0 ? bell(t, 16, 20, 70, 76) : bell(t, 41, 43, 49, 51);
       if (g < 0.02) { hide(i); continue; }
-      const c = oi === 0 ? ctx.devilPos(t) : { x: -9.6, z: -2.3 }, a = t * (oi ? 2.2 : 1.6) + (k / 7) * TAU, rr = oi ? 0.9 : 1.5;
+      const c = oi === 0 ? ctx.devilPos(t) : { x: -9.6, z: -2.3 }, a = t * (oi ? 2.2 : 1.6) + (k / 4) * TAU, rr = oi ? 0.9 : 1.5;
       p.set(c.x + Math.cos(a) * rr, (oi ? 1.3 : 1.4) + (oi === 0 ? ctx.lev(t) : 0.6 * bell(t, 41, 43, 49, 51)) + 0.35 * Math.sin(a * 2 + k), c.z + Math.sin(a) * rr);
       const sc = 0.3 * g; s.set(sc, sc * 1.3, sc); e.set(a, a * 1.3, 0); q.setFromEuler(e); m4.compose(p, q, s); mesh.setMatrixAt(i, m4);
       if (!colourSet) mesh.setColorAt(i, cc(['cyan', 'yellow', 'magenta', 'lime', 'orange', 'white', 'pink'][k]));
