@@ -43,8 +43,8 @@ def band_energy(y, lo, hi, hop):
     f, t, X = stft(y, SR_A, nperseg=2048, noverlap=2048 - hop, boundary=None, padded=False)
     k = (f >= lo) & (f < hi); return np.sqrt((np.abs(X[k]) ** 2).sum(0)), t
 
-def notes_from_track(m, voiced, hop_s, minlen=0.07, gap=0.05):
-    mm = np.round(m).astype(int); mm = median_filter(mm, 5)
+def notes_from_track(m, voiced, hop_s, minlen=0.07, gap=0.05, msz=5):
+    mm = np.round(m).astype(int); mm = median_filter(mm, msz)
     out = []; i = 0; n = len(mm); mf = int(minlen / hop_s)
     while i < n:
         if not voiced[i]: i += 1; continue
@@ -226,8 +226,79 @@ def render_voice(an, dur, duty=0.5):
     mix = resample_poly(mix, 1, 2); mix -= mix.mean(); mix = sosfilt(butter(2, 30, 'hp', fs=44100, output='sos'), mix); mix /= np.abs(mix).max() / 0.92
     return mix, p1
 
+# ---------------------------------------------------------------------------------------------- polyphonic mode (vocal stems / choirs)
+def poly_tracks(mono, nvoices=3, mlo=43, mhi=84, lam=0.5):
+    """iterative multi-F0: pick the best pitch track, cancel its harmonics, repeat. Returns [(track_midi, raw_peak_salience)] and the frame energy."""
+    nfft, hop = 4096, 512
+    f, t, X = stft(mono, SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
+    mag0 = np.abs(X); grid = np.arange(mlo, mhi + 1e-9, 0.25); fq = 440 * 2 ** ((grid - 69) / 12)
+    out = []; mag = mag0.copy()
+    for v in range(nvoices):
+        w = mag ** 0.6; w = w / (uniform_filter1d(w, 60, axis=0) + 1e-6)
+        S = np.zeros((len(grid), w.shape[1]))
+        for h in range(1, 7):
+            pos = fq * h * nfft / SR_A; i0 = np.clip(np.floor(pos).astype(int), 0, w.shape[0] - 2); fr = (pos - i0)[:, None]
+            S += (0.85 ** (h - 1)) * ((1 - fr) * w[i0] + fr * w[i0 + 1])
+        raw = S.max(0); Sn = S / (raw[None, :] + 1e-9)
+        D = np.minimum(np.abs(grid[:, None] - grid[None, :]), 7.0) * lam
+        n = S.shape[1]; cost = np.zeros(S.shape); back = np.zeros(S.shape, dtype=np.int32); cost[:, 0] = -Sn[:, 0]
+        for j in range(1, n):
+            tot = cost[:, j - 1][None, :] + D; back[:, j] = np.argmin(tot, 1); cost[:, j] = tot[np.arange(len(grid)), back[:, j]] - Sn[:, j] ** 2
+        path = np.zeros(n, dtype=int); path[-1] = np.argmin(cost[:, -1])
+        for j in range(n - 1, 0, -1): path[j - 1] = back[path[j], j]
+        m = grid[path]; out.append((m, raw))
+        for j in range(n):                                              # cancel this voice and its overtones before looking for the next one
+            f0 = 440 * 2 ** ((m[j] - 69) / 12)
+            for h in range(1, 11):
+                c = f0 * h * nfft / SR_A; lo, hi = int(np.floor(c - 1.4)), int(np.ceil(c + 1.4)) + 1
+                if 0 <= lo < mag.shape[0]: mag[max(0, lo):min(mag.shape[0], hi), j] *= 0.12
+    e = np.sqrt((mag0[(f >= 150) & (f < 2500)] ** 2).sum(0))
+    return out, e, hop / SR_A
+
+def analyse_poly(mono, nvoices=3, **kw):
+    tr, e, hop_s = poly_tracks(mono, nvoices, **kw); n = len(e)
+    loud = e > 0.07 * np.percentile(e, 95)
+    r0 = tr[0][1]; voices = []
+    for i, (m, raw) in enumerate(tr):
+        rel = raw / (np.percentile(r0, 90) + 1e-9)
+        voiced = loud & (rel > (0.30 if i else 0.15)) & (uniform_filter1d(rel, 3) > 0.2)
+        notes = notes_from_track(m, voiced, hop_s, 0.16, 0.08, 11)
+        voices.append(notes)
+    order = sorted(range(len(voices)), key=lambda i: -np.mean([p for a, b, p in voices[i]] or [0]))   # high -> low
+    return dict(hop_s=hop_s, voices=[voices[i] for i in order], e=e)
+
+def render_poly(an, dur):
+    N = int(dur * SR_R); hop_s = an['hop_s']; emax = np.percentile(an['e'], 97)
+    def chan(notes, level_fn):
+        f = np.zeros(N); v = np.zeros(N)
+        for a, b, p in notes:
+            s0, s1 = int(a * hop_s * SR_R), min(N, int(b * hop_s * SR_R))
+            if s0 >= N: break
+            n = s1 - s0; k = np.arange(n) / SR_R; late = np.maximum(0, k - 0.25)
+            f[s0:s1] = 440 * 2 ** ((p - 69) / 12) * 2 ** ((0.15 * np.sin(2 * np.pi * 5.2 * late) * np.minimum(1, late * 4)) / 12); v[s0:s1] = level_fn(a, b, k)
+        return f, v
+    lv = lambda a, b: np.clip(np.mean(an['e'][a:b]) / emax, 0, 1)
+    ph = lambda f: np.mod(np.cumsum(f / SR_R), 1.0)
+    f1, v1 = chan(an['voices'][0], lambda a, b, k: np.floor(np.minimum(15, np.maximum(5, 9 + 6 * lv(a, b) - k * 3.0))))
+    p1 = (ph(f1) < 0.5) * v1
+    p2 = np.zeros(N); tri = np.zeros(N)
+    if len(an['voices']) > 1:
+        f2, v2 = chan(an['voices'][1], lambda a, b, k: np.floor(np.minimum(13, np.maximum(4, 7 + 5 * lv(a, b) - k * 2.5))))
+        p2 = (ph(f2) < 0.25) * v2
+    if len(an['voices']) > 2:
+        f3, v3 = chan(an['voices'][2], lambda a, b, k: np.ones_like(k))
+        tri = np.floor((1 - np.abs(2 * ph(f3) - 1)) * 15.999) * (v3 > 0)
+    pulse = np.where((p1 + p2) > 0, 95.88 / (8128.0 / np.maximum(p1 + p2, 1e-9) + 100), 0.0)
+    tnd = 159.79 / (1.0 / (tri / 8227.0 + 1e-12) + 100)
+    mix = resample_poly(pulse + tnd, 1, 2); mix -= mix.mean(); mix = sosfilt(butter(2, 30, 'hp', fs=44100, output='sos'), mix); mix /= np.abs(mix).max() / 0.92
+    return mix, (p1, p2, tri)
+
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]; start = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0; dur = float(sys.argv[4]) if len(sys.argv) > 4 else 0.0
+    if '--poly' in sys.argv:
+        mono = load(src, start, dur); an = analyse_poly(mono); total = len(mono) / SR_A; mix, ch = render_poly(an, total)
+        write16(out + '-poly-44k.wav', mix); write8(out + '-poly-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
+        import json; print(json.dumps(dict(seconds=round(total, 1), notes_per_voice=[len(v) for v in an['voices']], ranges=[[int(min(n[2] for n in v)), int(max(n[2] for n in v))] if v else None for v in an['voices']], pulse1_levels=int(ch[0].max()) + 1, pulse2_levels=int(ch[1].max()) + 1, tri_levels=int(ch[2].max()) + 1))); sys.exit(0)
     if '--voice' in sys.argv:
         st = load_stereo(src, start, dur); an = analyse_voice(st, **({'mlo': 52, 'mhi': 76, 'power': 0.0, 'moving': True} if '--moving' in sys.argv else {})); total = len(st) / SR_A; mix, p1 = render_voice(an, total)
         write16(out + '-voice-44k.wav', mix); write8(out + '-voice-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
