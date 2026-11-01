@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""
+Song -> NES-style chiptune.
+
+1. analysis: central melody (pitch salience + Viterbi), bass line, chords on a beat grid, kick / snare / hat onsets
+2. re-synthesis with the channel structure of the NES APU: 2 pulse channels (4-bit volume, 12.5/25/50/75 % duty),
+   1 triangle channel (32 steps, 4 bit, no volume), 1 noise channel (15-bit LFSR, 16 period settings), mixed with the
+   APU's non-linear DAC formulas.
+usage: chiptune.py in.mp3 out_prefix [start_s] [dur_s]
+"""
+import subprocess, sys, wave, numpy as np
+from scipy.signal import stft, resample_poly, butter, sosfilt
+from scipy.ndimage import uniform_filter1d, median_filter
+
+SR_A = 22050                   # analysis rate
+SR_R = 88200                   # render rate (decimated to 44100)
+CPU = 1789773.0
+NOISE_PERIOD = [4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068]
+
+def load(path, start, dur):
+    cmd = ['ffmpeg', '-v', 'error', '-ss', str(start)] + (['-t', str(dur)] if dur else []) + ['-i', path, '-ac', '1', '-ar', str(SR_A), '-f', 'f32le', '-']
+    return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, dtype=np.float32).astype(np.float64)
+
+def salience_track(y, nfft, hop, mlo, mhi, step=0.25, lam=0.55, nh=5):
+    f, t, X = stft(y, SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
+    mag = np.abs(X) ** 0.6
+    mag = mag / (uniform_filter1d(mag, 60, axis=0) + 1e-6)               # whiten across frequency
+    grid = np.arange(mlo, mhi + 1e-9, step); fq = 440 * 2 ** ((grid - 69) / 12)
+    S = np.zeros((len(grid), mag.shape[1]))
+    for h in range(1, nh + 1):
+        pos = fq * h * nfft / SR_A; i0 = np.clip(np.floor(pos).astype(int), 0, mag.shape[0] - 2); fr = (pos - i0)[:, None]
+        S += (0.8 ** (h - 1)) * ((1 - fr) * mag[i0] + fr * mag[i0 + 1])
+    S /= S.max(0, keepdims=True) + 1e-9
+    D = np.minimum(np.abs(grid[:, None] - grid[None, :]), 7.0) * lam           # transition cost between pitch states
+    n = S.shape[1]; cost = np.zeros(S.shape); back = np.zeros(S.shape, dtype=np.int32); cost[:, 0] = -S[:, 0]
+    for j in range(1, n):
+        tot = cost[:, j - 1][None, :] + D; back[:, j] = np.argmin(tot, 1); cost[:, j] = tot[np.arange(len(grid)), back[:, j]] - S[:, j] ** 2
+    path = np.zeros(n, dtype=int); path[-1] = np.argmin(cost[:, -1])
+    for j in range(n - 1, 0, -1): path[j - 1] = back[path[j], j]
+    return grid[path], S.max(0), t
+
+def band_energy(y, lo, hi, hop):
+    f, t, X = stft(y, SR_A, nperseg=2048, noverlap=2048 - hop, boundary=None, padded=False)
+    k = (f >= lo) & (f < hi); return np.sqrt((np.abs(X[k]) ** 2).sum(0)), t
+
+def notes_from_track(m, voiced, hop_s, minlen=0.07, gap=0.05):
+    mm = np.round(m).astype(int); mm = median_filter(mm, 5)
+    out = []; i = 0; n = len(mm); mf = int(minlen / hop_s)
+    while i < n:
+        if not voiced[i]: i += 1; continue
+        j = i
+        while j + 1 < n and voiced[j + 1] and mm[j + 1] == mm[i]: j += 1
+        out.append([i, j + 1, int(mm[i])]); i = j + 1
+    merged = []
+    for a, b, p in out:                                             # join same-pitch notes separated by short gaps
+        if merged and merged[-1][2] == p and (a - merged[-1][1]) * hop_s <= gap: merged[-1][1] = b
+        else: merged.append([a, b, p])
+    return [x for x in merged if x[1] - x[0] >= mf]
+
+def peaks(env, hop_s, mind, k=1.1, win=25):
+    mu = uniform_filter1d(env, win); sd = np.sqrt(uniform_filter1d((env - mu) ** 2, win))
+    c = env > mu + k * sd; res = []; last = -1e9
+    for i in np.where(c)[0]:
+        if env[i] >= env[max(0, i - 2):i + 3].max() and i * hop_s - last >= mind: res.append(i); last = i * hop_s
+    return res
+
+def analyse(y):
+    hop = 512; hop_s = hop / SR_A
+    mel_m, mel_s, t = salience_track(y, 4096, hop, 55, 84)
+    bas_m, bas_s, tb = salience_track(y, 8192, hop, 28, 52, lam=0.7, nh=4)
+    e_mel, _ = band_energy(y, 200, 1800, hop); e_bas, _ = band_energy(y, 40, 200, hop)
+    nF = min(len(mel_m), len(bas_m), len(e_mel), len(e_bas)); mel_m, mel_s, bas_m, bas_s, e_mel, e_bas = [a[:nF] for a in (mel_m, mel_s, bas_m, bas_s, e_mel, e_bas)]
+    sm = lambda a, w: uniform_filter1d(a, w)
+    v_mel = (e_mel > 0.18 * sm(e_mel, 400).max()) & (mel_s > 0) & (sm(e_mel, 3) > 0.35 * sm(e_mel, 120))
+    v_bas = (e_bas > 0.2 * sm(e_bas, 400).max()) & (sm(e_bas, 3) > 0.3 * sm(e_bas, 120))
+    mel = notes_from_track(mel_m, v_mel, hop_s); bas = notes_from_track(bas_m, v_bas, hop_s, 0.09)
+    # --- beat grid from onset strength
+    f, tt, X = stft(y, SR_A, nperseg=1024, noverlap=1024 - hop, boundary=None, padded=False); L = np.log1p(np.abs(X) * 30)
+    flux = np.maximum(0, np.diff(L, axis=1)); full = np.r_[0, flux.sum(0)][:nF]
+    ac = np.correlate(full - full.mean(), full - full.mean(), 'full')[len(full) - 1:]
+    lo, hi = int(0.30 / hop_s), int(0.75 / hop_s); beat = (lo + np.argmax(ac[lo:hi])) * hop_s
+    # --- chords: chroma per half-bar
+    pcs = np.zeros((12, nF)); kf = np.arange(X.shape[0]) * SR_A / 1024
+    for k, fr in enumerate(kf):
+        if 90 < fr < 2000: pcs[int(round(12 * np.log2(fr / 440) + 69)) % 12] += np.abs(X[k, :nF]) ** 1.0
+    tpl = np.zeros((24, 12)); 
+    for r in range(12):
+        tpl[r, [r, (r + 4) % 12, (r + 7) % 12]] = 1; tpl[12 + r, [r, (r + 3) % 12, (r + 7) % 12]] = 1
+    seg = beat * 2; nseg = int(np.ceil(nF * hop_s / seg)); chords = []
+    for s in range(nseg):
+        a = int(s * seg / hop_s); b = min(nF, int((s + 1) * seg / hop_s)); v = pcs[:, a:b].sum(1)
+        if v.sum() < 1e-6: chords.append(None); continue
+        v = v / v.max(); sc = tpl @ v - 0.15 * (tpl.sum(1) * 0 + 1) * (np.arange(24) >= 12)         # slight preference for major on ties
+        c = int(np.argmax(sc)); chords.append((c % 12, c >= 12))
+    # --- percussion
+    ek, _ = band_energy(y, 40, 150, hop); eh, _ = band_energy(y, 4000, 10500, hop); em, _ = band_energy(y, 150, 3000, hop)
+    dk = np.maximum(0, np.diff(np.log1p(ek[:nF] * 20), prepend=0)); dh = np.maximum(0, np.diff(np.log1p(eh[:nF] * 40), prepend=0)); dm = np.maximum(0, np.diff(np.log1p(em[:nF] * 20), prepend=0))
+    kicks = peaks(dk, hop_s, 0.25, 1.4); snares = peaks(np.minimum(dm, dh * 1.3 + dm * 0.3), hop_s, 0.3, 1.6); hats = peaks(dh, hop_s, 0.12, 1.0)
+    snares = [i for i in snares if min([abs(i - k) for k in kicks] + [99]) > 3]; hats = [i for i in hats if min([abs(i - k) for k in kicks + snares] + [99]) > 2]
+    loud = lambda e, i0, i1: float(np.mean(e[i0:i1]))
+    return dict(hop_s=hop_s, nF=nF, mel=mel, bas=bas, mel_m=mel_m, e_mel=e_mel, e_bas=e_bas, beat=beat, chords=chords, seg=seg, kicks=kicks, snares=snares, hats=hats)
+
+# ---------------------------------------------------------------------------------------------- synthesis (NES APU style)
+def lfsr_seq():
+    reg = 1; out = np.zeros(32767, dtype=np.uint8)
+    for i in range(32767):
+        out[i] = reg & 1; fb = (reg & 1) ^ ((reg >> 1) & 1); reg = (reg >> 1) | (fb << 14)
+    return out
+
+def render(an, dur):
+    N = int(dur * SR_R); tt = np.arange(N) / SR_R; hop_s = an['hop_s']
+    def phase(freq): return np.mod(np.cumsum(freq / SR_R), 1.0)
+    def note_arrays(notes, vol_of, vib=True):
+        f = np.zeros(N); v = np.zeros(N)
+        for a, b, p in notes:
+            s0, s1 = int(a * hop_s * SR_R), min(N, int(b * hop_s * SR_R))
+            if s0 >= N: break
+            n = s1 - s0; k = np.arange(n) / SR_R; base = 440 * 2 ** ((p - 69) / 12)
+            fv = base * (2 ** ((0.22 * np.sin(2 * np.pi * 5.5 * np.maximum(0, k - 0.18)) * np.minimum(1, np.maximum(0, k - 0.18) * 5)) / 12) if vib and n / SR_R > 0.35 else 1.0)
+            f[s0:s1] = fv; vv = vol_of(a, b, k); v[s0:s1] = vv
+        return f, v
+    # melody -> pulse 1 (50 %): 4-bit volume from loudness, decaying like an APU envelope
+    emax = np.percentile(an['e_mel'], 97)
+    def mvol(a, b, k):
+        lv = np.clip(np.mean(an['e_mel'][a:b]) / emax, 0, 1); start = 7 + 8 * lv; dec = np.maximum(3, start - k * 7.0)
+        return np.floor(np.minimum(15, dec))
+    fm, vm = note_arrays(an['mel'], mvol)
+    ph = phase(fm); p1 = (ph < 0.5) * vm
+    # bass -> triangle (4-bit, 32 steps, no volume control)
+    fb, vb = note_arrays(an['bas'], lambda a, b, k: np.ones_like(k), vib=False)
+    ph = phase(fb); tri = np.floor((1 - np.abs(2 * ph - 1)) * 15.999) * (vb > 0)
+    # chords -> arpeggio on pulse 2 (25 %), 8th notes of the detected beat
+    f2 = np.zeros(N); v2 = np.zeros(N); st = an['beat'] / 2; k0 = 0
+    for s, ch in enumerate(an['chords']):
+        if ch is None: continue
+        root, minor = ch; iv = [0, 3 if minor else 4, 7, 12]; t0 = s * an['seg']; steps = int(an['seg'] / st)
+        for j in range(steps):
+            a = int((t0 + j * st) * SR_R); b = min(N, int((t0 + (j + 1) * st * 0.85) * SR_R))
+            if a >= N: break
+            m = 60 + (root - 60) % 12 + iv[j % 4] - 12 * 0
+            f2[a:b] = 440 * 2 ** ((m + 12 - 69) / 12); n = b - a; v2[a:b] = np.maximum(2, 7 - np.arange(n) / SR_R * 18)
+    ph = phase(f2); p2 = (ph < 0.25) * np.floor(v2)
+    # percussion -> noise channel, LFSR clocked by the 4-bit period setting
+    seq = lfsr_seq(); nz = np.zeros(N); nlev = np.zeros(N)
+    def hit(idx, per, length, level):
+        a = int(idx * hop_s * SR_R); n = int(length * SR_R); b = min(N, a + n)
+        if a >= N: return
+        k = np.arange(b - a) / SR_R; pos = (np.floor(k * CPU / NOISE_PERIOD[per]).astype(int)) % 32767
+        env = np.floor(level * np.maximum(0, 1 - k / length) ** 1.3); bit = seq[pos]
+        nz[a:b] = np.maximum(nz[a:b], (1 - bit) * env)
+    for i in an['kicks']: hit(i, 13, 0.16, 13)
+    for i in an['snares']: hit(i, 9, 0.13, 11)
+    for i in an['hats']: hit(i, 5, 0.04, 7)
+    # APU mixer (non-linear DAC)
+    pulse = np.where((p1 + p2) > 0, 95.88 / (8128.0 / np.maximum(p1 + p2, 1e-9) + 100), 0.0)
+    tnd = 159.79 / (1.0 / (tri / 8227.0 + nz / 12241.0 + 1e-12) + 100)
+    mix = pulse + tnd
+    mix = resample_poly(mix, 1, 2); mix -= mix.mean()
+    sos = butter(2, 30, 'hp', fs=44100, output='sos'); mix = sosfilt(sos, mix)
+    mix /= np.abs(mix).max() / 0.92
+    return mix, (p1, p2, tri, nz)
+
+def write16(path, x, sr=44100):
+    w = wave.open(path, 'wb'); w.setnchannels(1); w.setsampwidth(2); w.setframerate(sr); w.writeframes((np.clip(x, -1, 1) * 32767).astype('<i2').tobytes()); w.close()
+def write8(path, x, sr):
+    w = wave.open(path, 'wb'); w.setnchannels(1); w.setsampwidth(1); w.setframerate(sr); w.writeframes((np.clip(np.round(x * 127 + 128), 0, 255)).astype(np.uint8).tobytes()); w.close()
+
+if __name__ == '__main__':
+    src, out = sys.argv[1], sys.argv[2]; start = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0; dur = float(sys.argv[4]) if len(sys.argv) > 4 else 0.0
+    y = load(src, start, dur); an = analyse(y); total = len(y) / SR_A
+    mix, ch = render(an, total)
+    write16(out + '-chip-44k.wav', mix); write8(out + '-chip-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
+    import json
+    print(json.dumps(dict(seconds=round(total, 1), beat_s=round(an['beat'], 3), bpm=round(60 / an['beat'], 1), melody_notes=len(an['mel']), bass_notes=len(an['bas']), chords=len([c for c in an['chords'] if c]), kicks=len(an['kicks']), snares=len(an['snares']), hats=len(an['hats']),
+        melody_range=[int(min(n[2] for n in an['mel'])), int(max(n[2] for n in an['mel']))], pulse1_levels=int(ch[0].max()) + 1, tri_levels=int(ch[2].max()) + 1, noise_levels=int(ch[3].max()) + 1)))
