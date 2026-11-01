@@ -3,6 +3,7 @@ import { P } from '../palette.js';
 import { M, box, cyl, sph, cone, beam, canvasTex, hex, contactShadow } from './common.js';
 import { SLAB, HX, HZ, WALL_H, MARK, TAU, smooth, hash } from '../config.js';
 import { mulberry32 } from '../core/geometry.js';
+import { IMGS } from './footage.js';
 
 const RAINBOW = ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'magenta', 'pink'];
 
@@ -209,6 +210,8 @@ export function buildHangar(scene) {
     parts.posts.push([x, z]);
   }
 
+  if (IMGS.ven) { const vt = new THREE.Texture(IMGS.ven); vt.colorSpace = THREE.SRGBColorSpace; vt.magFilter = THREE.NearestFilter; vt.minFilter = THREE.NearestFilter; vt.generateMipmaps = false; vt.needsUpdate = true;
+    const vm = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.66), new THREE.MeshBasicMaterial({ map: vt, toneMapped: false })); vm.position.set(-9.9, 1.9, -HZ + 0.3); world.add(vm); } // "VEN A DORMIR" graffiti panel, cropped from the video
   // landmark: stone mask centred on the -Z wall
   const mask = stoneMask(parts); mask.scale.setScalar(1.3); mask.position.set(MARK.mask[0], 3.6, -HZ + 0.85); world.add(mask);
   box(world, 4.2, 4.6, 0.12, M('wood5'), MARK.mask[0], 3.2, -HZ + 0.36); // dark recess behind it

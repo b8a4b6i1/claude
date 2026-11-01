@@ -142,8 +142,8 @@ export function poseSentinel(s, t, i, bow, step) {
 }
 
 // ---------------------------------------------------------------- cube figure
-export function makeCube(accent) {
-  const root = new THREE.Group(); const W = M('white'), G = M('wall1');
+export function makeCube(accent, body = 'white') {
+  const root = new THREE.Group(); const W = M(body), G = M('wall1');
   const hips = J(root, 0, 0.62, 0); box(hips, 0.5, 0.5, 0.3, W, 0, 0.3, 0); const head = J(hips, 0, 0.6, 0); box(head, 0.4, 0.4, 0.4, W, 0, 0.2, 0);
   box(head, 0.07, 0.07, 0.02, M('ink'), -0.1, 0.24, 0.205); box(head, 0.07, 0.07, 0.02, M('ink'), 0.1, 0.24, 0.205); box(head, 0.14, 0.04, 0.02, M('ink'), 0, 0.09, 0.205);
   box(hips, 0.52, 0.1, 0.32, M(accent), 0, 0.2, 0);
@@ -159,15 +159,15 @@ export function poseCube(c, phase, look) {
 }
 
 // ---------------------------------------------------------------- visitor (human rig, sign conventions per the skill)
-export function makePerson(top = 'red', bottom = 'navy') {
-  const root = new THREE.Group(); const SK = M('skin1');
+export function makePerson(top = 'red', bottom = 'navy', o = {}) {
+  const root = new THREE.Group(); const SK = M(o.skin || 'skin1');
   const pel = J(root, 0, 0.86, 0); cyl(pel, 0.15, 0.17, 0.3, M(bottom), 0, -0.02, 0, null, 14); sph(pel, 0.17, M(bottom), 0, -0.05, 0, [1, 0.7, 0.8]);
   const torso = J(pel, 0, 0.12, 0); cyl(torso, 0.17, 0.2, 0.55, M(top), 0, 0.28, 0, null, 14); sph(torso, 0.2, M(top), 0, 0.5, 0, [1.05, 0.5, 0.75]);
   const neck = J(torso, 0, 0.6, 0); cyl(neck, 0.05, 0.06, 0.1, SK, 0, 0.03, 0); const head = J(neck, 0, 0.08, 0);
-  sph(head, 0.11, SK, 0, 0.1, 0, [0.95, 1.12, 1]); sph(head, 0.115, M('wood4'), 0, 0.14, -0.02, [1, 1, 1.05]); box(head, 0.02, 0.03, 0.02, M('skin2'), 0, 0.1, 0.11);
+  sph(head, 0.11, SK, 0, 0.1, 0, [0.95, 1.12, 1]); sph(head, 0.115, M(o.hair || 'wood4'), 0, 0.14, -0.02, [1, 1, 1.05]); box(head, 0.02, 0.03, 0.02, M('skin2'), 0, 0.1, 0.11);
   for (const s of [-1, 1]) sph(head, 0.014, M('ink'), s * 0.04, 0.13, 0.105);
   const arms = [-1, 1].map((s) => { const sh = J(torso, s * 0.2, 0.52, 0); sph(sh, 0.065, M(top), 0, 0, 0); limb(sh, 0.3, 0.05, M(top)); const el = J(sh, 0, -0.3, 0); sph(el, 0.05, SK, 0, 0, 0); limb(el, 0.27, 0.042, SK); const w = J(el, 0, -0.27, 0); sph(w, 0.05, SK, 0, -0.02, 0, [1, 1.2, 0.8]); return { sh, el, w }; });
-  const legs = [-1, 1].map((s) => { const hip = J(pel, s * 0.1, -0.1, 0); limb(hip, 0.42, 0.075, M(bottom)); const kn = J(hip, 0, -0.42, 0); sph(kn, 0.065, M(bottom), 0, 0, 0); limb(kn, 0.4, 0.06, M(bottom)); const an = J(kn, 0, -0.4, 0); box(an, 0.11, 0.08, 0.25, M('wall0'), 0, -0.02, 0.06); return { hip, kn, an }; });
+  const legs = [-1, 1].map((s) => { const hip = J(pel, s * 0.1, -0.1, 0); limb(hip, 0.42, 0.075, M(bottom)); const kn = J(hip, 0, -0.42, 0); sph(kn, 0.065, M(bottom), 0, 0, 0); limb(kn, 0.4, 0.06, M(bottom)); const an = J(kn, 0, -0.4, 0); box(an, 0.11, 0.08, 0.25, M(o.shoes || 'wall0'), 0, -0.02, 0.06); return { hip, kn, an }; });
   const shadow = contactShadow(0.5); root.add(shadow); return { root, pel, torso, head, arms, legs, shadow };
 }
 /** Dress a person rig as a diablada dancer: bulging-eyed mask, crest and horns, embroidered vest and apron, cape, motifs on sleeves and boots. */

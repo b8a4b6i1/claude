@@ -1,5 +1,7 @@
 import { P } from '../palette.js';
 import { TAU, BEAT, smooth, bell, pulse, hash } from '../config.js';
+import { IMGS } from './footage.js';
+const REEL = ['audience', 'stage', 'face', 'police'];
 
 const RB = ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'magenta', 'pink'];
 const col = (n) => P[n];
@@ -9,8 +11,13 @@ export function drawScreen(s, t) {
   const { ctx, canvas } = s.tex.userData; const w = canvas.width, h = canvas.height;
   const flash = pulse(t, BEAT.burst, 0.55) * 1.0, on = smooth((t - 0.4 - s.id * 0.25) / 0.8);
   ctx.fillStyle = col('ink'); ctx.fillRect(0, 0, w, h);
-  const kind = s.id % 5, tt = t + s.id * 3.7;
-  if (kind === 0) { // stage beams
+  const kind = s.id % 5, tt = t + s.id * 3.7; const reel = REEL.map((k) => IMGS[k]).filter(Boolean);
+  if (reel.length) { // cut through the stills; slow push-in on each, a hard cut every 5 s
+    const slot = Math.floor((t + s.id * 2.3) / 5), im = reel[(slot + s.id) % reel.length], k = ((t + s.id * 2.3) % 5) / 5, z = 1.0 + 0.1 * k;
+    const ar = canvas.width / canvas.height, iw = im.width, ih = im.height; let sw = iw, sh = iw / ar; if (sh > ih) { sh = ih; sw = ih * ar; } sw /= z; sh /= z;
+    ctx.drawImage(im, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, w, h);
+    if (k < 0.04) { ctx.globalAlpha = 0.5; ctx.fillStyle = col('white'); ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
+  } else if (kind === 0) { // stage beams
     ctx.fillStyle = col('navy'); ctx.fillRect(0, 0, w, h);
     for (let i = 0; i < 6; i++) { const a = Math.sin(tt * 0.9 + i) * 0.5; ctx.fillStyle = col(RB[(i * 2 + Math.floor(tt / 2)) % RB.length]);
       ctx.beginPath(); ctx.moveTo(w * (0.1 + i * 0.16), 0); ctx.lineTo(w * (0.1 + i * 0.16) + a * w * 0.35 - 5, h); ctx.lineTo(w * (0.1 + i * 0.16) + a * w * 0.35 + 5, h); ctx.lineTo(w * (0.1 + i * 0.16) + 2, 0); ctx.fill(); }

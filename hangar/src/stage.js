@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { HX, HZ, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash } from './config.js';
 import { makeDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
+import { createExtras } from './scene/cast2.js';
 import { drawScreen, drawMonitor } from './scene/screens.js';
 import { makeBurst, mouthGlow, makeMotes } from './scene/fx.js';
 
@@ -32,13 +33,14 @@ const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(
 export function createStage(scene, parts) {
   const devil = new URLSearchParams(location.search).get('devil') === 'diablada' ? makeDiablo() : makeDevil(), fish = makeFish(), sent = [makeSentinel(), makeSentinel()], cubes = [makeCube('red'), makeCube('blue')], vis = makeVisitor();
   for (const o of [devil.root, fish.root, ...sent.map((s) => s.root), ...cubes.map((c) => c.root), vis.root]) scene.add(o);
-  scene.add(fish.shadow); fish.shadow.visible = true;
+  scene.add(fish.shadow); fish.shadow.visible = true; const extras = createExtras(scene);
   const burst = makeBurst(scene), motes = makeMotes(scene, LOOP);
   const fishPos = new THREE.Vector3(); const stool = parts.stool;
   const fishAt = (t) => { const u = clamp((t - BEAT.fishIn) / (BEAT.fishOut - BEAT.fishIn), 0, 1); return new THREE.Vector3(lerp(-15, 15, u), 3.5 + 0.6 * Math.sin(u * TAU * 2.5) + 0.7 * bell(u, 0.25, 0.4, 0.6, 0.75), 1.0 + 3.4 * Math.sin(u * TAU * 1.25)); };
 
   function update(t) {
     t = ((t % LOOP) + LOOP) % LOOP;
+    extras.update(t);
     // screens, monitor, floor, mouth
     parts.screens.forEach((s) => drawScreen(s, t)); drawMonitor(parts.monitor, t);
     const burstE = bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 1, BEAT.burstEnd + 1);
@@ -88,6 +90,6 @@ export function createStage(scene, parts) {
     vis.shadow.position.y = 0.02 - vis.root.position.y;
     devil.shadow.position.y = 0.02 / devil.root.scale.y;
   }
-  return { update, actors: { devil, fish, sent, cubes, vis }, burst };
+  return { update, actors: { devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
 }
 const pacerPhase = (c, t) => { const u = TAU * t / LOOP + c.ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; const s = c.a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))); return s * TAU / 1.3; };
