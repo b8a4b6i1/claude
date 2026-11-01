@@ -136,6 +136,16 @@ export function createExtras(scene) {
     p.root.position.set(x, 0, -3.5); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, dist * TAU / 2.2, 0.35, 0, 0.0); p.torso.rotation.x = 0.18; p.root.rotation.z = 0.05 * Math.sin(u * 2);
   });
 
+  // the twins in blue dresses stroll together holding hands (inner arms angled toward each other so the hands meet), swinging the outer arms
+  { const A = twin(), B = twin(); const SEP = 0.3, LANE = -1.5, CX0 = 1.0, AMP = 4.5;
+    const phaseOf = (u) => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return AMP * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))); };
+    const upd = (p, side) => (_, t) => { const u = TAU * t / LOOP + 1.0, x = CX0 + AMP * Math.sin(u), vx = Math.cos(u), d = phaseOf(u), wk = smooth(clamp(Math.abs(vx) * 4, 0, 1));
+      p.root.position.set(x, 0, LANE + side * SEP); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6);
+      poseWalk(p, d * TAU / 1.2, wk, 0.15 * Math.sin(t * 0.5), 0);
+      if (side < 0) { p.arms[0].sh.rotation.set(-0.1, 0, 0.3); p.arms[0].el.rotation.set(-0.25, 0, 0); } else { p.arms[1].sh.rotation.set(-0.1, 0, -0.3); p.arms[1].el.rotation.set(-0.25, 0, 0); }   // clasped inner hands
+      const inner = side < 0 ? 0 : 1; p.arms[1 - inner].sh.rotation.x *= 1.1; p.torso.rotation.z = 0.02 * Math.sin(t * 2 + side); };
+    add(A, CX0, LANE - SEP, FACE, upd(A, -1)); add(B, CX0, LANE + SEP, FACE, upd(B, 1)); }
+
   // ---- five people rehearsing in the band corner (band group origin is world (-19, 0, 0); +x faces the entry)
   const BX = -19.0;
   const vanish = (p, i, t) => { const k = bandPresence(i, t); p.root.visible = k > 0.01; p.root.scale.setScalar(Math.max(k, 0.001)); p.root.rotation.y = FACE + TAU * 2 * (1 - k); p.root.position.y += 0.9 * (1 - k); };

@@ -47,7 +47,7 @@ export function createStage(scene, parts) {
   const levAt = (t) => 0.9 * bell(t, 38, 40, 50, 52) + 0.06 * Math.sin(t * 2.5) * bell(t, 38, 40, 50, 52);
   const sentStep = (t) => bell(t, BEAT.burst - 0.5, BEAT.burst + 1.2, BEAT.burstEnd - 1.5, BEAT.burstEnd + 0.5);
   const sentPos = (sg, t) => ({ x: X0 + 0.95 + sentStep(t), y: 0.7 * bell(t, BEAT.burst + 0.5, BEAT.burst + 2, BEAT.burstEnd - 2, BEAT.burstEnd) * (1 + 0.2 * Math.sin(t * 3)), z: sg * 2.7 });
-  const SPELL_TARGETS = [[2.0, 1.4, 1.2], [8.2, 1.2, -2.8], [9.4, 1.4, 3.75]];
+  const SPELL_TARGETS = [[2.0, 1.4, 1.2], [8.2, 1.2, -2.8], [8.3, 1.4, 3.75]];
   const ctx = { HX, fishAt: (t) => fishAt(t), cubeA: (t) => ({ x: CUBE_A.x0 + CUBE_A.a * Math.sin(TAU * t / LOOP + CUBE_A.ph), z: CUBE_A.z }), devilPos: (t) => { const d = DEVIL(t); return { x: d.x, z: d.z }; }, lev: levAt,
     sleepK, choirW, choirActive, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
   ctx.spellTarget = (i, tb) => { const j = ((i % 3) + 3) % 3; if (j === 1 && tb !== undefined) { const d = extras.named.deerPos(tb); return new THREE.Vector3(d.x, 1.2, d.z); } const p = SPELL_TARGETS[j]; return new THREE.Vector3(p[0], p[1], p[2]); };

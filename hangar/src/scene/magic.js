@@ -29,7 +29,7 @@ export function createMagic(scene, ctx) {
     origin: (tb) => { const c = ctx.cubeA(tb); return V(c.x, 1.0, c.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 2.6, 0.4 + r[0] * 0.8, Math.sin(a) * 2.6); } });
   // --- cabin: stars pour out of the hatch, dust ring when it lands
   spec({ n: 6, P: 3.0, life: 3.0, size: 0.3, grav: -0.1, colors: ['yellow', 'pink', 'cyan'], gate: () => 1,
-    origin: () => V(10.8, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
+    origin: () => V(9.7, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
   // --- roller skater leaves a rainbow trail on the floor
   spec({ n: 36, P: 3.0, life: 3.0, size: 0.3, grav: 0, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2'],
     gate: () => 1, origin: (tb) => V(10.5 + 2.5 * Math.sin(TAU * tb / LOOP), 0.08, -3.5), vel: () => V(0, 0, 0) });
@@ -68,7 +68,7 @@ export function createMagic(scene, ctx) {
   });
   // --- wish machine: sparkles where the prize bursts every 9 s (prize apex is 1.8 m in front of the booth, 3.4 m high)
   spec({ n: 12, P: 9.0, off: 5.0, life: 1.0, size: 0.32, grav: -2, colors: ['pink', 'yellow', 'cyan', 'lime', 'magenta'], mode: 'burst', gate: () => 1,
-    origin: () => V(11.2, 3.3, 3.75), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.3, 0.8 + r[0] * 1.2, Math.sin(a) * 1.3); } });
+    origin: () => V(10.1, 3.3, 3.75), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.3, 0.8 + r[0] * 1.2, Math.sin(a) * 1.3); } });
   // --- summoning and dispersal puffs (once per loop)
   spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });

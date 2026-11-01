@@ -252,17 +252,31 @@ export function buildHangar(scene) {
     (() => { const g = new THREE.Group(), m = M('pink', { emit: 0.5 }); box(g, 0.05, 0.34, 0.05, m, 0.1, 0.1, 0); sph(g, 0.1, m, 0, -0.08, 0, [1.2, 0.9, 1]); box(g, 0.2, 0.06, 0.05, m, 0.18, 0.27, 0, [0, 0, -0.4]); return g; })(),
   ];
   prizes.forEach((g) => { g.visible = false; c1.add(g); });
+  // rotating police-style beacon on the roof (red/blue) that spins all the time and flashes during the shake
+  const beacon = new THREE.Group(); beacon.position.set(-0.8, 2.84, -0.5); c1.add(beacon); cyl(beacon, 0.16, 0.18, 0.14, M('steel3'), 0, -0.04, 0, null, 12);
+  const bar = new THREE.Group(); beacon.add(bar); const redM = new THREE.MeshBasicMaterial({ color: P.red, toneMapped: false }), blueM = new THREE.MeshBasicMaterial({ color: P.blue2, toneMapped: false });
+  const r1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.2), redM); r1.position.set(0.14, 0.12, 0); bar.add(r1); const b1 = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.2), blueM); b1.position.set(-0.14, 0.12, 0); bar.add(b1);
+  // jack-in-the-box puppet that springs out of the roof when the prize comes out
+  const puppet = new THREE.Group(); puppet.position.set(0.55, 2.74, -0.45); c1.add(puppet);
+  const springs = []; for (let k = 0; k < 6; k++) { const ring = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.025, 6, 12), M('steel1')); ring.rotation.x = Math.PI / 2; puppet.add(ring); springs.push(ring); }
+  const ph = new THREE.Group(); puppet.add(ph); sph(ph, 0.2, M('pink2'), 0, 0, 0); for (const sx of [-1, 1]) { sph(ph, 0.045, M('white'), sx * 0.08, 0.04, 0.17, [1, 1.1, 0.5]); sph(ph, 0.02, M('ink'), sx * 0.08, 0.04, 0.2); sph(ph, 0.04, M('red'), sx * 0.12, -0.06, 0.16, [1, 0.7, 0.4]); }
+  box(ph, 0.1, 0.03, 0.03, M('ink'), 0, -0.08, 0.19); cone(ph, 0.16, 0.32, M('red'), 0, 0.3, 0, null, 6); sph(ph, 0.06, M('yellow'), 0, 0.5, 0); for (const sx of [-1, 1]) { const arm = new THREE.Group(); arm.position.set(sx * 0.2, -0.1, 0); ph.add(arm); box(arm, 0.04, 0.2, 0.04, M('pink2'), 0, -0.1, 0); sph(arm, 0.045, M('white'), 0, -0.22, 0); ph.userData['arm' + (sx > 0 ? 'R' : 'L')] = arm; }
+  puppet.visible = false;
   parts.updBooth = (t) => {
     const cyc = 9.0, u = ((t % cyc) + cyc) % cyc, n = Math.floor(t / cyc) % 4;
     coin.visible = u < 0.95; coin.position.set(1.07, 2.55 - 1.5 * smooth(u / 0.9), 1.33); coin.rotation.z = u * 12;
     const shake = u > 1.0 && u < 2.9 ? 1 : 0; c1.rotation.z += shake * 0.04 * Math.sin(t * 70); c1.position.y += shake * 0.03 * Math.abs(Math.sin(t * 35));
     const open = smooth((u - 2.9) / 0.5) * (1 - smooth((u - 5.0) / 0.6)); flapPivot.rotation.x = 1.25 * open;
     const lit = shake ? hash(Math.floor(t * 18)) : 0;
+    bar.rotation.y = t * (shake ? 14 : 4); redM.color.set(shake && Math.floor(t * 12) % 2 ? P.white : P.red); blueM.color.set(shake && Math.floor(t * 12) % 2 ? P.red : P.blue2);
+    const pp = smooth((u - 3.2) / 0.4) * (1 - smooth((u - 5.0) / 0.5)), hgt = 0.15 + 1.0 * pp;
+    puppet.visible = pp > 0.01; springs.forEach((rg, k) => { rg.position.y = 0.04 + hgt * (k + 0.5) / 6; rg.scale.set(1 - 0.18 * Math.sin(k + t * 20) * pp, 1 - 0.18 * Math.sin(k + t * 20) * pp, 1); });
+    ph.position.y = hgt + 0.18; puppet.rotation.z = 0.35 * Math.sin(t * 11) * pp; ph.rotation.y = 0.5 * Math.sin(t * 7); ph.userData.armL.rotation.z = 0.5 + 1.0 * Math.max(0, Math.sin(t * 13)); ph.userData.armR.rotation.z = -0.5 - 1.0 * Math.max(0, Math.sin(t * 13 + 1.5));
     bulbs.forEach((bm, k) => { const on = shake ? ((k + Math.floor(t * 18)) % 2 === 0) : ((k + Math.floor(t * 3)) % 4 === 0); bm.color.set(on ? (shake ? P.orange : P.yellow) : P.wood5); });
     prizes.forEach((g, j) => { const show = j === n && u >= 3.2 && u < 5.0; g.visible = show; if (!show) return; const p = smooth((u - 3.2) / 1.8);
       g.position.set(0, 0.7 + 2.6 * p, 1.35 + 0.45 * Math.sin(Math.PI * p)); g.scale.setScalar(0.35 + 0.85 * p); g.rotation.y = u * 6; g.rotation.z = 0.2 * Math.sin(u * 7); });
   };
-  c1.position.set(9.4, 0, 3.75); c1.rotation.y = Math.PI / 2; world.add(c1); parts.cabin = c1;
+  c1.position.set(8.3, 0, 3.75); c1.rotation.y = Math.PI / 2; world.add(c1); parts.cabin = c1;
   const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(1.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
   // dividing wall with a brick-framed doorway, 3 m high so tall things behind it still read
   const dv = new THREE.Group(); dv.position.set(DIV_X, 0, 0); world.add(dv);
