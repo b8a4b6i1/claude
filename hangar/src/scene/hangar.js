@@ -219,10 +219,12 @@ export function buildHangar(scene) {
   box(wp, 0.9, 2.1, 0.1, M('wood5'), 1.9, 1.05, 1.62);
   for (let i = 0; i < 2; i++) box(wp, 0.16, 0.9, 0.04, M('red'), -1.7 + i * 0.5, 0.9, 1.63, [0, 0, 0.3 * (i ? 1 : -1)]);
   
-  const c1 = new THREE.Group(); box(c1, 4.4, 3.2, 0.3, M('wall0'), 0, 1.6, 0); box(c1, 4.5, 0.16, 0.4, M('wall2'), 0, 3.28, 0); box(c1, 4.5, 0.2, 0.4, M('con2'), 0, 0.1, 0); box(c1, 0.3, 3.2, 1.6, M('wall0'), 2.0, 1.6, -0.9); box(c1, 0.3, 3.2, 1.6, M('wall0'), -2.0, 1.6, -0.9); // freestanding white wall with side returns
-  for (let i = 0; i < 3; i++) { box(c1, 0.2, 0.9, 0.04, M('red'), -1.3 + i * 1.3, 1.1, 0.18, [0, 0, 0.3 * (i - 1)]); box(c1, 0.7, 0.14, 0.04, M('red'), -1.3 + i * 1.3, 0.62, 0.18); }
-  box(c1, 1.5, 1.2, 0.04, M('ink'), 0.5, 2.2, 0.17); box(c1, 1.6, 0.1, 0.06, M('wood5'), 0.5, 2.85, 0.18); box(c1, 1.6, 0.1, 0.06, M('wood5'), 0.5, 1.55, 0.18); sph(c1, 0.32, M('green'), -1.3, 2.3, 0.2, [1, 1.1, 0.2]); sph(c1, 0.14, M('skin0'), -1.3, 2.2, 0.26, [1, 1.1, 0.3]); // service hatch + masked-face disc, abstract
-  c1.position.set(17.0, 0, 2.7); c1.rotation.y = Math.PI / 2 - 0.08; world.add(c1);
+  const c1 = new THREE.Group(); // small square booth: 2.4 x 2.4 m footprint, 2.6 m high
+  box(c1, 2.4, 2.6, 2.4, M('wall0'), 0, 1.3, 0); box(c1, 2.55, 0.14, 2.55, M('wall2'), 0, 2.67, 0); box(c1, 2.5, 0.2, 2.5, M('con2'), 0, 0.1, 0);
+  box(c1, 1.1, 0.8, 0.05, M('ink'), 0.35, 1.75, 1.2); box(c1, 1.2, 0.1, 0.07, M('wood5'), 0.35, 2.2, 1.21); box(c1, 1.2, 0.1, 0.07, M('wood5'), 0.35, 1.3, 1.21); box(c1, 0.1, 0.9, 0.07, M('wood5'), -0.25, 1.75, 1.21); box(c1, 0.1, 0.9, 0.07, M('wood5'), 0.95, 1.75, 1.21);
+  for (let i = 0; i < 3; i++) { box(c1, 0.14, 0.6, 0.04, M('red'), -0.8 + i * 0.8, 0.75, 1.21, [0, 0, 0.3 * (i - 1)]); box(c1, 0.5, 0.1, 0.04, M('red'), -0.8 + i * 0.8, 0.38, 1.21); }
+  sph(c1, 0.26, M('green'), -0.8, 1.9, 1.22, [1, 1.1, 0.2]); sph(c1, 0.11, M('skin0'), -0.8, 1.84, 1.27, [1, 1.1, 0.3]);
+  c1.position.set(17.0, 0, 2.7); c1.rotation.y = Math.PI / 2; world.add(c1); parts.cabin = c1;
   const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(1.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
   // dividing wall with a brick-framed doorway, 3 m high so tall things behind it still read
   const dv = new THREE.Group(); dv.position.set(DIV_X, 0, 0); world.add(dv);

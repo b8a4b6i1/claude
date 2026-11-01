@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { M, box, cyl, sph, cone, limb, beam, canvasTex, contactShadow } from './common.js';
 import { makePerson, poseWalk, makeCube, poseCube } from './actors.js';
-import { TAU, clamp, smooth, hash, LOOP } from '../config.js';
+import { TAU, clamp, smooth, hash, LOOP, bell } from '../config.js';
 import { P } from '../palette.js';
 
 const J = (parent, x, y, z) => { const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g); return g; };
@@ -13,7 +13,7 @@ function twin() {
   cone(p.pel, 0.32, 0.62, M('cyan2'), 0, -0.22, 0, null, 14); box(p.torso, 0.4, 0.04, 0.3, M('wall0'), 0, 0.18, 0); sph(p.head, 0.13, M('wood4'), 0, 0.06, -0.07, [1, 1.3, 0.9]);
   return p;
 }
-function conductor() {
+export function conductor() {
   const p = makePerson('black', 'black', { skin: 'con0', hair: 'ink', shoes: 'ink' });
   box(p.torso, 0.14, 0.34, 0.02, M('wall0'), 0, 0.4, 0.18); box(p.torso, 0.1, 0.04, 0.02, M('ink'), 0, 0.58, 0.19); box(p.arms[1].w, 0.02, 0.02, 0.52, M('wall0'), 0, -0.05, 0.28);
   return p;
@@ -76,19 +76,19 @@ function roller() {
 
 /** Everyone the scan shows that the first pass left out. Real people appear as faceless cardboard-style figures. All motion is a pure function of t. */
 export function createExtras(scene) {
-  const list = []; const add = (o, x, z, yaw, upd) => { const r = o.root; r.position.set(x, 0, z); r.rotation.y = yaw; scene.add(r); list.push({ o, upd }); if (o.shadow === undefined && r.children.every((c) => !c.isMesh || c.material.map == null)) {} return o; };
+  const list = []; const named = {}; const add = (o, x, z, yaw, upd) => { const r = o.root; r.position.set(x, 0, z); r.rotation.y = yaw; scene.add(r); list.push({ o, upd }); if (o.shadow === undefined && r.children.every((c) => !c.isMesh || c.material.map == null)) {} return o; };
   const noShadow = (p) => { if (!p.shadow) { const s = contactShadow(0.45); p.root.add(s); p.shadow = s; } };
   const FACE = Math.PI / 2; // facing the entry, +X
-  add(tankWoman(), -9.6, -2.3, FACE, (p, t) => { poseWalk(p, 0, 0, 0.2 * Math.sin(0.5 * t), 0); for (const [i, s] of [[0, 1], [1, -1]]) { p.arms[i].sh.rotation.set(0.3, 0, s * 0.65); p.arms[i].el.rotation.set(-1.7, 0, 0); } p.root.rotation.z = 0.015 * Math.sin(0.7 * t); });
-  add(singer(), 0.5, -3.7, FACE, (p, t) => { const w = TAU * t / 1.8; poseWalk(p, 0, 0, 0.2 * Math.sin(0.8 * t), 0.05 * Math.sin(w)); p.arms[1].sh.rotation.set(-1.7, 0, -0.1); p.arms[1].el.rotation.set(-1.7, 0, 0); p.arms[0].sh.rotation.set(0.15 * Math.sin(w), 0, -0.3); p.pel.position.y = 0.86 + 0.015 * Math.abs(Math.sin(w)); });
-  add(deerMan(), 11.0, -2.8, FACE, (p, t) => { const w = TAU * t / 2.0, d = Math.max(0, Math.sin(w)); poseWalk(p, 0, 0, 0.2 * Math.sin(0.6 * t), 0); p.arms[1].sh.rotation.set(-0.5 - 0.7 * d, 0, 0.1); p.arms[1].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.arms[0].sh.rotation.set(-0.5 - 0.7 * d, 0, -0.1); p.arms[0].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.torso.rotation.x = 0.15 + 0.3 * d; p.legs[0].hip.rotation.x = -0.25; p.flames.forEach((f, i) => f.scale.set(1, 1 + 0.35 * Math.sin(t * 17 + i * 1.7), 1)); });
+  add(tankWoman(), -9.6, -2.3, FACE, (p, t) => { p.root.position.y = 0.6 * bell(t, 41, 43, 49, 51) + 0.04 * Math.sin(t * 2) * bell(t, 41, 43, 49, 51); poseWalk(p, 0, 0, 0.2 * Math.sin(0.5 * t), 0); for (const [i, s] of [[0, 1], [1, -1]]) { p.arms[i].sh.rotation.set(0.3, 0, s * 0.65); p.arms[i].el.rotation.set(-1.7, 0, 0); } p.root.rotation.z = 0.015 * Math.sin(0.7 * t); });
+  named.singer = add(singer(), 0.5, -3.7, FACE, (p, t) => { const w = TAU * t / 1.8; poseWalk(p, 0, 0, 0.2 * Math.sin(0.8 * t), 0.05 * Math.sin(w)); p.arms[1].sh.rotation.set(-1.7, 0, -0.1); p.arms[1].el.rotation.set(-1.7, 0, 0); p.arms[0].sh.rotation.set(0.15 * Math.sin(w), 0, -0.3); p.pel.position.y = 0.86 + 0.015 * Math.abs(Math.sin(w)); });
+  named.deer = add(deerMan(), 11.0, -2.8, FACE, (p, t) => { const w = TAU * t / 2.0, d = Math.max(0, Math.sin(w)); poseWalk(p, 0, 0, 0.2 * Math.sin(0.6 * t), 0); p.arms[1].sh.rotation.set(-0.5 - 0.7 * d, 0, 0.1); p.arms[1].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.arms[0].sh.rotation.set(-0.5 - 0.7 * d, 0, -0.1); p.arms[0].el.rotation.set(-0.7 - 0.5 * d, 0, 0); p.torso.rotation.x = 0.15 + 0.3 * d; p.legs[0].hip.rotation.x = -0.25; p.flames.forEach((f, i) => f.scale.set(1, 1 + 0.35 * Math.sin(t * 17 + i * 1.7), 1)); });
   const b = boulder(); b.position.set(10.0, 0, -2.4); scene.add(b); list.push({ o: { root: b }, upd: (o, t) => { b.rotation.z = 0.04 * Math.sin(t * 2.2); b.scale.y = 1 + 0.03 * Math.sin(t * 4.4); } });
-  add(catStandee(), 2.0, 1.2, FACE, (c, t) => { c.body.rotation.z = 0.06 * Math.sin(t * 1.3); });
+  named.cat = add(catStandee(), 2.0, 1.2, FACE, (c, t) => { c.body.rotation.z = 0.06 * Math.sin(t * 1.3); const ph = t % 9; if (ph < 1) c.body.rotation.y = TAU * smooth(ph); else c.body.rotation.y = 0; });
   // pink roller skater with a horse head glides along the right-hand side near the entry
-  add(roller(), 18, -3.5, 0, (p, t) => {
+  named.roller = add(roller(), 18, -3.5, 0, (p, t) => {
     const u = TAU * t / LOOP, x = 18 + 4 * Math.sin(u), vx = Math.cos(u), dist = 4 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();
     p.root.position.set(x, 0, -3.5); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, dist * TAU / 2.2, 0.35, 0, 0.0); p.torso.rotation.x = 0.18; p.root.rotation.z = 0.05 * Math.sin(u * 2);
   });
   for (const e of list) { const p = e.o; if (p.root && !p.shadow && !p.root.children.some((c) => c.isMesh && c.material && c.material.map === undefined && false)) noShadow(p); }
-  return { list, update(t) { for (const e of list) e.upd(e.o, t); } };
+  return { list, named, update(t) { for (const e of list) e.upd(e.o, t); } };
 }

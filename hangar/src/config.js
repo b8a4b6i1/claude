@@ -1,7 +1,7 @@
 export const LOOP = 90;
 export const SLAB = { w: 48, d: 10, h: 0.42 };
 export const DIV_X = -5.0; // dividing wall at u = 29 m of the walkthrough (u = 24 - x)
-export const DOOR = { z0: -3.8, z1: -0.6 }; // passage on the right-hand side, beside the white cabin
+export const DOOR = { z0: 0.6, z1: 3.8 }; // passage on the left-hand (open) side of the dividing wall
 export const HX = SLAB.w / 2, HZ = SLAB.d / 2;
 export const WALL_H = 6.2;
 export const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
