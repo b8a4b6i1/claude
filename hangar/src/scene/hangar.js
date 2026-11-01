@@ -209,7 +209,7 @@ export function buildHangar(scene) {
     const dd = new THREE.Group(); box(dd, 2.2, 3.2, 0.2, M('wood4'), -15, 1.6, -HZ + 0.28); box(dd, 1.2, 0.75, 0.04, M('red'), -15.05, 1.9, -HZ + 0.4); sph(dd, 0.3, M('wall0'), -15.35, 2.0, -HZ + 0.43, [1, 0.8, 0.2]); cone(dd, 0.06, 0.3, M('red3'), -15.55, 2.35, -HZ + 0.43, null, 4); world.add(dd);
     const fd = new THREE.Group(); box(fd, 2.4, 3.2, 0.2, M('wood3'), -10, 1.6, HZ - 0.12); cyl(fd, 0.55, 0.55, 0.05, M('orange'), -10, 2.2, HZ - 0.0, [Math.PI / 2, 0, 0], 20); cone(fd, 0.22, 0.5, M('ink'), -10, 2.2, HZ + 0.03, [Math.PI / 2, 0, 0], 8); box(fd, 2.0, 0.5, 0.04, M('wood6'), -10, 0.95, HZ - 0.0); for (let k = 0; k < 8; k++) box(fd, 0.1, 0.18, 0.03, M(['red', 'cyan', 'yellow', 'lime', 'pink', 'blue2', 'orange', 'purple2'][k]), -10.9 + k * 0.26, 0.95, HZ + 0.03); world.add(fd); }
 
-  for (const [x, z] of [[20, -3.6], [14, -3.6], [8.5, -3.6], [2, -3.6], [-9, -3.6], [-16.5, -3.6], [17, 3.4], [6, 3.4], [-14.5, 3.4], [-19.5, 3.4]]) { // interior posts
+  for (const [x, z] of [[20, -3.6], [14, -3.6], [8.5, -3.6], [2, -3.6], [-9, -3.6], [-16.5, -3.6], [17, 3.4], [6, 3.4], [-14.5, 3.4]]) { // interior posts
     box(world, 0.46, WALL_H, 0.46, M('con0'), x, WALL_H / 2, z); box(world, 0.52, 1.1, 0.52, M('con4'), x, 0.55, z); box(world, 0.8, 0.22, 0.8, M('con2'), x, 0.11, z);
     parts.posts.push([x, z]);
   }
@@ -229,20 +229,21 @@ export function buildHangar(scene) {
   wp.position.set(-2.5, 0, 1.6); wp.rotation.y = Math.PI / 2 - 0.1; world.add(wp);
   const c1 = new THREE.Group(); box(c1, 4.4, 3.2, 0.3, M('wall0'), 0, 1.6, 0); box(c1, 4.5, 0.16, 0.4, M('wall2'), 0, 3.28, 0); box(c1, 4.5, 0.2, 0.4, M('con2'), 0, 0.1, 0); box(c1, 0.3, 3.2, 1.6, M('wall0'), 2.0, 1.6, -0.9); box(c1, 0.3, 3.2, 1.6, M('wall0'), -2.0, 1.6, -0.9); // freestanding white wall with side returns
   for (let i = 0; i < 3; i++) { box(c1, 0.2, 0.9, 0.04, M('red'), -1.3 + i * 1.3, 1.1, 0.18, [0, 0, 0.3 * (i - 1)]); box(c1, 0.7, 0.14, 0.04, M('red'), -1.3 + i * 1.3, 0.62, 0.18); }
-  box(c1, 1.2, 1.3, 0.03, M('wall1'), -1.2, 2.3, 0.17); sph(c1, 0.3, M('orange2'), 1.2, 2.3, 0.2, [1, 1.1, 0.2]); // poster blocks, abstract
+  box(c1, 1.5, 1.2, 0.04, M('ink'), 0.5, 2.2, 0.17); box(c1, 1.6, 0.1, 0.06, M('wood5'), 0.5, 2.85, 0.18); box(c1, 1.6, 0.1, 0.06, M('wood5'), 0.5, 1.55, 0.18); sph(c1, 0.32, M('green'), -1.3, 2.3, 0.2, [1, 1.1, 0.2]); sph(c1, 0.14, M('skin0'), -1.3, 2.2, 0.26, [1, 1.1, 0.3]); // service hatch + masked-face disc, abstract
   c1.position.set(5.0, 0, 1.4); c1.rotation.y = Math.PI / 2 - 0.08; world.add(c1);
-  const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(0.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
+  const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(1.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
   // dividing wall with a brick-framed doorway, 3 m high so tall things behind it still read
   const dv = new THREE.Group(); dv.position.set(DIV_X, 0, 0); world.add(dv);
   box(dv, 0.34, 3.0, DOOR.z0 + HZ, M('wall0'), 0, 1.5, (-HZ + DOOR.z0) / 2); box(dv, 0.34, 3.0, HZ - DOOR.z1, M('wall0'), 0, 1.5, (HZ + DOOR.z1) / 2);
   box(dv, 0.34, 0.45, DOOR.z1 - DOOR.z0, M('wall1'), 0, 2.78, (DOOR.z0 + DOOR.z1) / 2); box(dv, 0.5, 0.2, SLAB.d, M('wood5'), 0, 3.05, 0);
   for (const [zz, sg] of [[DOOR.z0, -1], [DOOR.z1, 1]]) { box(dv, 0.5, 3.0, 0.42, M('rust1'), 0, 1.5, zz + sg * 0.21); for (let k = 0; k < 8; k++) box(dv, 0.52, 0.05, 0.43, M('rust2'), 0, 0.3 + k * 0.36, zz + sg * 0.21); }
   box(dv, 0.5, 0.2, DOOR.z1 - DOOR.z0 + 0.9, M('wood4'), 0, 2.56, (DOOR.z0 + DOOR.z1) / 2);
+  box(dv, 0.1, 0.9, 0.4, M('ink'), 0.25, 3.7, (DOOR.z0 + DOOR.z1) / 2 + 0.3); box(dv, 0.1, 0.3, 0.7, M('ink'), 0.25, 4.3, (DOOR.z0 + DOOR.z1) / 2 + 0.1); // black J emblem above the passage
   // eclipse doorway on the long wall: black opening with an ember ring that flares at the burst
-  box(world, 2.5, 3.4, 0.12, M('ink'), -2.5, 1.7, -HZ + 0.3); box(world, 2.9, 0.3, 0.3, M('wood5'), -2.5, 3.55, -HZ + 0.32);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.07, 10, 36), new THREE.MeshStandardMaterial({ color: P.orange, emissive: P.orange, emissiveIntensity: 0.7 })); ring.position.set(-2.5, 2.2, -HZ + 0.42); world.add(ring); parts.eclipse = ring.material;
+  box(world, 2.5, 3.4, 0.12, M('ink'), -3.6, 1.7, -HZ + 0.3); box(world, 2.9, 0.3, 0.3, M('wood5'), -3.6, 3.55, -HZ + 0.32);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.07, 10, 36), new THREE.MeshStandardMaterial({ color: P.orange, emissive: P.orange, emissiveIntensity: 0.7 })); ring.position.set(-3.6, 2.2, -HZ + 0.42); world.add(ring); parts.eclipse = ring.material;
   const lt = canvasTex(256, 48, (c, w, h2) => { c.clearRect(0, 0, w, h2); c.fillStyle = P.red; c.font = 'bold 40px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('JIRAFA ARDIENDO', w / 2, 38); });
-  const lm = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 0.55), new THREE.MeshBasicMaterial({ map: lt, transparent: true, alphaTest: 0.4, toneMapped: false })); lm.position.set(-4.6, 0.9, -HZ + 0.23); lm.scale.setScalar(0.75); world.add(lm);
+  const lm = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 0.55), new THREE.MeshBasicMaterial({ map: lt, transparent: true, alphaTest: 0.4, toneMapped: false })); lm.position.set(-1.2, 0.9, -HZ + 0.23); lm.scale.setScalar(0.7); world.add(lm);
   // desk + monitor, facing +X
   const desk = deskSet(parts); desk.position.set(MARK.desk[0], 0, MARK.desk[1]); world.add(desk);
   const st = desk.userData.stool.clone().add(new THREE.Vector3(MARK.desk[0], 0, MARK.desk[1]));
