@@ -165,8 +165,70 @@ def write16(path, x, sr=44100):
 def write8(path, x, sr):
     w = wave.open(path, 'wb'); w.setnchannels(1); w.setsampwidth(1); w.setframerate(sr); w.writeframes((np.clip(np.round(x * 127 + 128), 0, 255)).astype(np.uint8).tobytes()); w.close()
 
+
+# ---------------------------------------------------------------------------------------------- voice-only mode
+def load_stereo(path, start, dur):
+    cmd = ['ffmpeg', '-v', 'error', '-ss', str(start)] + (['-t', str(dur)] if dur else []) + ['-i', path, '-ac', '2', '-ar', str(SR_A), '-f', 'f32le', '-']
+    return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, dtype=np.float32).reshape(-1, 2).astype(np.float64)
+
+def voice_mag(st, nfft, hop, power=2.0):
+    """magnitude of the centre-panned part of the mix (where lead vocals usually sit): mid * centre_weight^power"""
+    f, t, XL = stft(st[:, 0], SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
+    _, _, XR = stft(st[:, 1], SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
+    a, b = np.abs(XL), np.abs(XR); centre = 1 - np.abs(a - b) / (a + b + 1e-9)
+    return f, t, np.abs((XL + XR) / 2) * centre ** power
+
+def analyse_voice(st, mlo=62, mhi=84, lam=0.5):
+    hop = 512; hop_s = hop / SR_A; nfft = 4096
+    f, t, M = voice_mag(st, nfft, hop)
+    # mask the bass line and its overtones (they otherwise win the pitch search): bass f0 from the 100-way low register
+    fb_, tb_, Mb = voice_mag(st, 8192, hop); bg = np.arange(26, 50.01, 0.25); bfq = 440 * 2 ** ((bg - 69) / 12); Sb = np.zeros((len(bg), Mb.shape[1]))
+    for h in range(1, 5):
+        pos = bfq * h * 8192 / SR_A; i0 = np.clip(np.floor(pos).astype(int), 0, Mb.shape[0] - 2); Sb += (0.8 ** (h - 1)) * Mb[i0]
+    nb = min(Sb.shape[1], M.shape[1]); bf0 = bfq[np.argmax(Sb[:, :nb], 0)]
+    M = M[:, :nb].copy(); n_ = M.shape[1]
+    for j in range(n_):
+        for h in range(1, 13):
+            c = bf0[j] * h * nfft / SR_A; lo, hi = int(np.floor(c - 1.3)), int(np.ceil(c + 1.3)) + 1
+            if 0 <= lo < M.shape[0]: M[max(0, lo):min(M.shape[0], hi), j] *= 0.08
+    mag = M ** 0.6; mag = mag / (uniform_filter1d(mag, 60, axis=0) + 1e-6)
+    grid = np.arange(mlo, mhi + 1e-9, 0.25); fq = 440 * 2 ** ((grid - 69) / 12)
+    S = np.zeros((len(grid), mag.shape[1]))
+    for h in range(1, 6):
+        pos = fq * h * nfft / SR_A; i0 = np.clip(np.floor(pos).astype(int), 0, mag.shape[0] - 2); fr = (pos - i0)[:, None]
+        S += (0.8 ** (h - 1)) * ((1 - fr) * mag[i0] + fr * mag[i0 + 1])
+    S /= S.max(0, keepdims=True) + 1e-9
+    D = np.minimum(np.abs(grid[:, None] - grid[None, :]), 7.0) * lam
+    n = S.shape[1]; cost = np.zeros(S.shape); back = np.zeros(S.shape, dtype=np.int32); cost[:, 0] = -S[:, 0]
+    for j in range(1, n):
+        tot = cost[:, j - 1][None, :] + D; back[:, j] = np.argmin(tot, 1); cost[:, j] = tot[np.arange(len(grid)), back[:, j]] - S[:, j] ** 2
+    path = np.zeros(n, dtype=int); path[-1] = np.argmin(cost[:, -1])
+    for j in range(n - 1, 0, -1): path[j - 1] = back[path[j], j]
+    m = grid[path]
+    k = (f >= 160) & (f < 1400); e = np.sqrt((M[k] ** 2).sum(0)); sm = lambda a, w: uniform_filter1d(a, w)
+    voiced = (e > 0.22 * np.percentile(e, 95)) & (sm(e, 3) > 0.3 * sm(e, 150))
+    mel = notes_from_track(m, voiced, hop_s, 0.09, 0.06)
+    return dict(hop_s=hop_s, nF=n, mel=mel, e_mel=e, mel_m=m, t=t, voiced=voiced)
+
+def render_voice(an, dur, duty=0.5):
+    N = int(dur * SR_R); hop_s = an['hop_s']; f = np.zeros(N); v = np.zeros(N); emax = np.percentile(an['e_mel'], 97)
+    for a, b, p in an['mel']:
+        s0, s1 = int(a * hop_s * SR_R), min(N, int(b * hop_s * SR_R))
+        if s0 >= N: break
+        n = s1 - s0; k = np.arange(n) / SR_R; base = 440 * 2 ** ((p - 69) / 12); late = np.maximum(0, k - 0.2)
+        f[s0:s1] = base * 2 ** ((0.2 * np.sin(2 * np.pi * 5.5 * late) * np.minimum(1, late * 5)) / 12)
+        lv = np.clip(np.mean(an['e_mel'][a:b]) / emax, 0, 1); v[s0:s1] = np.floor(np.minimum(15, np.maximum(4, 8 + 7 * lv - k * 4.0)))
+    ph = np.mod(np.cumsum(f / SR_R), 1.0); p1 = (ph < duty) * v
+    mix = np.where(p1 > 0, 95.88 / (8128.0 / np.maximum(p1, 1e-9) + 100), 0.0)
+    mix = resample_poly(mix, 1, 2); mix -= mix.mean(); mix = sosfilt(butter(2, 30, 'hp', fs=44100, output='sos'), mix); mix /= np.abs(mix).max() / 0.92
+    return mix, p1
+
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]; start = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0; dur = float(sys.argv[4]) if len(sys.argv) > 4 else 0.0
+    if '--voice' in sys.argv:
+        st = load_stereo(src, start, dur); an = analyse_voice(st); total = len(st) / SR_A; mix, p1 = render_voice(an, total)
+        write16(out + '-voice-44k.wav', mix); write8(out + '-voice-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
+        import json; print(json.dumps(dict(seconds=round(total, 1), notes=len(an['mel']), range=[int(min(n[2] for n in an['mel'])), int(max(n[2] for n in an['mel']))], voiced_pct=round(100 * float(np.mean(an['voiced'])), 1), pulse_levels=int(p1.max()) + 1))); sys.exit(0)
     y = load(src, start, dur); an = analyse(y); total = len(y) / SR_A
     mix, ch = render(an, total)
     write16(out + '-chip-44k.wav', mix); write8(out + '-chip-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
