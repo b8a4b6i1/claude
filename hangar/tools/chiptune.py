@@ -293,8 +293,28 @@ def render_poly(an, dur):
     mix = resample_poly(pulse + tnd, 1, 2); mix -= mix.mean(); mix = sosfilt(butter(2, 30, 'hp', fs=44100, output='sos'), mix); mix /= np.abs(mix).max() / 0.92
     return mix, (p1, p2, tri)
 
+def analyse_tonic(mono, nvoices=3):
+    """one voice only: the lowest sounding voice at every instant (the root of the harmony, the 'tonic' voice). Also reports the tonic pitch class by key-profile matching."""
+    tr, e, hop_s = poly_tracks(mono, nvoices); n = len(e); loud = e > 0.07 * np.percentile(e, 95); r0 = tr[0][1]
+    low = np.full(n, np.inf)
+    for i, (m, raw) in enumerate(tr):
+        rel = raw / (np.percentile(r0, 90) + 1e-9); v = loud & (rel > (0.30 if i else 0.15)) & (uniform_filter1d(rel, 3) > 0.2)
+        low = np.where(v & (np.round(m) < low), np.round(m), low)
+    voiced = np.isfinite(low); m = np.where(voiced, low, 0.0)
+    notes = notes_from_track(m, voiced, hop_s, 0.16, 0.08, 11)
+    hist = np.zeros(12)
+    for a, b, p in notes: hist[p % 12] += (b - a) * hop_s
+    maj = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88]); mnr = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
+    best = max(((np.corrcoef(hist, np.roll(pr, r))[0, 1], r, nm) for r in range(12) for pr, nm in ((maj, 'major'), (mnr, 'minor'))))
+    return dict(hop_s=hop_s, voices=[notes], e=e, hist=hist, key=best)
+
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]; start = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0; dur = float(sys.argv[4]) if len(sys.argv) > 4 else 0.0
+    if '--tonic' in sys.argv:
+        mono = load(src, start, dur); an = analyse_tonic(mono); total = len(mono) / SR_A; mix, ch = render_poly(an, total)
+        write16(out + '-tonic-44k.wav', mix); write8(out + '-tonic-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
+        NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; v = an['voices'][0]; tot = sum(b - a for a, b, p in v) or 1
+        import json; print(json.dumps(dict(seconds=round(total, 1), notes=len(v), range=[int(min(n[2] for n in v)), int(max(n[2] for n in v))], key=NAMES[an['key'][1]] + ' ' + an['key'][2], key_corr=round(float(an['key'][0]), 2), share_on_tonic_pct=round(100 * sum(b - a for a, b, p in v if p % 12 == an['key'][1]) / tot, 0), pitch_class_share_pct={NAMES[i]: round(100 * float(an['hist'][i] / an['hist'].sum()), 0) for i in np.argsort(-an['hist'])[:5]}))); sys.exit(0)
     if '--poly' in sys.argv:
         mono = load(src, start, dur); an = analyse_poly(mono); total = len(mono) / SR_A; mix, ch = render_poly(an, total)
         write16(out + '-poly-44k.wav', mix); write8(out + '-poly-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
