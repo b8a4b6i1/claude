@@ -245,13 +245,19 @@ export function buildHangar(scene) {
   const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 14), new THREE.MeshBasicMaterial({ color: P.yellow, toneMapped: false })); coin.rotation.x = Math.PI / 2; c1.add(coin);
   box(c1, 0.96, 0.52, 0.04, M('ink'), 0, 0.58, 1.21);                                                                                      // prize hatch recess
   const flapPivot = new THREE.Group(); flapPivot.position.set(0, 0.32, 1.25); c1.add(flapPivot); box(flapPivot, 0.9, 0.5, 0.05, M('wood4'), 0, 0.25, 0); box(flapPivot, 0.9, 0.05, 0.06, M('yellow'), 0, 0.5, 0.01);
+  // prizes of the wish machine are all rejections: rotten tomato, no-entry sign, broken crown, raised fist, megaphone
   const prizes = [
-    (() => { const g = new THREE.Group(), r = M('red', { emit: 0.6 }); sph(g, 0.14, r, -0.1, 0.08, 0); sph(g, 0.14, r, 0.1, 0.08, 0); cone(g, 0.2, 0.3, r, 0, -0.1, 0, [Math.PI, 0, 0], 4); return g; })(),
-    (() => { const g = new THREE.Group(); const o = new THREE.Mesh(new THREE.OctahedronGeometry(0.24, 0), M('yellow', { emit: 0.7 })); o.scale.set(1, 1.15, 0.5); g.add(o); return g; })(),
-    (() => { const g = new THREE.Group(); const o = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), M('cyan', { emit: 0.7 })); g.add(o); return g; })(),
-    (() => { const g = new THREE.Group(), m = M('pink', { emit: 0.5 }); box(g, 0.05, 0.34, 0.05, m, 0.1, 0.1, 0); sph(g, 0.1, m, 0, -0.08, 0, [1.2, 0.9, 1]); box(g, 0.2, 0.06, 0.05, m, 0.18, 0.27, 0, [0, 0, -0.4]); return g; })(),
+    (() => { const g = new THREE.Group(); sph(g, 0.21, M('red', { emit: 0.45 }), 0, 0, 0, [1.1, 0.9, 1]); cone(g, 0.12, 0.12, M('green', { emit: 0.3 }), 0, 0.2, 0, null, 5); box(g, 0.04, 0.1, 0.04, M('green2'), 0, 0.27, 0); sph(g, 0.05, M('lime'), 0.12, 0.05, 0.17, [1, 0.6, 0.5]); return g; })(),
+    (() => { const g = new THREE.Group(); const d = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.05, 20), M('white', { emit: 0.4 })); d.rotation.x = Math.PI / 2; g.add(d); const r = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.05, 6, 20), M('red', { emit: 0.6 })); r.position.z = 0.03; g.add(r); box(g, 0.5, 0.06, 0.05, M('red', { emit: 0.6 }), 0, 0, 0.04, [0, 0, -0.78]); return g; })(),
+    (() => { const g = new THREE.Group(), y = M('yellow', { emit: 0.6 }); const half = (sx) => { const h = new THREE.Group(); box(h, 0.22, 0.12, 0.1, y, 0, 0, 0); cone(h, 0.06, 0.16, y, -0.07, 0.13, 0, null, 4); cone(h, 0.06, 0.16, y, 0.07, 0.13, 0, null, 4); h.position.set(sx * 0.14, sx * -0.04, 0); h.rotation.z = sx * -0.35; return h; }; g.add(half(-1)); g.add(half(1)); sph(g, 0.04, M('red'), 0, 0.02, 0.06); return g; })(),
+    (() => { const g = new THREE.Group(); const sk = M('skin1', { emit: 0.25 }); box(g, 0.2, 0.2, 0.17, sk, 0, 0.05, 0); for (let k = 0; k < 4; k++) box(g, 0.045, 0.09, 0.15, sk, -0.07 + k * 0.047, 0.19, 0); box(g, 0.05, 0.12, 0.08, sk, -0.13, 0.03, 0.04, [0, 0, 0.5]); box(g, 0.15, 0.3, 0.15, M('red', { emit: 0.35 }), 0, -0.2, 0); return g; })(),
+    (() => { const g = new THREE.Group(); const c = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.08, 0.42, 12), M('orange', { emit: 0.5 })); c.rotation.z = -Math.PI / 2; c.position.x = 0.05; g.add(c); const e = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.22, 0.04, 12), M('white', { emit: 0.4 })); e.rotation.z = -Math.PI / 2; e.position.x = 0.27; g.add(e); box(g, 0.14, 0.1, 0.1, M('steel3'), -0.2, 0, 0); box(g, 0.05, 0.16, 0.05, M('steel3'), -0.12, -0.12, 0); return g; })(),
   ];
   prizes.forEach((g) => { g.visible = false; c1.add(g); });
+  // protest banner painted on the booth's side wall (the one facing the open edge, towards the camera)
+  const banTex = canvasTex(128, 64, (c, w, h) => { c.fillStyle = P.white; c.fillRect(0, 0, w, h); c.fillStyle = P.red; c.fillRect(0, 0, w, 6); c.fillRect(0, h - 6, w, 6); c.fillStyle = P.ink; c.font = 'bold 30px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('NO AL', w / 2, 29); c.fillStyle = P.red; c.font = 'bold 21px Impact, Arial Black, sans-serif'; c.fillText('FASCISMO', w / 2, 55); });
+  const banner = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.05), new THREE.MeshBasicMaterial({ map: banTex, toneMapped: false })); banner.position.set(-1.235, 1.45, 0); banner.rotation.y = -Math.PI / 2; c1.add(banner);
+  box(c1, 0.04, 1.14, 2.2, M('wood5'), -1.2, 1.45, 0);
   // rotating police-style beacon on the roof (red/blue) that spins all the time and flashes during the shake
   const beacon = new THREE.Group(); beacon.position.set(-0.8, 2.84, -0.5); c1.add(beacon); cyl(beacon, 0.16, 0.18, 0.14, M('steel3'), 0, -0.04, 0, null, 12);
   const bar = new THREE.Group(); beacon.add(bar); const redM = new THREE.MeshBasicMaterial({ color: P.red, toneMapped: false }), blueM = new THREE.MeshBasicMaterial({ color: P.blue2, toneMapped: false });
@@ -263,7 +269,7 @@ export function buildHangar(scene) {
   box(ph, 0.1, 0.03, 0.03, M('ink'), 0, -0.08, 0.19); cone(ph, 0.16, 0.32, M('red'), 0, 0.3, 0, null, 6); sph(ph, 0.06, M('yellow'), 0, 0.5, 0); for (const sx of [-1, 1]) { const arm = new THREE.Group(); arm.position.set(sx * 0.2, -0.1, 0); ph.add(arm); box(arm, 0.04, 0.2, 0.04, M('pink2'), 0, -0.1, 0); sph(arm, 0.045, M('white'), 0, -0.22, 0); ph.userData['arm' + (sx > 0 ? 'R' : 'L')] = arm; }
   puppet.visible = false;
   parts.updBooth = (t) => {
-    const cyc = 9.0, u = ((t % cyc) + cyc) % cyc, n = Math.floor(t / cyc) % 4;
+    const cyc = 9.0, u = ((t % cyc) + cyc) % cyc, n = Math.floor(t / cyc) % 5;
     coin.visible = u < 0.95; coin.position.set(1.07, 2.55 - 1.5 * smooth(u / 0.9), 1.33); coin.rotation.z = u * 12;
     const shake = u > 1.0 && u < 2.9 ? 1 : 0; c1.rotation.z += shake * 0.04 * Math.sin(t * 70); c1.position.y += shake * 0.03 * Math.abs(Math.sin(t * 35));
     const open = smooth((u - 2.9) / 0.5) * (1 - smooth((u - 5.0) / 0.6)); flapPivot.rotation.x = 1.25 * open;
