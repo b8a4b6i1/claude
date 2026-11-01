@@ -5,7 +5,7 @@ import { TAU, LOOP, clamp, lerp, smooth, win, bell } from '../config.js';
 
 const lerpAngle = (a, b, k) => { const d = ((b - a + Math.PI) % TAU + TAU) % TAU - Math.PI; return a + d * k; };
 export const CHOIR = { C: { x: 3.0, z: 0.0 }, summon: 17.0, formed: 22.0, singEnd: 36.0, gone: 40.0 };
-const pos = (t) => ({ x: 4.5 + 3.5 * Math.sin(TAU * t / 45), z: 1.4 * Math.sin(TAU * t / 30 + 1) });
+const pos = (t) => ({ x: 3.5 + 6.5 * Math.sin(TAU * t / 45), z: 1.8 * Math.sin(TAU * t / 30 + 1) });
 /** 0 = everyone at home, 1 = in the choir; smooth ramps in and out. */
 export const choirW = (t) => smooth((t - CHOIR.summon) / (CHOIR.formed - CHOIR.summon)) * (1 - smooth((t - CHOIR.singEnd) / (CHOIR.gone - CHOIR.singEnd)));
 export const BEAT_P = 1.5;

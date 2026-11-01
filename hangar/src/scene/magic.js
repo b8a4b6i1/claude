@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { P } from '../palette.js';
-import { LOOP, TAU, BEAT, clamp, smooth, bell, hash, X0, X1 } from '../config.js';
+import { LOOP, TAU, BEAT, clamp, smooth, bell, hash, X0, X1, BAND, bandReturn } from '../config.js';
 
 const col = (n) => new THREE.Color(P[n]);
 
@@ -48,7 +48,7 @@ export function createMagic(scene, ctx) {
     origin: (tb, r, k) => { const s = ctx.choirSlots[ctx.choirActive(tb)]; return V(s.x, 1.9, s.z); }, vel: (r) => V((r[0] - 0.5) * 0.3, 0.8 + 0.3 * r[1], (r[2] - 0.5) * 0.3) });
   // --- devil spell impact: sparks where each bolt lands
   spec({ n: 10, P: 4.5, off: 0.9, life: 1.0, size: 0.34, grav: -3, colors: ['magenta', 'cyan', 'purple2', 'pink'], mode: 'burst', gate: (t) => (t > 14 && t < 73.5 && !(t > 53.4 && t < 61.4) ? 1 : 0),
-    origin: (tb) => { const p = ctx.spellTarget(Math.floor((tb - 0.9) / 4.5 + 1e-6) % 3); return V(p.x, p.y, p.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1 + 2 * r[0]), 1.2 + 2 * r[1], Math.sin(a) * (1 + 2 * r[0])); } });
+    origin: (tb) => { const p = ctx.spellTarget(Math.floor((tb - 0.9) / 4.5 + 1e-6) % 3, tb); return V(p.x, p.y, p.z); }, vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1 + 2 * r[0]), 1.2 + 2 * r[1], Math.sin(a) * (1 + 2 * r[0])); } });
   // --- the devil sleeps: slow Z's rise; wakes with a ring of stars
   spec({ n: 3, P: 2.0, life: 2.0, size: 0.34, grav: 0, colors: ['blue2', 'cyan'], sway: 0.25, gate: (t) => (ctx.sleepK(t) > 0.5 ? 1 : 0),
     origin: (tb) => { const d = ctx.devilPos(tb); return V(d.x, 2.7, d.z); }, vel: (r) => V(0.3, 0.5, (r[0] - 0.5) * 0.2) });
@@ -59,13 +59,20 @@ export function createMagic(scene, ctx) {
     origin: (tb, r) => { const d = ctx.devilPos(tb); return V(d.x + (r[0] - 0.5) * 0.8, 0.4 + r[1] * 1.6, d.z + (r[2] - 0.5) * 0.8); }, vel: (r) => V((r[0] - 0.5) * 1.6, 0.8 + r[1] * 1.6, (r[2] - 0.5) * 1.6) });
   spec({ n: 22, P: LOOP, off: 58.4, life: 1.8, size: 0.34, grav: 0, colors: ['orange', 'yellow', 'red3', 'orange2'], mode: 'burst', gate: () => 1,
     origin: (tb, r) => { const d = ctx.devilPos(tb), a = r[0] * TAU; return V(d.x + Math.cos(a) * 2.0, 0.2 + r[1] * 1.8, d.z + Math.sin(a) * 2.0); }, vel: (r, k, n) => { const a = r[0] * TAU; return V(-Math.cos(a) * 1.05, 0.2 + 0.2 * r[1], -Math.sin(a) * 1.05); } });
+  // --- the goldfish eliminates the musicians one by one: a poof at each, and a pop of sparks when they return
+  BAND.forEach((b, i) => {
+    spec({ n: 16, P: LOOP, off: b.tk, life: 1.2, size: 0.36, grav: -3, colors: ['red', 'orange', 'yellow', 'magenta', 'cyan'], mode: 'burst', gate: () => 1,
+      origin: () => V(b.x, 1.0, b.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.2 + 1.6 * r[0]), 1.6 + 2 * r[1], Math.sin(a) * (1.2 + 1.6 * r[0])); } });
+    spec({ n: 8, P: LOOP, off: bandReturn(i), life: 0.9, size: 0.3, grav: -1, colors: ['yellow', 'lime', 'cyan'], mode: 'burst', gate: () => 1,
+      origin: () => V(b.x, 0.3, b.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * 1.4, 0.8 + r[0], Math.sin(a) * 1.4); } });
+  });
   // --- summoning and dispersal puffs (once per loop)
   spec({ n: 14, P: LOOP, off: 16.2, life: 1.6, size: 0.36, grav: -1, colors: ['cyan', 'purple2', 'pink', 'yellow'], mode: 'burst', gate: () => 1,
     origin: () => V(ctx.choirC.x, 1.6, ctx.choirC.z), vel: (r, k, n) => { const a = (k / n) * TAU; return V(Math.cos(a) * (1.5 + 2 * r[0]), 1.0 + r[1] * 1.8, Math.sin(a) * (1.5 + 2 * r[0])); } });
   spec({ n: 25, P: LOOP, off: 36.0, life: 1.8, size: 0.36, grav: -2, colors: ['red', 'yellow', 'lime', 'cyan', 'magenta'], mode: 'burst', gate: () => 1,
     origin: (tb, r, k) => { const s = ctx.choirSlots[k % ctx.choirSlots.length]; return V(s.x, 1.0, s.z); }, vel: (r, k, n) => { const a = r[0] * TAU; return V(Math.cos(a) * (1 + 3 * r[1]), 1.5 + 2 * r[2], Math.sin(a) * (1 + 3 * r[1])); } });
 
-  const total = specs.reduce((s, sp) => s + sp.n, 0) + 7 * 2;
+  const total = specs.reduce((s, sp) => s + sp.n, 0) + 4 * 2;
   const geo = new THREE.OctahedronGeometry(0.5, 0);
   const mesh = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ toneMapped: false }), total);
   mesh.frustumCulled = false; mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);

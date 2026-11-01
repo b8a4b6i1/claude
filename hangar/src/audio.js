@@ -55,6 +55,8 @@ export function createAudio() {
     sit: () => { tone(MIDI(40), 0.08, { type: 'triangle', vol: 0.6 }); noise(0.06, { vol: 0.2, hp: 500, lp: 2500 }); },
     key: () => noise(0.03, { vol: 0.22, hp: 3500, lp: 8000 }),
     roar: () => { noise(1.6, { vol: 0.6, hp: 80, lp: 1200, slide: -1.5 }); tone(MIDI(28), 1.4, { type: 'sawtooth', vol: 0.4, slide: -0.6, vib: 0.02 }); tone(MIDI(40), 1.0, { duty: 0.125, vol: 0.3, slide: -0.4, at: 0.05 }); },
+    chomp: () => { tone(MIDI(76), 0.07, { duty: 0.5, vol: 0.4, slide: -1.2 }); noise(0.14, { vol: 0.35, hp: 900, lp: 5000, slide: -1.5, at: 0.05 }); tone(MIDI(52), 0.18, { duty: 0.25, vol: 0.35, slide: -1, at: 0.08 }); },
+    pop: () => { tone(MIDI(72), 0.06, { duty: 0.25, vol: 0.3, slide: 1 }); tone(MIDI(84), 0.1, { duty: 0.25, vol: 0.3, at: 0.06 }); },
     burn: () => { noise(1.6, { vol: 0.5, hp: 300, lp: 6000, slide: -2.2 }); tone(MIDI(64), 1.4, { duty: 0.125, vol: 0.3, slide: -1.6, vib: 0.03 }); },
     reform: () => { [48, 52, 55, 60, 64, 67, 72, 76].forEach((m, i) => tone(MIDI(m), 0.18, { duty: 0.25, vol: 0.3, at: i * 0.2 })); noise(0.6, { vol: 0.15, hp: 5000, at: 1.3 }); },
     confetti: () => [76, 79, 83, 88, 91, 95].forEach((m, i) => tone(MIDI(m), 0.09, { duty: 0.125, vol: 0.25, at: i * 0.06 })),
@@ -94,6 +96,7 @@ export function createAudio() {
     if (crossed(a, b, 38.6)) sfx.sit();
     if (crossed(a, b, BEAT.burst)) { sfx.roar(); setTimeout(() => sfx.confetti(), 250); }
     if (crossed(a, b, BEAT.burst + 0.6)) sfx.float();
+    for (const [tk, rs] of [[65, 84], [68.5, 84.6], [72, 85.2], [75.5, 85.8], [79, 86.4]]) { if (crossed(a, b, tk)) sfx.chomp(); if (crossed(a, b, rs)) sfx.pop(); }
     if (crossed(a, b, 52.6)) sfx.burn();
     if (crossed(a, b, 58.6)) sfx.reform();
     if (crossed(a, b, 77.5)) sfx.sleep();

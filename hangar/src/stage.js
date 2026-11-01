@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { P } from './palette.js';
 import { M } from './scene/common.js';
-import { HX, HZ, X0, X1, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash, spellHit, sleepK, devilBody, ashPile } from './config.js';
-import { makeDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
+import { HX, HZ, X0, X1, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash, spellHit, sleepK, devilBody, ashPile, devilChar, BAND } from './config.js';
+import { makeDevil, charDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
 import { createExtras } from './scene/cast2.js';
 import { createMagic } from './scene/magic.js';
 import { createChoir, choirW, choirActive, SLOTS, CHOIR } from './scene/choir.js';
@@ -32,7 +32,7 @@ const VISITOR = makePath([[0, 17, 0.5], [3.5, 12.6, -0.3], [16, 12.6, -0.3], [30
 const VISITOR_YAW = [[0, -1.571], [3.5, -1.571], [9.8, 3.14], [15.4, 3.14], [16.6, -1.75], [30, -1.75], [31, -1.571], [32, -1.571], [33, -2.2], [37.5, -2.2], [39, 3.14], [52, 3.14], [52.8, 0.94], [58, 0.94], [59, 1.571], [90, 1.571]];
 const DEVIL_AT = [10.2, -0.5], DEVIL_HOP = [-11.0, 1.5]; // sleeps by the entry, then patrols the whole hangar: long hall, through the passage, to the spiral in the mask hall and back
 const DEVIL = makePath([[0, 10.2, -0.5], [12, 10.2, -0.5], [18, 4, -2.5], [25, -1, 1.6], [28, -3.2, 2.2], [31, -7, 2.2], [36, -11, 1.5], [61, -11, 1.5], [63.5, -7, 2.2], [66, -3.2, 2.2], [72, 4, -2.5], [76, 10.2, -0.5], [90, 10.2, -0.5]], true);
-const CUBE_A = { x0: 5, a: 2.2, z: -0.6, w: 1, ph: 0 }, CUBE_B = { x0: 0, a: 1.5, z: 3.7, w: 1, ph: 2.1 };
+const CUBE_A = { x0: 3.5, a: 6.0, z: -0.6, w: 1, ph: 0 }, CUBE_B = { x0: 0, a: 1.5, z: 3.7, w: 1, ph: 2.1 };
 const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; return a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))) - a * (2 * Math.floor(ph / Math.PI) + 0); };
 
 export function createStage(scene, parts) {
@@ -50,11 +50,14 @@ export function createStage(scene, parts) {
   const SPELL_TARGETS = [[2.0, 1.4, 1.2], [8.2, 1.2, -2.8], [11.8, 1.4, 3.75]];
   const ctx = { HX, fishAt: (t) => fishAt(t), cubeA: (t) => ({ x: CUBE_A.x0 + CUBE_A.a * Math.sin(TAU * t / LOOP + CUBE_A.ph), z: CUBE_A.z }), devilPos: (t) => { const d = DEVIL(t); return { x: d.x, z: d.z }; }, lev: levAt,
     sleepK, choirW, choirActive, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
-  ctx.spellTarget = (i) => { const p = SPELL_TARGETS[((i % 3) + 3) % 3]; return new THREE.Vector3(p[0], p[1], p[2]); };
+  ctx.spellTarget = (i, tb) => { const j = ((i % 3) + 3) % 3; if (j === 1 && tb !== undefined) { const d = extras.named.deerPos(tb); return new THREE.Vector3(d.x, 1.2, d.z); } const p = SPELL_TARGETS[j]; return new THREE.Vector3(p[0], p[1], p[2]); };
   const magic = createMagic(scene, ctx);
-  const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat }, { o: nm.deer }, { o: nm.singer }, { o: nm.roller, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
+  const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat }, { o: nm.woman }, { o: nm.singer }, { o: nm.roller, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
   const fishPos = new THREE.Vector3(); const stool = parts.stool;
-  const fishAt = (t) => { const u = clamp((t - BEAT.fishIn) / (BEAT.fishOut - BEAT.fishIn), 0, 1); return new THREE.Vector3(lerp(X1 + 6, X0 - 2, u), 3.5 + 0.6 * Math.sin(u * TAU * 3.5) + 0.7 * bell(u, 0.25, 0.4, 0.6, 0.75), 0.5 + 3.0 * Math.sin(u * TAU * 2.2)); };
+  const FISH = (() => { const k = [[0, X1 + 8, 4.0, 1.0], [30, X1 + 8, 4.0, 1.0], [38, 4, 3.9, 0.5], [46, -8, 3.7, 2.5], [52, -3, 4.0, -2.0], [58, -12, 3.6, 0.0], [62.8, -16, 3.3, 0.5]];
+    BAND.forEach((b) => { k.push([b.tk - 1.5, b.x, 3.2, b.z]); k.push([b.tk, b.x + 0.15, 1.75, b.z]); k.push([b.tk + 0.9, b.x, 3.2, b.z]); });
+    k.push([81.5, -20, 3.4, 0.5], [86, 2, 3.9, 1.0], [89, X1 + 8, 4.0, 1.0], [90, X1 + 8, 4.0, 1.0]); return k; })();
+  const fishAt = (t) => { t = clamp(t, 0, 90); let i = 0; while (i < FISH.length - 2 && t > FISH[i + 1][0]) i++; const a = FISH[i], b = FISH[i + 1], u = smooth(clamp((t - a[0]) / Math.max(1e-6, b[0] - a[0]), 0, 1)); return new THREE.Vector3(lerp(a[1], b[1], u), lerp(a[2], b[2], u) + 0.22 * Math.sin(t * 2.1), lerp(a[3], b[3], u)); };
 
   function update(t) {
     t = ((t % LOOP) + LOOP) % LOOP;
@@ -70,7 +73,7 @@ export function createStage(scene, parts) {
     const k = 0.75 + 0.45 * bell(t, 32, 34, 40, 42) + 0.55 * bell(t, BEAT.burst, BEAT.burst + 1, BEAT.burstEnd - 2, BEAT.burstEnd), up = bell(t, BEAT.burst - 0.4, BEAT.burst + 0.8, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1), flame = bell(t, BEAT.burst + 0.4, BEAT.burst + 1.2, BEAT.burstEnd - 2.5, BEAT.burstEnd - 1.5);
     const sl = sleepK(t), cp = t % 4.5, cast = (t < 13.0 || t > 72.4 || (t > 52.8 && t < 61.2)) ? 0 : (cp > 3.9 ? (cp - 3.9) / 0.6 : (cp < 0.35 ? 1 - cp / 0.35 : 0));
     poseDevil(devil, t, k * (1 - walkAmt * 0.4) * (1 - 0.95 * sl), Math.max(up, 0.85 * cast, bell(t, 52.3, 52.7, 54.2, 54.8)) * (1 - sl), Math.max(flame, cast, bell(t, 52.3, 52.6, 54.3, 54.9)) * (1 - sl), { phase: dp.dist * TAU / 1.0, amt: walkAmt });
-    devil.head.rotation.x += 0.75 * sl; devil.torso.rotation.x += 0.45 * sl; const body = devilBody(t); devil.root.scale.set(1.4 * (0.45 + 0.55 * body), 1.4 * body * (1 + 0.012 * Math.sin(t * 1.6) * sl), 1.4 * (0.45 + 0.55 * body)); devil.root.visible = body > 0.01;
+    devil.head.rotation.x += 0.75 * sl; devil.torso.rotation.x += 0.45 * sl; const body = devilBody(t); charDevil(devil, devilChar(t), bell(t, 52.3, 53.0, 54.0, 55.2)); devil.root.scale.set(1.4 * (0.45 + 0.55 * body), 1.4 * body * (1 + 0.012 * Math.sin(t * 1.6) * sl), 1.4 * (0.45 + 0.55 * body)); devil.root.visible = body > 0.01;
     devil.root.position.set(dp.x, levAt(t) + 0.35 * Math.sin(Math.PI * clamp((t - 10.4) / 0.7, 0, 1)), dp.z); if (t > 52.4 && t < 54.6) { devil.root.position.x += 0.06 * Math.sin(t * 55); devil.root.position.z += 0.05 * Math.cos(t * 47); } devil.root.rotation.y = lerpAngle(Math.PI / 4 + 0.2 * Math.sin(t * 0.8), Math.atan2(dvx, dvz), walkAmt);
     fishPos.copy(fishAt(t)); const dd = Math.hypot(fishPos.x - dp.x, fishPos.z - dp.z), near = smooth(1 - dd / 6);
     const toFish = Math.atan2(fishPos.x - dp.x, fishPos.z - dp.z) - devil.root.rotation.y;
@@ -115,6 +118,6 @@ export function createStage(scene, parts) {
     { const pk = ashPile(t); pile.visible = pk > 0.01; pile.scale.set(pk, pk, pk); pile.children.forEach((c) => { if (c.userData.i !== undefined) { c.visible = Math.sin(t * 9 + c.userData.i * 2.3) > -0.2; c.scale.setScalar(0.6 + 0.4 * Math.sin(t * 13 + c.userData.i)); } }); }
     devil.shadow.position.y = (0.02 - devil.root.position.y) / Math.max(0.05, devil.root.scale.y); devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
   }
-  return { update, actors: { devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
+  return { update, actors: { deer: extras.named.deer, devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
 }
 const pacerPhase = (c, t) => { const u = TAU * t / LOOP + c.ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; const s = c.a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))); return s * TAU / 1.3; };

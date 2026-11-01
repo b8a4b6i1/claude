@@ -5,7 +5,7 @@ p.on('pageerror', (e) => errs.push(e.message)); p.on('console', (m) => m.type() 
 await p.goto('http://127.0.0.1:4180/index.html?t=1', { waitUntil: 'load' }); await p.waitForFunction(() => window.__dioramaReady === true, null, { timeout: 120000 });
 const r = await p.evaluate(() => {
   const d = window.__diorama, A = d.stage.actors, THREE = d.THREE; const out = { nan: 0, steps: {}, seat: null, loopSeam: null, inSlab: {} };
-  const roots = { devil: A.devil.root, fish: A.fish.root, sentA: A.sent[0].root, sentB: A.sent[1].root, cubeA: A.cubes[0].root, cubeB: A.cubes[1].root, visitor: A.vis.root };
+  const roots = { devil: A.devil.root, fish: A.fish.root, sentA: A.sent[0].root, sentB: A.sent[1].root, cubeA: A.cubes[0].root, cubeB: A.cubes[1].root, visitor: A.vis.root, deer: A.deer.root };
   const prev = {}; const v = new THREE.Vector3();
   for (let t = 0; t <= 90.0001; t += 0.05) {
     d.stage.update(t); d.scene.updateMatrixWorld(true);

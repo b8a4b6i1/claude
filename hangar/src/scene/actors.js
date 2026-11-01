@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { P } from '../palette.js';
 import { M, box, cyl, sph, cone, limb, beam, contactShadow } from './common.js';
 import { TAU, clamp, lerp, smooth, win, bell, hash } from '../config.js';
 
@@ -7,7 +8,7 @@ const rot = (g, x = 0, y = 0, z = 0) => g.rotation.set(x, y, z);
 
 // ---------------------------------------------------------------- red devil
 export function makeDevil() {
-  const root = new THREE.Group(); const R = M('red'), R2 = M('red2'), R3 = M('red3');
+  const root = new THREE.Group(); const R = M('red').clone(), R2 = M('red2').clone(), R3 = M('red3').clone(); const mats = [R, R2, R3].map((m) => ({ m, base: m.color.clone() }));
   const pelvis = J(root, 0, 0.8, 0); sph(pelvis, 0.2, R2, 0, -0.04, 0, [1.15, 0.8, 0.9]);
   const torso = J(pelvis, 0, 0.06, 0); sph(torso, 0.3, R, 0, 0.3, 0, [1, 1.12, 0.82]); sph(torso, 0.22, R3, 0, 0.22, 0.14, [1, 1.1, 0.5]); // chest + belly patch
   const head = J(torso, 0, 0.72, 0.02); sph(head, 0.26, R, 0, 0.12, 0, [1.05, 0.95, 0.95]);
@@ -37,9 +38,9 @@ export function makeDevil() {
   });
   const tail = []; let tp = J(pelvis, 0, -0.1, -0.2);
   for (let i = 0; i < 5; i++) { const seg = J(tp, 0, 0, 0); cyl(seg, 0.06 - i * 0.008, 0.07 - i * 0.008, 0.2, R2, 0, 0, -0.1, [Math.PI / 2, 0, 0]); tail.push(seg); const nx = J(seg, 0, 0, -0.2); tp = nx; }
-  cone(tp, 0.07, 0.2, M('red3'), 0, 0, -0.08, [-Math.PI / 2, 0, 0], 6);
+  cone(tp, 0.07, 0.2, R3, 0, 0, -0.08, [-Math.PI / 2, 0, 0], 6);
   const shadow = contactShadow(0.55); root.add(shadow); root.scale.setScalar(1.4);
-  return { root, pelvis, torso, head, arms, legs, tail, shadow };
+  return { root, pelvis, torso, head, arms, legs, tail, shadow, mats };
 }
 
 // ---------------------------------------------------------------- diablada dancer (Andean carnival devil)
@@ -79,6 +80,10 @@ export function makeDiablo() {
   const shadow = contactShadow(0.6); root.add(shadow); root.scale.setScalar(1.3);
   return { root, pelvis, torso, head, arms, legs, tail: [], cape, shadow };
 }
+
+/** scorch the devil: k 0..1 blends the body toward soot-black, glow adds an orange ember emissive while it is still burning. */
+const SOOT = new THREE.Color(P.ink), EMBER = new THREE.Color(P.orange);
+export function charDevil(d, k, glow) { if (!d.mats) return; d.mats.forEach(({ m, base }) => { m.color.copy(base).lerp(SOOT, 0.92 * k); m.emissive.copy(EMBER); m.emissiveIntensity = 0.28 * glow * (1 - 0.6 * k); }); }
 
 /** k: dance energy, up: arms raised 0..1, flame 0..1, walk: {phase, amt} when hopping between marks. */
 export function poseDevil(d, t, k, up, flame, walk) {

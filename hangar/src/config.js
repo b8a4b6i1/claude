@@ -27,3 +27,13 @@ export function sleepK(t) { if (t < 50) return 1 - smooth((t - 10.2) / 0.8); ret
 /** The devil burns up at 52.4-54.6 s, lies as ash until 58.4 s and re-forms from the ash by 60.8 s. Returns body scale 0..1 (1 = whole). */
 export function devilBody(t) { if (t < 54.0 || t >= 60.8) return 1; if (t < 55.4) return 1 - smooth((t - 54.0) / 1.4); if (t < 58.4) return 0; return smooth((t - 58.4) / 2.4); }
 export const ashPile = (t) => smooth((t - 54.4) / 1.2) * (1 - smooth((t - 58.4) / 2.4));
+
+/** The goldfish eliminates the five rehearsing musicians one by one (tk = moment it strikes) and they pop back at the end of the loop. */
+export const BAND = [
+  { id: 'singer', x: -18.4, z: 0.0, tk: 65.0 }, { id: 'guitarist', x: -19.5, z: 1.3, tk: 68.5 }, { id: 'bass', x: -21.4, z: 2.3, tk: 72.0 },
+  { id: 'keys', x: -20.3, z: -2.2, tk: 75.5 }, { id: 'drummer', x: -22.5, z: 0.0, tk: 79.0 },
+];
+export const bandReturn = (i) => 84.0 + 0.6 * i;
+export function bandPresence(i, t) { const tk = BAND[i].tk, rs = bandReturn(i); if (t < tk) return 1; if (t < tk + 0.5) return 1 - smooth((t - tk) / 0.5); if (t < rs) return 0; if (t < rs + 0.6) return smooth((t - rs) / 0.6); return 1; }
+/** how scorched the devil is: grows while he burns (52.4-54.4 s), stays through the ash, fades as he re-forms. */
+export function devilChar(t) { if (t < 52.4) return 0; if (t < 59.4) return smooth((t - 52.4) / 1.2); if (t < 61.0) return 1 - smooth((t - 59.4) / 1.6); return 0; }
