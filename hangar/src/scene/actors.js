@@ -170,7 +170,31 @@ export function makePerson(top = 'red', bottom = 'navy') {
   const legs = [-1, 1].map((s) => { const hip = J(pel, s * 0.1, -0.1, 0); limb(hip, 0.42, 0.075, M(bottom)); const kn = J(hip, 0, -0.42, 0); sph(kn, 0.065, M(bottom), 0, 0, 0); limb(kn, 0.4, 0.06, M(bottom)); const an = J(kn, 0, -0.4, 0); box(an, 0.11, 0.08, 0.25, M('wall0'), 0, -0.02, 0.06); return { hip, kn, an }; });
   const shadow = contactShadow(0.5); root.add(shadow); return { root, pel, torso, head, arms, legs, shadow };
 }
+/** Dress a person rig as a diablada dancer: bulging-eyed mask, crest and horns, embroidered vest and apron, cape, motifs on sleeves and boots. */
+export function makeVisitor() {
+  const p = makePerson('white', 'white'); const RED = M('red'), OR = M('orange'), BK = M('black'), SK = M('orange2');
+  for (const s of [-1, 1]) { // apron panels in front of the thighs
+    box(p.pel, 0.14, 0.55, 0.03, RED, s * 0.09, -0.3, 0.16); box(p.pel, 0.02, 0.55, 0.035, OR, s * 0.09 - 0.07, -0.3, 0.16); box(p.pel, 0.02, 0.55, 0.035, OR, s * 0.09 + 0.07, -0.3, 0.16); box(p.pel, 0.15, 0.03, 0.035, OR, s * 0.09, -0.57, 0.16);
+    sph(p.pel, 0.04, BK, s * 0.09, -0.2, 0.18, [0.9, 1.4, 0.3]); sph(p.pel, 0.04, BK, s * 0.09, -0.42, 0.18, [0.9, 1.4, 0.3]);
+  }
+  box(p.torso, 0.42, 0.5, 0.32, RED, 0, 0.3, 0.0); box(p.torso, 0.44, 0.035, 0.34, OR, 0, 0.05, 0); box(p.torso, 0.44, 0.035, 0.34, OR, 0, 0.5, 0); box(p.torso, 0.2, 0.28, 0.02, BK, 0, 0.32, 0.17); sph(p.torso, 0.045, SK, -0.07, 0.36, 0.18, [1, 1, 0.3]); sph(p.torso, 0.045, SK, 0.07, 0.36, 0.18, [1, 1, 0.3]); // vest + ornament
+  const cape = J(p.torso, 0, 0.58, -0.18); box(cape, 0.78, 0.75, 0.025, RED, 0, -0.38, 0); box(cape, 0.78, 0.05, 0.03, OR, 0, -0.76, 0); box(cape, 0.3, 0.4, 0.03, BK, 0, -0.38, -0.01); p.cape = cape;
+  const mask = J(p.head, 0, 0.02, 0.01); mask.scale.setScalar(0.66);
+  sph(mask, 0.22, SK, 0, 0.12, 0, [1, 1.1, 0.95]); sph(mask, 0.15, BK, 0, 0.2, 0.1, [1, 1.2, 0.7]); box(mask, 0.2, 0.06, 0.05, OR, 0, -0.02, 0.2); box(mask, 0.16, 0.025, 0.05, M('red2'), 0, -0.02, 0.225);
+  for (const s of [-1, 1]) {
+    sph(mask, 0.13, M('yellow2'), s * 0.23, 0.17, 0.1, [1, 1, 0.7]); sph(mask, 0.095, M('yellow'), s * 0.24, 0.17, 0.15, [1, 1, 0.5]); sph(mask, 0.05, BK, s * 0.245, 0.17, 0.2, [1, 1, 0.5]);
+    cone(mask, 0.17, 0.62, M('yellow'), s * 0.3, 0.8, 0, [0, 0, -s * 0.55], 6); cone(mask, 0.12, 0.5, M('lime'), s * 0.2, 0.78, 0.04, [0, 0, -s * 0.22], 6); cone(mask, 0.1, 0.42, OR, s * 0.4, 0.66, 0, [0, 0, -s * 0.9], 6);
+    beam(mask, [s * 0.1, 0.3, 0], [s * 0.42, 0.95, 0], 0.045, M('wood5')); beam(mask, [s * 0.42, 0.95, 0], [s * 0.5, 1.22, 0], 0.03, M('wood4'));
+    beam(mask, [s * 0.2, 0.22, 0], [s * 0.62, 0.34, 0], 0.04, M('wood4')); beam(mask, [s * 0.62, 0.34, 0], [s * 0.82, 0.22, 0], 0.03, OR);
+  }
+  cone(mask, 0.09, 0.8, M('pink'), 0, 0.72, 0.02, null, 6); cone(mask, 0.08, 0.45, M('green'), 0, 1.05, 0.02, null, 6); cone(mask, 0.07, 0.35, M('yellow'), 0, 1.25, 0.02, null, 6); sph(mask, 0.09, M('pink2'), 0, 0.5, 0.08, [1, 1.6, 0.6]);
+  for (const a of p.arms) { box(a.el, 0.06, 0.16, 0.02, RED, 0, -0.14, 0.055); box(a.el, 0.045, 0.07, 0.02, RED, 0, -0.04, 0.055, [0, 0, 0.5]); } // sleeve motifs
+  for (const l of p.legs) { box(l.kn, 0.08, 0.18, 0.02, RED, 0, -0.2, 0.065); box(l.kn, 0.06, 0.08, 0.02, RED, 0, -0.07, 0.065, [0, 0, 0.4]); } // boot motifs
+  return p;
+}
+
 export function poseWalk(p, phase, amt, look = 0, tilt = 0) {
+  if (p.cape) rot(p.cape, 0.12 + 0.18 * amt * Math.abs(Math.sin(phase)), 0, 0);
   const sw = Math.sin(phase), cs = Math.cos(phase);
   const kL = 0.05 + 0.46 * Math.max(0, -cs) + 0.22 * Math.max(0, sw), kR = 0.05 + 0.46 * Math.max(0, cs) + 0.22 * Math.max(0, -sw);
   p.pel.position.y = 0.86 + Math.abs(cs) * 0.03 * amt; rot(p.torso, 0.05 * amt, sw * 0.05, 0); rot(p.head, -tilt, look, 0);

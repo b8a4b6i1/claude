@@ -4,7 +4,7 @@ Diorama pixel-art del hangar del video "Presente" (jirafa ardiendo), hecho con l
 Loop de 40 s, función pura de `t`. Slab 24 x 16, cámara fija 45/33, paleta de 64 colores.
 
 - Abrir `hangar-diorama.html` (standalone, funciona por `file://`) o `index.html` + `dist/app.js`.
-- `?t=27` congela un instante; `?dither=0` apaga el dither.
+- `?t=27` congela un instante; `?dither=0` apaga el dither; `?devil=diablada` viste al diablo rojo con el traje de diablada (el visitante ya lo lleva por defecto).
 - Compilar: `npm i && node build.mjs`. QA: `python3 -m http.server 4180` y `node qa/snap.mjs`, `node qa/numbers.mjs`.
 
 Beats: 0 establece / 3-10 el visitante entra / 10-16 mira las pantallas / 12-36 el pez dorado cruza /

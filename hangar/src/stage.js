@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { HX, HZ, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, pulse, hash } from './config.js';
-import { makeDevil, makeDiablo, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
+import { makeDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
 import { drawScreen, drawMonitor } from './scene/screens.js';
 import { makeBurst, mouthGlow, makeMotes } from './scene/fx.js';
 
@@ -30,7 +30,7 @@ const CUBE_A = { x0: -8.4, a: 2.2, z: -0.4, w: 1, ph: 0 }, CUBE_B = { x0: 6.2, a
 const pacerDist = (a, t, ph) => { const u = TAU * t / LOOP + ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; return a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))) - a * (2 * Math.floor(ph / Math.PI) + 0); };
 
 export function createStage(scene, parts) {
-  const devil = new URLSearchParams(location.search).get('devil') === 'classic' ? makeDevil() : makeDiablo(), fish = makeFish(), sent = [makeSentinel(), makeSentinel()], cubes = [makeCube('red'), makeCube('blue')], vis = makePerson('red', 'navy');
+  const devil = new URLSearchParams(location.search).get('devil') === 'diablada' ? makeDiablo() : makeDevil(), fish = makeFish(), sent = [makeSentinel(), makeSentinel()], cubes = [makeCube('red'), makeCube('blue')], vis = makeVisitor();
   for (const o of [devil.root, fish.root, ...sent.map((s) => s.root), ...cubes.map((c) => c.root), vis.root]) scene.add(o);
   scene.add(fish.shadow); fish.shadow.visible = true;
   const burst = makeBurst(scene), motes = makeMotes(scene, LOOP);
