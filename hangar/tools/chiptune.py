@@ -171,18 +171,21 @@ def load_stereo(path, start, dur):
     cmd = ['ffmpeg', '-v', 'error', '-ss', str(start)] + (['-t', str(dur)] if dur else []) + ['-i', path, '-ac', '2', '-ar', str(SR_A), '-f', 'f32le', '-']
     return np.frombuffer(subprocess.run(cmd, capture_output=True, check=True).stdout, dtype=np.float32).reshape(-1, 2).astype(np.float64)
 
-def voice_mag(st, nfft, hop, power=2.0):
+def voice_mag(st, nfft, hop, power=2.0, moving=False):
     """magnitude of the centre-panned part of the mix (where lead vocals usually sit): mid * centre_weight^power"""
     f, t, XL = stft(st[:, 0], SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
     _, _, XR = stft(st[:, 1], SR_A, nperseg=nfft, noverlap=nfft - hop, boundary=None, padded=False)
     a, b = np.abs(XL), np.abs(XR); centre = 1 - np.abs(a - b) / (a + b + 1e-9)
-    return f, t, np.abs((XL + XR) / 2) * centre ** power
+    M = np.abs((XL + XR) / 2) * centre ** power
+    if moving:                                                             # keep what moves: remove each bin's slowly varying background (held notes, drones)
+        bg = median_filter(M, size=(1, int(1.6 / (hop / SR_A)) | 1), mode='nearest'); M = np.maximum(0, M - 1.15 * bg)
+    return f, t, M
 
-def analyse_voice(st, mlo=62, mhi=84, lam=0.5):
+def analyse_voice(st, mlo=62, mhi=84, lam=0.5, power=2.0, moving=False):
     hop = 512; hop_s = hop / SR_A; nfft = 4096
-    f, t, M = voice_mag(st, nfft, hop)
+    f, t, M = voice_mag(st, nfft, hop, power, moving)
     # mask the bass line and its overtones (they otherwise win the pitch search): bass f0 from the 100-way low register
-    fb_, tb_, Mb = voice_mag(st, 8192, hop); bg = np.arange(26, 50.01, 0.25); bfq = 440 * 2 ** ((bg - 69) / 12); Sb = np.zeros((len(bg), Mb.shape[1]))
+    fb_, tb_, Mb = voice_mag(st, 8192, hop, power); bg = np.arange(26, 50.01, 0.25); bfq = 440 * 2 ** ((bg - 69) / 12); Sb = np.zeros((len(bg), Mb.shape[1]))
     for h in range(1, 5):
         pos = bfq * h * 8192 / SR_A; i0 = np.clip(np.floor(pos).astype(int), 0, Mb.shape[0] - 2); Sb += (0.8 ** (h - 1)) * Mb[i0]
     nb = min(Sb.shape[1], M.shape[1]); bf0 = bfq[np.argmax(Sb[:, :nb], 0)]
@@ -226,7 +229,7 @@ def render_voice(an, dur, duty=0.5):
 if __name__ == '__main__':
     src, out = sys.argv[1], sys.argv[2]; start = float(sys.argv[3]) if len(sys.argv) > 3 else 0.0; dur = float(sys.argv[4]) if len(sys.argv) > 4 else 0.0
     if '--voice' in sys.argv:
-        st = load_stereo(src, start, dur); an = analyse_voice(st); total = len(st) / SR_A; mix, p1 = render_voice(an, total)
+        st = load_stereo(src, start, dur); an = analyse_voice(st, **({'mlo': 52, 'mhi': 76, 'power': 0.0, 'moving': True} if '--moving' in sys.argv else {})); total = len(st) / SR_A; mix, p1 = render_voice(an, total)
         write16(out + '-voice-44k.wav', mix); write8(out + '-voice-22k-u8.wav', resample_poly(mix, 1, 2), 22050)
         import json; print(json.dumps(dict(seconds=round(total, 1), notes=len(an['mel']), range=[int(min(n[2] for n in an['mel'])), int(max(n[2] for n in an['mel']))], voiced_pct=round(100 * float(np.mean(an['voiced'])), 1), pulse_levels=int(p1.max()) + 1))); sys.exit(0)
     y = load(src, start, dur); an = analyse(y); total = len(y) / SR_A
