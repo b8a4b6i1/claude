@@ -61,6 +61,8 @@ const css = `
   }
   #snd { position: fixed; right: 14px; bottom: 14px; width: 40px; height: 40px; border: 2px solid #1a1816; background: #fff; border-radius: 4px; padding: 6px; cursor: pointer; opacity: 0.55; }
   #snd:hover, #snd:focus-visible { opacity: 1; outline: none; }
+  #snd.wait { animation: sndpulse 1.1s ease-in-out infinite; }
+  @keyframes sndpulse { 0%, 100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
   #snd svg { width: 100%; height: 100%; display: block; }
   #fallback {
     position: fixed;

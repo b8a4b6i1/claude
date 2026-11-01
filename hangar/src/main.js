@@ -38,13 +38,14 @@ const unlock = () => audio.unlock();
 unlock();                                                                       // try to start the sound as soon as the page loads (works when the browser allows autoplay)
 ['pointerdown', 'pointerup', 'keydown', 'touchstart', 'touchend', 'wheel', 'click'].forEach((ev) => window.addEventListener(ev, unlock, { passive: true })); // otherwise the first gesture does it
 document.addEventListener('visibilitychange', () => { if (!document.hidden) unlock(); });
-setInterval(() => { on.setAttribute('display', audio.enabled && audio.running ? 'inline' : 'none'); off.setAttribute('display', audio.enabled && audio.running ? 'none' : 'inline'); }, 400);
-sndBtn.addEventListener('click', (e) => { e.stopPropagation(); audio.unlock(); audio.setEnabled(!audio.enabled); showSnd(); });
+setInterval(() => { sndBtn.classList.toggle('wait', audio.enabled && !audio.running); showSnd(); }, 250);   // the icon always shows sound ON (not muted); it only pulses while the browser still holds the audio back
+sndBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!audio.running) { audio.unlock(); return; } audio.setEnabled(!audio.enabled); showSnd(); });
 const draw = (t) => { stage.update(t); post.uniforms.uTime.value = t; post.uniforms.uLoop.value = LOOP; post.render(scene, camera); };
 let t0 = performance.now(), ready = false;
 function loop(now) { const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
 window.addEventListener('resize', resize); window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 resize();
+window.__audio = audio;
 window.__diorama = { THREE, scene, camera, renderer, post, stage, parts, CLIP, freeze(t) { frozen = t; resize(); draw(t); }, view(pos, tgt) { camera.position.set(...pos); camera.lookAt(...tgt); } };
 requestAnimationFrame(loop);
 

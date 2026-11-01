@@ -112,6 +112,6 @@ export function createAudio() {
     if (t - last > 0.5 || t === last) { last = t; return; } // freeze / seek / tab was hidden
     fire(last, t); last = t;
   }
-  function unlock() { init(); if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {}); unlocked = true; }
+  function unlock() { init(); if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {}); unlocked = true; }
   return { update, unlock, setEnabled(v) { enabled = v; if (ctx) { if (v && ctx.state === 'suspended') ctx.resume(); master.gain.value = v ? 0.22 : 0; } }, get enabled() { return enabled; }, get running() { return !!ctx && ctx.state === 'running'; }, get unlocked() { return unlocked; } };
 }
