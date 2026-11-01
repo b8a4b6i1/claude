@@ -111,7 +111,7 @@ function fanCarpet() {
     const m = new THREE.Mesh(new THREE.CircleGeometry(3.2, 3, (i / n) * Math.PI * 1.1, (Math.PI * 1.1) / n), M(RAINBOW[i % RAINBOW.length]));
     m.rotation.x = -Math.PI / 2; m.position.y = 0; m.receiveShadow = true; g.add(m);
   }
-  g.position.set(-19.0, 0.03, 2.8); g.rotation.y = 0.7; return g;
+  g.position.set(-21.5, 0.05, 1.2); g.rotation.y = 0.7; return g;
 }
 
 function stoneMask(parts) {
@@ -179,8 +179,10 @@ export function buildHangar(scene) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(1.2 + r() * 1.6, 0.07), M(['wall0', 'cyan2', 'pink2', 'yellow2'][i % 4])); m.rotation.x = -Math.PI / 2;
     m.rotation.z = r() * Math.PI; m.position.set(-22 + r() * 44, 0.03, -3.5 + r() * 7); world.add(m);
   }
+  for (let i = 0; i < 7; i++) box(world, 6.0, 0.03, 0.3, M(['red', 'orange', 'yellow', 'lime', 'cyan', 'blue', 'purple'][i]), -17.0, 0.035, 0.6 + i * 0.36, [0, 0.12, 0]); // rainbow stripes toward the band
+  for (let i = 0; i < 10; i++) for (let j = 0; j < 4; j++) box(world, 0.9, 0.03, 0.9, M(['yellow', 'cyan', 'pink', 'lime', 'ink', 'orange'][(i + j * 2) % 6]), -20.0 + i * 0.75 + j * 0.35, 0.04, 2.3 + j * 0.75, [0, 0.4, 0]); // harlequin tiles
   const sp = spiral(); world.add(sp); parts.spiral = sp; world.add(fanCarpet());
-  const band = new THREE.Group(); band.position.set(-20.6, 0, -1.4); world.add(band); parts.band = band;
+  const band = new THREE.Group(); band.position.set(-19.8, 0, -1.8); world.add(band); parts.band = band;
   box(band, 6.2, 0.03, 4.6, M('teal2'), 0, 0.02, 0.1); box(band, 5.8, 0.035, 4.2, M('green2'), 0, 0.025, 0.1); // green floral rug
   box(band, 4.8, 0.04, 3.2, M('red2'), -0.2, 0.035, -0.4); box(band, 4.4, 0.045, 2.8, M('red'), -0.2, 0.04, -0.4); box(band, 3.2, 0.05, 1.6, M('navy'), -0.2, 0.045, -0.4); cyl(band, 0.55, 0.55, 0.055, M('wood6'), -0.2, 0.05, -0.4, null, 18); // red rug, blue field, medallion
   const amp = (x, z, ry) => { const a = new THREE.Group(); box(a, 0.9, 0.7, 0.4, M('wood6'), 0, 0.35, 0); box(a, 0.78, 0.5, 0.04, M('wood2'), 0, 0.35, 0.21); a.position.set(x, 0.05, z); a.rotation.y = ry; band.add(a); };
@@ -188,33 +190,48 @@ export function buildHangar(scene) {
   box(band, 0.7, 1.7, 0.6, M('black'), 0.4, 0.9, -1.6); box(band, 0.7, 0.3, 0.5, M('steel3'), 0.4, 1.9, -1.6); box(band, 0.5, 0.5, 0.04, M('steel2'), 0.4, 1.0, -1.28); // bass stack
   box(band, 1.5, 0.08, 0.5, M('orange2'), 0.2, 0.85, 0.7); for (let i = 0; i < 14; i++) box(band, 0.07, 0.03, 0.3, M('white'), -0.45 + i * 0.1, 0.9, 0.78); beam(band, [-0.5, 0.05, 0.6], [-0.2, 0.82, 0.7], 0.04, M('steel2')); beam(band, [0.9, 0.05, 0.6], [0.6, 0.82, 0.7], 0.04, M('steel2')); // keyboard on a stand
   for (const [gx, gc] of [[-1.5, 'cyan'], [-0.6, 'wall0']]) { box(band, 0.34, 0.5, 0.08, M(gc), gx, 0.5, 0.2, [0, 0, 0.08]); box(band, 0.07, 0.8, 0.05, M('wood1'), gx + 0.03, 1.15, 0.2, [0, 0, 0.08]); box(band, 0.12, 0.14, 0.05, M('wood4'), gx + 0.06, 1.62, 0.2); } // guitars
-  box(band, 0.5, 1.9, 0.5, M('wood2'), -2.6, 1.0, -1.7); for (let i = 0; i < 8; i++) for (let j = 0; j < 6; j++) box(band, 0.04, 0.04, 0.03, M('ink'), -2.8 + i * 0.056, 0.4 + j * 0.2, -1.43); // synth tower with knobs
+  { const mg = new THREE.Group(); box(mg, 1.6, 2.4, 0.6, M('wood2'), 0, 1.3, 0); for (let i = 0; i < 12; i++) for (let j = 0; j < 7; j++) box(mg, 0.05, 0.05, 0.03, M('ink'), -0.7 + i * 0.12, 0.45 + j * 0.28, 0.32); box(mg, 1.5, 0.12, 0.8, M('wood6'), 0, 0.42, 0.4); for (let k = 0; k < 18; k++) box(mg, 0.06, 0.03, 0.28, M(k % 3 === 1 ? 'ink' : 'white'), -0.68 + k * 0.08, 0.5, 0.62); mg.position.set(-17.5, 0, 3.7); mg.rotation.y = Math.PI; world.add(mg); } // synth tower on the left-hand side of the mask hall with knobs
 
-  // back walls: -Z wall (right on screen) and -X wall (left on screen)
-  const zShots = [{ x: 3, y: 2.2, w: 3.2, h: 2.0 }, { x: 9, y: 2.2, w: 3.4, h: 2.0 }, { x: 15, y: 2.2, w: 3.2, h: 2.0 }];
-  const wz = buildWall(SLAB.w, 3, zShots, 8); wz.position.set(0, 0, -HZ); world.add(wz);
-  const xShots = [];
-  const wx = buildWall(SLAB.d, 5, xShots, 2); wx.rotation.y = Math.PI / 2; wx.position.set(-HX, 0, 0); world.add(wx);
-  parts.screens = [...zShots, ...xShots].map((s, i) => ({ ...s, id: i }));
+  // Walkthrough frame: the camera walks from the entry (+X end) toward the mask (-X end), u = 24 - x. Right-hand wall = back wall (-Z); left-hand wall is the cut-away side (+Z).
+  const rightShots = [
+    { x: 16, y: 2.2, w: 3.2, h: 2.0, mode: 'audience' }, { x: 11, y: 2.3, w: 5.2, h: 2.8, mode: 'big' },
+    { x: 6, y: 2.2, w: 3.2, h: 2.0, mode: 'stage' }, { x: 3, y: 2.2, w: 2.6, h: 1.9, mode: 'police' }];
+  const wz = buildWall(SLAB.w, 3, rightShots, 8); wz.position.set(0, 0, -HZ); world.add(wz);
+  const wx = buildWall(SLAB.d, 5, [], 2); wx.rotation.y = Math.PI / 2; wx.position.set(-HX, 0, 0); world.add(wx);
+  // left-hand wall screens stand on the cut-away edge as free panels facing the camera side
+  const leftShots = [{ x: 15, y: 2.0, w: 3.0, h: 2.0, mode: 'film' }, { x: 12.2, y: 1.7, w: 2.0, h: 1.9, mode: 'pink' }, { x: 3.5, y: 1.9, w: 2.6, h: 1.8, mode: 'face' }, { x: -4.2, y: 1.8, w: 2.2, h: 2.3, mode: 'blackface' }];
+  for (const sc of leftShots) { const g = new THREE.Group(); box(g, sc.w + 0.5, sc.h + 0.5, 0.2, M('wood5'), sc.x, sc.y, HZ - 0.15); const tex = canvasTex(96, Math.round(96 * sc.h / sc.w), () => {}); const m = new THREE.Mesh(new THREE.PlaneGeometry(sc.w, sc.h), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); m.position.set(sc.x, sc.y, HZ - 0.04); g.add(m); sc.tex = tex; world.add(g); }
+  // red carpet strip under the big concert screen
+  box(world, 5.6, 0.04, 1.0, M('red2'), 11, 0.03, -HZ + 0.7);
+  parts.screens = [...rightShots, ...leftShots].map((sc, i) => ({ ...sc, id: i }));
+  // mask-hall right-hand wall: green-framed timber gate and the 'el buen pueblo' door; left-hand: flame-logo door and children's frieze
+  { const gt = new THREE.Group(); box(gt, 3.0, 3.6, 0.2, M('green2'), -7.5, 1.8, -HZ + 0.25); box(gt, 2.4, 3.2, 0.24, M('wood3'), -7.5, 1.6, -HZ + 0.3); for (let k = 0; k < 5; k++) box(gt, 0.04, 3.2, 0.26, M('wood5'), -8.4 + k * 0.45, 1.6, -HZ + 0.31); world.add(gt);
+    const dd = new THREE.Group(); box(dd, 2.2, 3.2, 0.2, M('wood4'), -15, 1.6, -HZ + 0.28); box(dd, 1.2, 0.75, 0.04, M('red'), -15.05, 1.9, -HZ + 0.4); sph(dd, 0.3, M('wall0'), -15.35, 2.0, -HZ + 0.43, [1, 0.8, 0.2]); cone(dd, 0.06, 0.3, M('red3'), -15.55, 2.35, -HZ + 0.43, null, 4); world.add(dd);
+    const fd = new THREE.Group(); box(fd, 2.4, 3.2, 0.2, M('wood3'), -10, 1.6, HZ - 0.12); cyl(fd, 0.55, 0.55, 0.05, M('orange'), -10, 2.2, HZ - 0.0, [Math.PI / 2, 0, 0], 20); cone(fd, 0.22, 0.5, M('ink'), -10, 2.2, HZ + 0.03, [Math.PI / 2, 0, 0], 8); box(fd, 2.0, 0.5, 0.04, M('wood6'), -10, 0.95, HZ - 0.0); for (let k = 0; k < 8; k++) box(fd, 0.1, 0.18, 0.03, M(['red', 'cyan', 'yellow', 'lime', 'pink', 'blue2', 'orange', 'purple2'][k]), -10.9 + k * 0.26, 0.95, HZ + 0.03); world.add(fd); }
 
-  for (const [x, z] of [[-18, -3.6], [-12, -3.6], [0, -3.6], [6, -3.6], [12, -3.6], [18, -3.6]]) { // interior posts with knee braces
+  for (const [x, z] of [[20, -3.6], [14, -3.6], [8.5, -3.6], [2, -3.6], [-9, -3.6], [-16.5, -3.6], [17, 3.4], [6, 3.4], [-14.5, 3.4], [-19.5, 3.4]]) { // interior posts
     box(world, 0.46, WALL_H, 0.46, M('con0'), x, WALL_H / 2, z); box(world, 0.52, 1.1, 0.52, M('con4'), x, 0.55, z); box(world, 0.8, 0.22, 0.8, M('con2'), x, 0.11, z);
     parts.posts.push([x, z]);
   }
 
   if (IMGS.ven) { const vt = new THREE.Texture(IMGS.ven); vt.colorSpace = THREE.SRGBColorSpace; vt.magFilter = THREE.NearestFilter; vt.minFilter = THREE.NearestFilter; vt.generateMipmaps = false; vt.needsUpdate = true;
-    const vm = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.66), new THREE.MeshBasicMaterial({ map: vt, toneMapped: false })); vm.position.set(-21.0, 1.9, -HZ + 0.3); world.add(vm); } // "VEN A DORMIR" graffiti panel, cropped from the video
+    const vm = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.66), new THREE.MeshBasicMaterial({ map: vt, toneMapped: false })); vm.position.set(-19.0, 1.9, -HZ + 0.3); world.add(vm); } // "VEN A DORMIR" graffiti panel, cropped from the video
   // landmark: stone mask centred on the -Z wall
-  const mask = stoneMask(parts); mask.scale.setScalar(1.3); mask.position.set(MARK.mask[0], 3.6, -HZ + 0.85); world.add(mask);
-  box(world, 4.2, 4.6, 0.12, M('wood5'), MARK.mask[0], 3.2, -HZ + 0.36); // dark recess behind it
-  parts.maskPos = new THREE.Vector3(MARK.mask[0], 3.3, -HZ + 1.3);
+  const mask = stoneMask(parts); mask.scale.setScalar(1.3); mask.rotation.y = Math.PI / 2; mask.position.set(-HX + 0.85, 3.6, MARK.mask[1]); world.add(mask);
+  box(world, 0.12, 4.6, 4.2, M('wood5'), -HX + 0.36, 3.2, MARK.mask[1]); // dark recess behind it
+  parts.maskPos = new THREE.Vector3(-HX + 1.3, 3.3, MARK.mask[1]);
 
   // whitewashed cabin with window recesses and a door, beside the dividing wall; abstract red marks only
   const wp = new THREE.Group(); box(wp, 4.6, 3.1, 3.2, M('wall0'), 0, 1.55, 0); box(wp, 4.7, 0.16, 3.3, M('wall2'), 0, 3.15, 0); box(wp, 4.7, 0.22, 3.3, M('con2'), 0, 0.11, 0);
   for (const wx of [-1.5, 0.2, 1.5]) box(wp, 0.7, 1.4, 0.1, M('steel3'), wx, 1.7, 1.62);
   box(wp, 0.9, 2.1, 0.1, M('wood5'), 1.9, 1.05, 1.62);
   for (let i = 0; i < 2; i++) box(wp, 0.16, 0.9, 0.04, M('red'), -1.7 + i * 0.5, 0.9, 1.63, [0, 0, 0.3 * (i ? 1 : -1)]);
-  wp.position.set(-0.4, 0, -2.4); wp.rotation.y = -0.15; world.add(wp);
+  wp.position.set(-2.5, 0, 1.6); wp.rotation.y = Math.PI / 2 - 0.1; world.add(wp);
+  const c1 = new THREE.Group(); box(c1, 4.4, 3.2, 0.3, M('wall0'), 0, 1.6, 0); box(c1, 4.5, 0.16, 0.4, M('wall2'), 0, 3.28, 0); box(c1, 4.5, 0.2, 0.4, M('con2'), 0, 0.1, 0); box(c1, 0.3, 3.2, 1.6, M('wall0'), 2.0, 1.6, -0.9); box(c1, 0.3, 3.2, 1.6, M('wall0'), -2.0, 1.6, -0.9); // freestanding white wall with side returns
+  for (let i = 0; i < 3; i++) { box(c1, 0.2, 0.9, 0.04, M('red'), -1.3 + i * 1.3, 1.1, 0.18, [0, 0, 0.3 * (i - 1)]); box(c1, 0.7, 0.14, 0.04, M('red'), -1.3 + i * 1.3, 0.62, 0.18); }
+  box(c1, 1.2, 1.3, 0.03, M('wall1'), -1.2, 2.3, 0.17); sph(c1, 0.3, M('orange2'), 1.2, 2.3, 0.2, [1, 1.1, 0.2]); // poster blocks, abstract
+  c1.position.set(5.0, 0, 1.4); c1.rotation.y = Math.PI / 2 - 0.08; world.add(c1);
+  const dr = new THREE.Group(); box(dr, 1.4, 2.3, 0.1, M('con1'), 0, 1.15, 0); box(dr, 1.2, 2.0, 0.06, M('con2'), 0, 1.15, 0.07); sph(dr, 0.15, M('white'), 0, 1.7, 0.12, [1, 1, 0.3]); for (const sx of [-1, 1]) sph(dr, 0.075, M('white'), sx * 0.15, 1.87, 0.12, [1, 1, 0.3]); dr.position.set(0.0, 0, -HZ + 0.3); world.add(dr); // grey door with the mouse-skull mark
   // dividing wall with a brick-framed doorway, 3 m high so tall things behind it still read
   const dv = new THREE.Group(); dv.position.set(DIV_X, 0, 0); world.add(dv);
   box(dv, 0.34, 3.0, DOOR.z0 + HZ, M('wall0'), 0, 1.5, (-HZ + DOOR.z0) / 2); box(dv, 0.34, 3.0, HZ - DOOR.z1, M('wall0'), 0, 1.5, (HZ + DOOR.z1) / 2);
@@ -222,19 +239,19 @@ export function buildHangar(scene) {
   for (const [zz, sg] of [[DOOR.z0, -1], [DOOR.z1, 1]]) { box(dv, 0.5, 3.0, 0.42, M('rust1'), 0, 1.5, zz + sg * 0.21); for (let k = 0; k < 8; k++) box(dv, 0.52, 0.05, 0.43, M('rust2'), 0, 0.3 + k * 0.36, zz + sg * 0.21); }
   box(dv, 0.5, 0.2, DOOR.z1 - DOOR.z0 + 0.9, M('wood4'), 0, 2.56, (DOOR.z0 + DOOR.z1) / 2);
   // eclipse doorway on the long wall: black opening with an ember ring that flares at the burst
-  box(world, 2.5, 3.4, 0.12, M('ink'), 21, 1.7, -HZ + 0.3); box(world, 2.9, 0.3, 0.3, M('wood5'), 21, 3.55, -HZ + 0.32);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.07, 10, 36), new THREE.MeshStandardMaterial({ color: P.orange, emissive: P.orange, emissiveIntensity: 0.7 })); ring.position.set(21, 2.2, -HZ + 0.42); world.add(ring); parts.eclipse = ring.material;
+  box(world, 2.5, 3.4, 0.12, M('ink'), -2.5, 1.7, -HZ + 0.3); box(world, 2.9, 0.3, 0.3, M('wood5'), -2.5, 3.55, -HZ + 0.32);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.07, 10, 36), new THREE.MeshStandardMaterial({ color: P.orange, emissive: P.orange, emissiveIntensity: 0.7 })); ring.position.set(-2.5, 2.2, -HZ + 0.42); world.add(ring); parts.eclipse = ring.material;
   const lt = canvasTex(256, 48, (c, w, h2) => { c.clearRect(0, 0, w, h2); c.fillStyle = P.red; c.font = 'bold 40px Impact, Arial Black, sans-serif'; c.textAlign = 'center'; c.fillText('JIRAFA ARDIENDO', w / 2, 38); });
-  const lm = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 0.55), new THREE.MeshBasicMaterial({ map: lt, transparent: true, alphaTest: 0.4, toneMapped: false })); lm.position.set(18.3, 0.9, -HZ + 0.23); world.add(lm);
+  const lm = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 0.55), new THREE.MeshBasicMaterial({ map: lt, transparent: true, alphaTest: 0.4, toneMapped: false })); lm.position.set(-4.6, 0.9, -HZ + 0.23); lm.scale.setScalar(0.75); world.add(lm);
   // desk + monitor, facing +X
-  const desk = deskSet(parts); desk.position.set(MARK.desk[0], 0, MARK.desk[1]); desk.rotation.y = Math.PI / 2; world.add(desk);
-  const st = desk.userData.stool.clone().applyEuler(new THREE.Euler(0, Math.PI / 2, 0)).add(new THREE.Vector3(MARK.desk[0], 0, MARK.desk[1]));
+  const desk = deskSet(parts); desk.position.set(MARK.desk[0], 0, MARK.desk[1]); world.add(desk);
+  const st = desk.userData.stool.clone().add(new THREE.Vector3(MARK.desk[0], 0, MARK.desk[1]));
   parts.stool = st;
-  const dk = drumKit(); dk.position.set(2.1, 0.05, -0.2); dk.rotation.y = 0.5; parts.band.add(dk);
+  const dk = drumKit(); dk.position.set(-1.7, 0.05, -1.2); dk.rotation.y = -0.4; parts.band.add(dk);
   // speaker stack and crates near the right back
   const sp1 = new THREE.Group(); box(sp1, 1.0, 1.4, 0.8, M('steel3'), 0, 0.7, 0); cyl(sp1, 0.32, 0.32, 0.05, M('con4'), 0, 0.5, 0.42, [Math.PI / 2, 0, 0], 16); cyl(sp1, 0.22, 0.22, 0.05, M('con4'), 0, 1.05, 0.42, [Math.PI / 2, 0, 0], 16);
   box(sp1, 1.0, 0.9, 0.8, M('steel2'), 0, 1.85, 0); cyl(sp1, 0.28, 0.28, 0.05, M('con4'), 0, 1.85, 0.42, [Math.PI / 2, 0, 0], 16);
-  sp1.position.set(22.3, 0, -3.9); sp1.rotation.y = -0.3; world.add(sp1);
+  sp1.position.set(-21.4, 0, -3.9); sp1.rotation.y = -0.3; world.add(sp1);
   for (let i = 0; i < 3; i++) box(world, 0.9, 0.55, 0.7, M(['wood2', 'wood1', 'wood3'][i]), -22.5 + i * 0.95, 0.275 + (i === 1 ? 0.55 : 0), 3.9 - i * 0.2, [0, 0.1 * i, 0]);
   parts.world = world;
   return parts;

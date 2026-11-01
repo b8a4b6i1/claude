@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { M, hex } from './common.js';
-import { HZ, MARK, BEAT, TAU, clamp, lerp, smooth, hash, bell } from '../config.js';
+import { HZ, HX, MARK, BEAT, TAU, clamp, lerp, smooth, hash, bell } from '../config.js';
 import { P } from '../palette.js';
 
 const RB = ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'magenta', 'pink', 'red3', 'blue2'];
@@ -14,7 +14,7 @@ export function makeBurst(scene) {
   for (let i = 0; i < N; i++) {
     const a = hash(i * 3 + 1) * TAU, r = Math.sqrt(hash(i * 3 + 2)) * 4.0;
     const B = new THREE.Vector3(MARK.spiral[0] + 1.5 + Math.cos(a) * r, 0.05, MARK.spiral[1] + Math.sin(a) * r * 0.9);
-    const A = new THREE.Vector3(MARK.mask[0] + (hash(i * 5) - 0.5) * 0.5, 3.3 + (hash(i * 7) - 0.5) * 0.3, -HZ + 1.5);
+    const A = new THREE.Vector3(MARK.mask[0] + 1.0, 3.3 + (hash(i * 7) - 0.5) * 0.3, MARK.mask[1] + (hash(i * 5) - 0.5) * 0.5);
     const C = A.clone().lerp(B, 0.5).add(new THREE.Vector3((hash(i * 11) - 0.5) * 3, 2.2 + hash(i * 13) * 2.4, 1.0));
     items.push({ A, B, C, d: hash(i * 17) * 3.6, life: 2.4 + hash(i * 19) * 1.4, spin: hash(i * 23) * 9 + 3, ax: new THREE.Vector3(hash(i), hash(i + 5), hash(i + 9)).normalize(), land: hash(i * 29) * TAU });
     mesh.setColorAt(i, hex(RB[i % RB.length]));

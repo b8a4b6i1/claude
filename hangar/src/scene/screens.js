@@ -7,8 +7,21 @@ const RB = ['red', 'orange', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple'
 const col = (n) => P[n];
 
 /** Every wall screen is a pure function of t; abstract colour fields only. */
+function cover(ctx, im, w, h, z = 1, ox = 0) {
+  const ar = w / h, iw = im.width, ih = im.height; let sw = iw, sh = iw / ar; if (sh > ih) { sh = ih; sw = ih * ar; } sw /= z; sh /= z;
+  ctx.drawImage(im, (iw - sw) / 2 + ox, (ih - sh) / 2, sw, sh, 0, 0, w, h);
+}
+function fixed(s, t, ctx, w, h) {
+  const k = (t % 12) / 12;
+  if (s.mode === 'audience' || s.mode === 'stage' || s.mode === 'face' || s.mode === 'police') { if (IMGS[s.mode]) cover(ctx, IMGS[s.mode], w, h, 1 + 0.08 * k); else { ctx.fillStyle = col('ink'); ctx.fillRect(0, 0, w, h); } return; }
+  if (s.mode === 'big') { ctx.fillStyle = col('navy'); ctx.fillRect(0, 0, w, h); for (let i = 0; i < 7; i++) { ctx.fillStyle = col(['magenta', 'purple', 'blue2', 'pink', 'purple2', 'blue', 'red3'][i]); ctx.beginPath(); ctx.moveTo(w * (0.05 + i * 0.15), 0); ctx.lineTo(w * (0.05 + i * 0.15) + Math.sin(t * 0.8 + i) * w * 0.25, h); ctx.lineTo(w * (0.05 + i * 0.15) + Math.sin(t * 0.8 + i) * w * 0.25 + 8, h); ctx.lineTo(w * (0.05 + i * 0.15) + 6, 0); ctx.fill(); } ctx.fillStyle = col('ink'); ctx.fillRect(w * 0.3, h * 0.35, w * 0.4, h * 0.65); return; }
+  if (s.mode === 'film') { ctx.fillStyle = col('grey2'); ctx.fillRect(0, 0, w, h); ctx.fillStyle = col('ink'); ctx.fillRect(0, h * 0.55, w, h * 0.45); ctx.fillStyle = col('wall0'); ctx.fillRect(w * 0.45, h * 0.15, w * 0.12, h * 0.8); ctx.fillStyle = col('skin0'); ctx.fillRect(w * 0.46, h * 0.1, w * 0.1, h * 0.12); for (let i = 0; i < 20; i++) { ctx.fillStyle = col('con0'); ctx.fillRect(hash(i + Math.floor(t * 12)) * w, hash(i * 3 + Math.floor(t * 12)) * h, 1, 3); } return; }
+  if (s.mode === 'pink') { ctx.fillStyle = col('pink'); ctx.fillRect(0, 0, w, h); ctx.fillStyle = col('ink'); ctx.fillRect(w * 0.3, h * 0.2, w * 0.4, h * 0.7); ctx.fillStyle = col('skin0'); ctx.fillRect(w * 0.36, h * 0.3, w * 0.28, h * 0.4); ctx.fillStyle = col('ink'); ctx.fillRect(w * 0.4, h * 0.42, w * 0.06, h * 0.05); ctx.fillRect(w * 0.54, h * 0.42, w * 0.06, h * 0.05); return; }
+  if (s.mode === 'blackface') { ctx.fillStyle = col('ink'); ctx.fillRect(0, 0, w, h); for (let i = 0; i < 9; i++) { ctx.fillStyle = col(i % 2 ? 'white' : 'wall0'); ctx.fillRect(w * (0.3 + 0.05 * Math.sin(i * 1.7 + t * 0.6)), h * (0.1 + i * 0.09), w * (0.3 + 0.08 * Math.sin(i * 2.3)), h * 0.07); } return; }
+}
 export function drawScreen(s, t) {
   const { ctx, canvas } = s.tex.userData; const w = canvas.width, h = canvas.height;
+  if (s.mode) { fixed(s, t, ctx, w, h); const f2 = pulse(t, BEAT.burst, 0.55); if (f2 > 0.05) { ctx.globalAlpha = Math.min(0.8, f2); ctx.fillStyle = col(RB[Math.floor(t * 10) % RB.length]); ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; } s.tex.needsUpdate = true; return; }
   const flash = pulse(t, BEAT.burst, 0.55) * 1.0, on = smooth((t - 0.4 - s.id * 0.25) / 0.8);
   ctx.fillStyle = col('ink'); ctx.fillRect(0, 0, w, h);
   const kind = s.id % 5, tt = t + s.id * 3.7; const reel = REEL.map((k) => IMGS[k]).filter(Boolean);
