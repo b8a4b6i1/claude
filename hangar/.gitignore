@@ -2,7 +2,5 @@ node_modules/
 dist/
 refs/video/
 qa/shots/
-audio/
-src/song.js
 hangar-diorama.html
 index.html
