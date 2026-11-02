@@ -94,3 +94,49 @@ export function makePoly() {
   const shadow = contactShadow(0.55); root.add(shadow); root.scale.setScalar(0.88);
   return { root, body, head, armL, armR, stick, legs, shadow };
 }
+
+// ---------------------------------------------------------------- Proxy: glitchy goat/horse head made of rainbow scan-lines, hot-pink patterned bodysuit, white gloves, black chest badge, a pink keyboard, white roller skates with rainbow laces and candy-coloured wheels
+export function makeProxy() {
+  const p = makePerson('magenta', 'magenta', { skin: 'white', hair: 'magenta', shoes: 'white' });
+  p.head.children.forEach((c) => { c.visible = false; });
+  const cols = ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2', 'magenta'], head = p.head;
+  const snout = J(head, 0, 0.11, 0.07); snout.rotation.x = 0.45;
+  for (let i = 0; i < 9; i++) box(snout, 0.17 - 0.007 * i, 0.027, 0.36 - 0.016 * i, M(cols[i % 8]), 0, (i - 4) * 0.026, 0.1 - 0.006 * i);   // muzzle: stacked scan-line slices
+  box(head, 0.2, 0.22, 0.17, M('wall0'), 0, 0.16, -0.04); for (let i = 0; i < 5; i++) box(head, 0.2, 0.012, 0.171, M(cols[(i * 3) % 8]), 0, 0.07 + i * 0.046, -0.04);
+  box(head, 0.23, 0.07, 0.02, M('ink'), 0, 0.17, 0.05, [0, 0, 0.35]); sph(head, 0.014, M('red'), 0.07, 0.15, 0.06); sph(head, 0.014, M('red'), -0.07, 0.15, 0.06); sph(head, 0.016, M('ink'), 0, 0.02, 0.4);
+  for (const s of [-1, 1]) cone(head, 0.045, 0.16, M('orange'), s * 0.09, 0.3, -0.06, [0.2, 0, -s * 0.5], 4);
+  const swoosh = [[0, 0.27, -0.1, 'blue2'], [0, 0.34, -0.2, 'pink'], [0, 0.37, -0.32, 'orange'], [0, 0.34, -0.43, 'yellow'], [0, 0.28, -0.5, 'cyan']];                 // curved rainbow horn
+  for (let i = 0; i < swoosh.length - 1; i++) beam(head, swoosh[i].slice(0, 3), swoosh[i + 1].slice(0, 3), 0.045, M(swoosh[i][3]));
+  const glitch = J(head, 0, 0, 0); box(glitch, 0.2, 0.2, 0.02, M('blue2'), 0.03, 0.14, -0.13); box(glitch, 0.2, 0.2, 0.02, M('pink'), -0.03, 0.14, -0.12); p.glitch = glitch;                  // chromatic-aberration copies
+  const pats = ['orange2', 'white', 'blue2', 'yellow', 'pink2'];
+  for (let i = 0; i < 20; i++) { const x = (hash(i * 3 + 1) - 0.5) * 0.28, y = 0.06 + 0.46 * hash(i * 3 + 2); box(p.torso, 0.05 + 0.03 * hash(i), 0.035, 0.02, M(pats[i % 5]), x, y, Math.sqrt(Math.max(0.003, 0.0361 - x * x)) + 0.01); }
+  cyl(p.torso, 0.065, 0.065, 0.02, M('ink'), 0, 0.4, 0.185, [Math.PI / 2, 0, 0], 14); box(p.torso, 0.05, 0.012, 0.01, M('white'), 0, 0.39, 0.197);
+  for (const l of p.legs) { for (let k = 0; k < 5; k++) box(l.hip, 0.04 + 0.02 * hash(k + 7), 0.04, 0.02, M(pats[(k + 1) % 5]), (hash(k + 2) - 0.5) * 0.06, -0.06 - 0.075 * k, 0.078); for (let k = 0; k < 4; k++) box(l.kn, 0.04, 0.035, 0.02, M(pats[k % 5]), (hash(k + 11) - 0.5) * 0.05, -0.06 - 0.085 * k, 0.065);
+    box(l.an, 0.12, 0.17, 0.26, M('white'), 0, 0.0, 0.05); box(l.an, 0.125, 0.03, 0.3, M('wood4'), 0, -0.095, 0.06); box(l.an, 0.125, 0.025, 0.1, M('blue2'), 0, 0.02, 0.06); box(l.an, 0.126, 0.025, 0.1, M('yellow'), 0, -0.02, 0.06);
+    for (let k = 0; k < 4; k++) box(l.an, 0.02, 0.02, 0.025, M(['red', 'yellow', 'cyan', 'pink'][k]), (k - 1.5) * 0.026, 0.092, 0.13);
+    ['pink', 'cyan', 'yellow', 'red'].forEach((c, k) => { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.04, 12), M(c)); w.rotation.z = Math.PI / 2; w.position.set(k % 2 ? 0.07 : -0.07, -0.16, k < 2 ? -0.06 : 0.16); l.an.add(w); }); }
+  for (const a of p.arms) sph(a.w, 0.075, M('white'), 0, -0.03, 0, [1, 1.2, 0.9]);
+  const kb = J(p.arms[0].w, 0, -0.1, 0.1); box(kb, 0.34, 0.05, 0.14, M('magenta'), 0, 0, 0); for (let r = 0; r < 3; r++) for (let k = 0; k < 8; k++) box(kb, 0.028, 0.02, 0.028, M(['orange2', 'blue2', 'yellow', 'pink2'][(k + r) % 4]), -0.14 + k * 0.04, 0.035, -0.04 + r * 0.04); kb.rotation.z = 0.2;
+  return p;
+}
+
+// ---------------------------------------------------------------- Romi: auburn shoulder-length hair, turquoise earrings, navy floral kimono-sleeve mini dress over a black top, bracelets, brown knee-high boots; plays a theremin on a tripod
+export function makeRomi() {
+  const p = makePerson('navy', 'skin1', { skin: 'skin1', hair: 'rust2', shoes: 'wood3' });
+  box(p.head, 0.2, 0.3, 0.07, M('rust2'), 0, 0.02, -0.07); for (const s of [-1, 1]) { box(p.head, 0.045, 0.28, 0.12, M('rust2'), s * 0.105, 0.04, -0.01); sph(p.head, 0.016, M('teal'), s * 0.115, -0.1, 0.02, [1, 1.8, 0.7]); }
+  box(p.head, 0.2, 0.05, 0.06, M('rust2'), 0.02, 0.24, 0.0, [0, 0, -0.15]);
+  box(p.torso, 0.14, 0.16, 0.02, M('ink'), 0, 0.5, 0.17, [0, 0, 0]); box(p.torso, 0.045, 0.05, 0.02, M('skin1'), 0, 0.58, 0.18);
+  const fl = ['white', 'pink', 'teal', 'rust1', 'pink2'];
+  cone(p.pel, 0.29, 0.34, M('navy'), 0, -0.1, 0, null, 14);
+  for (let i = 0; i < 22; i++) { const a = hash(i * 3 + 1) * TAU, r = 0.1 + 0.19 * hash(i * 3 + 2), y = -0.1 - 0.16 * (1 - r / 0.29) * 0.0; box(p.pel, 0.04, 0.03, 0.04, M(fl[i % 5]), Math.cos(a) * r, -0.12 + 0.1 * (1 - r / 0.29) - 0.1 * hash(i), Math.sin(a) * r); }
+  for (let i = 0; i < 14; i++) box(p.torso, 0.045, 0.035, 0.02, M(fl[i % 5]), (hash(i * 2 + 5) - 0.5) * 0.28, 0.08 + 0.35 * hash(i * 2 + 6), 0.18);
+  for (const a of p.arms) { cone(a.sh, 0.13, 0.34, M('navy'), 0, -0.17, 0, null, 12); for (let k = 0; k < 4; k++) box(a.sh, 0.04, 0.03, 0.04, M(fl[k % 5]), (hash(k + 4) - 0.5) * 0.18, -0.22 - 0.05 * hash(k), (hash(k + 8) - 0.5) * 0.18); cyl(a.el, 0.046, 0.046, 0.025, M('wall0'), 0, -0.22, 0, null, 10); }
+  for (const l of p.legs) { cyl(l.kn, 0.07, 0.066, 0.4, M('wood3'), 0, -0.2, 0, null, 12); cyl(l.kn, 0.074, 0.074, 0.03, M('wood2'), 0, -0.01, 0, null, 12); box(l.an, 0.11, 0.09, 0.27, M('wood3'), 0, -0.01, 0.06); }
+  // theremin on a tripod, in front of her: wooden box, vertical pitch antenna at one end, volume loop at the other
+  const th = J(p.root, 0, 0, 0.62), W = M('wood1'), S = M('steel1');
+  box(th, 0.7, 0.12, 0.2, W, 0, 1.0, 0); box(th, 0.7, 0.012, 0.21, M('wood0'), 0, 1.065, 0); sph(th, 0.015, M('ink'), 0, 1.0, 0.105);
+  cyl(th, 0.018, 0.018, 0.9, S, 0, 0.55, 0, null, 8); box(th, 0.03, 0.06, 0.03, M('yellow'), 0, 0.2, 0);
+  for (let k = 0; k < 3; k++) { const a = (k / 3) * TAU + 0.4; beam(th, [0, 0.55, 0], [Math.cos(a) * 0.36, 0.02, Math.sin(a) * 0.36], 0.02, S); }
+  cyl(th, 0.008, 0.008, 0.55, S, -0.36, 1.33, 0, null, 6); const loop = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.008, 6, 20), S); loop.position.set(0.44, 1.12, 0); loop.rotation.y = Math.PI / 2; th.add(loop); beam(th, [0.35, 1.04, 0], [0.44, 1.02, 0], 0.012, S);
+  p.th = th; return p;
+}

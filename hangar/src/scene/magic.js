@@ -30,9 +30,11 @@ export function createMagic(scene, ctx) {
   // --- cabin: stars pour out of the hatch, dust ring when it lands
   spec({ n: 6, P: 3.0, life: 3.0, size: 0.3, grav: -0.1, colors: ['yellow', 'pink', 'cyan'], gate: () => 1,
     origin: () => V(9.7, 1.9, 3.75), vel: (r) => V(1.0 + 0.8 * r[0], 0.9 + 0.5 * r[1], (r[2] - 0.5) * 1.4) });
-  // --- roller skater leaves a rainbow trail on the floor
+  // --- Proxy leaves a rainbow trail on the floor as he skates
   spec({ n: 36, P: 3.0, life: 3.0, size: 0.3, grav: 0, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2'],
-    gate: () => 1, origin: (tb) => V(10.5 + 2.5 * Math.sin(TAU * tb / LOOP), 0.08, -3.5), vel: () => V(0, 0, 0) });
+    gate: () => 1, origin: (tb) => { const q = ctx.proxyPos(tb); return V(q.x, 0.08, q.z); }, vel: () => V(0, 0, 0) });
+  // --- notes drift up from Romi's theremin
+  spec({ n: 5, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['teal', 'pink', 'cyan', 'yellow'], sway: 0.2, gate: () => 1, origin: (tb) => { const q = ctx.romiPos(tb); return V(q.x, 1.7, q.z); }, vel: (r) => V((r[0] - 0.5) * 0.4, 0.7, (r[1] - 0.5) * 0.4) });
   // --- computer glyphs while the visitor sits
   spec({ n: 14, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['green', 'lime', 'cyan'],
     gate: (t) => bell(t, 39.5, 41, 51, 52.5), origin: () => V(-12.8, 1.15, -3.55), vel: (r) => V((r[0] - 0.5) * 0.5, 0.8, 0.5 + 0.3 * r[1]) });

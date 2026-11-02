@@ -50,13 +50,13 @@ export function createStage(scene, parts) {
   const sentPos = (sg, t) => ({ x: X0 + 0.95 + sentStep(t), y: 0.7 * bell(t, BEAT.burst + 0.5, BEAT.burst + 2, BEAT.burstEnd - 2, BEAT.burstEnd) * (1 + 0.2 * Math.sin(t * 3)), z: sg * 2.7 });
   const SPELL_TARGETS = [[3.8, 1.4, -1.9], [8.2, 1.2, -2.8], [8.3, 1.4, 3.75]];
   const ctx = { HX, fishAt: (t) => fishAt(t), cubeA: (t) => ({ x: CUBE_A.x0 + CUBE_A.a * Math.sin(TAU * t / LOOP + CUBE_A.ph), z: CUBE_A.z }), devilPos: (t) => { const d = DEVIL(t); return { x: d.x, z: d.z }; }, lev: levAt,
-    womanPos: (t) => extras.named.womanPos(t), singerPos: (t) => extras.named.singerPos(t), sleepK, choirW, choirActive, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
+    womanPos: (t) => extras.named.womanPos(t), singerPos: (t) => extras.named.singerPos(t), proxyPos: (t) => extras.named.proxyPos(t), romiPos: (t) => extras.named.romiPos(t), sleepK, choirW, choirActive, choirSlots: SLOTS, choirC: CHOIR.C, sentPos, spellTarget: (i) => ({ x: SPELL_TARGETS[i][0], y: SPELL_TARGETS[i][1], z: SPELL_TARGETS[i][2] }) };
   ctx.spellTarget = (i, tb) => { const j = ((i % 3) + 3) % 3; if (j === 0 && tb !== undefined) { const d = extras.named.catPos(tb); return new THREE.Vector3(d.x, 1.4, d.z); } if (j === 1 && tb !== undefined) { const d = extras.named.deerPos(tb); return new THREE.Vector3(d.x, 1.2, d.z); } const p = SPELL_TARGETS[j]; return new THREE.Vector3(p[0], p[1], p[2]); };
   const magic = createMagic(scene, ctx);
-  const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat, moving: true }, { o: nm.woman, moving: true }, { o: nm.singer, moving: true }, { o: nm.roller, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
+  const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat, moving: true }, { o: nm.woman, moving: true }, { o: nm.singer, moving: true }, { o: nm.proxy, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
   // ---- solid bodies: nobody walks through anybody (radius r, mass, fixed = never moves). Booth and desk are rectangles nobody enters.
   const named = extras.named, namedRoots = new Map(Object.entries(named).filter(([, v]) => v && v.root).map(([k, v]) => [v.root, k]));
-  const SIZE = { deer: [0.4, 1.5], cat: [0.42, 1.2], woman: [0.3, 1], singer: [0.3, 1], rael: [0.3, 1], roller: [0.3, 1] };
+  const SIZE = { deer: [0.4, 1.5], cat: [0.42, 1.2], woman: [0.3, 1], singer: [0.3, 1], rael: [0.3, 1], proxy: [0.3, 1] };
   const bodies = [{ root: devil.root, r: 0.6, mass: 3, name: 'diablo' }, { root: vis.root, r: 0.3, mass: 1, name: 'visitante' }, { root: cubes[0].root, r: 0.36, mass: 1, name: 'cubo' }, { root: choir.root, r: 0.3, mass: 1, name: 'director' },
     ...sent.map((s, i) => ({ root: s.root, r: 0.45, mass: 1, fixed: true, name: 'centinela' + i }))];
   extras.list.forEach((e, i) => { const o = e.o, nmk = namedRoots.get(o.root), z = SIZE[nmk]; if (!o.root) return;

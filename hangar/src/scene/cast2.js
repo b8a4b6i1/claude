@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { M, box, cyl, sph, cone, limb, beam, canvasTex, contactShadow } from './common.js';
-import { makeMoises, makeRael, makeBoojie, makePoly, poseRun } from './heroes.js';
+import { makeMoises, makeRael, makeBoojie, makePoly, makeProxy, makeRomi, poseRun } from './heroes.js';
 import { makePerson, poseWalk, makeCube, poseCube } from './actors.js';
 import { TAU, clamp, smooth, hash, LOOP, bell, spellHit, bandPresence } from '../config.js';
 import { P } from '../palette.js';
@@ -88,6 +88,7 @@ const loopPath = (pts) => { const len = pts.map((p, i) => Math.hypot(pts[(i + 1)
   return { tot, at(f) { f = ((f % 1) + 1) % 1; let d = f * tot, i = 0; while (d > len[i]) { d -= len[i]; i++; } const a = pts[i], b = pts[(i + 1) % pts.length], u = d / len[i]; return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]; } }; };
 const BJ_PATH = loopPath([[-3.6, 2.6], [-7, 2.6], [-12, 2.8], [-15, 0.8], [-12, -1.8], [-8, -1.0], [-7, 1.2], [-3.6, 1.2], [2, 2.4], [7, 0.8], [11, -1.5], [8, -3.6], [0, -3.6], [-3.4, -0.6]]), BJ_LAPS = 3;
 const PL_PATH = loopPath([[-3.4, 3.3], [-7, 3.3], [-10.5, 3.2], [-14, 1.0], [-13, -1.8], [-9.8, -0.2], [-7, 0.9], [-3.4, 0.9], [1.0, 1.6], [4.0, -0.8], [9.5, 0.3], [12.5, -2.0], [6, -3.7], [1, -3.0], [-1.8, -0.6]]), PL_LAPS = 2;
+const PX_PATH = loopPath([[12.5, -1.2], [9.5, 0.8], [6.0, -0.8], [3.0, 1.6], [-0.5, 2.0], [-3.2, 0.6], [-1.5, -2.0], [2.5, -3.4], [7.0, -3.0], [10.5, -3.5]]), PX_LAPS = 3;
 const pathState = (PATH, laps, t) => { const f = t * laps / LOOP, a = PATH.at(f - 0.004 * 2), b = PATH.at(f + 0.004 * 2), [x, z] = PATH.at(f); return { x, z, yaw: Math.atan2(b[0] - a[0], b[1] - a[1]), dist: f * PATH.tot }; };
 
 /** Everyone the scan shows that the first pass left out. Real people appear as faceless cardboard-style figures. All motion is a pure function of t. */
@@ -162,10 +163,19 @@ export function createExtras(scene) {
     c.armR.rotation.z = 2.4 + 0.3 * Math.sin(TAU * t * 1.3); c.stick.rotation.z = -1.0 + 0.3 * Math.sin(TAU * t * 1.3 + 1); c.armL.rotation.z = -0.15 - 0.25 * step;
     c.legs[0].rotation.x = 0.6 * step; c.legs[1].rotation.x = -0.6 * step; });
   named.catPos = (t) => { const st = pathState(PL_PATH, PL_LAPS, t); return { x: st.x, z: st.z }; };
-  named.roller = add(roller(), 4.5, -3.5, 0, (p, t) => {
-    const u = TAU * t / LOOP, x = 4.5 + 7.0 * Math.sin(u), vx = Math.cos(u), dist = 7.0 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();
-    p.root.position.set(x, 0, -3.5); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, dist * TAU / 2.2, 0.35, 0, 0.0); p.torso.rotation.x = 0.18; p.root.rotation.z = 0.05 * Math.sin(u * 2);
-  });
+  const px = makeProxy(); named.proxy = add(px, PX_PATH.at(0)[0], PX_PATH.at(0)[1], 0, (p, t) => { const st = pathState(PX_PATH, PX_LAPS, t), w = TAU * t / 1.5, push = Math.sin(TAU * t / 1.0), jit = hash(Math.floor(t * 14) * 1.7);
+    p.root.position.set(st.x, 0, st.z); p.root.rotation.y = st.yaw;
+    p.pel.position.y = 0.8 + 0.02 * Math.abs(Math.sin(w)); p.torso.rotation.set(0.1, 0.12 * Math.sin(w * 0.5), 0.06 * Math.sin(w)); p.head.rotation.set(-0.1, 0.3 * Math.sin(w * 0.5), 0.08 * Math.sin(w));
+    p.legs[0].hip.rotation.set(0.5 * push - 0.2, 0, 0.12); p.legs[1].hip.rotation.set(-0.5 * push - 0.2, 0, -0.12); p.legs[0].kn.rotation.set(0.5 + 0.25 * Math.max(0, push), 0, 0); p.legs[1].kn.rotation.set(0.5 + 0.25 * Math.max(0, -push), 0, 0); p.legs[0].an.rotation.set(-0.3, 0, 0); p.legs[1].an.rotation.set(-0.3, 0, 0);
+    p.arms[0].sh.rotation.set(-0.6, 0, -0.2); p.arms[0].el.rotation.set(-1.0, 0, 0); p.arms[1].sh.rotation.set(-0.2, 0, 1.9 + 0.2 * Math.sin(w * 3)); p.arms[1].el.rotation.set(-0.2, 0, 0.3 * Math.sin(w * 3));
+    p.glitch.position.x = jit > 0.8 ? (jit - 0.9) * 0.5 : 0; p.glitch.scale.x = jit > 0.9 ? 1.4 : 1; });
+  named.proxyPos = (t) => { const st = pathState(PX_PATH, PX_LAPS, t); return { x: st.x, z: st.z }; };
+  // Romi plays the theremin in the front corner of the mask hall, hands hovering at the two antennas
+  { const ro = makeRomi(); named.romi = add(ro, -17.6, 3.7, Math.PI / 4, (p, t) => { const w = TAU * t / 3.0, v = TAU * t / 0.75;
+      p.root.position.y = 0; p.torso.rotation.set(0.04, 0.06 * Math.sin(w), 0.04 * Math.sin(w * 0.7)); p.head.rotation.set(-0.05, 0.2 * Math.sin(w * 0.5), 0.1 * Math.sin(w)); p.pel.position.y = 0.86;
+      p.arms[0].sh.rotation.set(-1.15 + 0.12 * Math.sin(w * 1.3), 0, -0.55); p.arms[0].el.rotation.set(-0.9 + 0.1 * Math.sin(v), 0, 0);        // pitch hand floats near the rod, trembling
+      p.arms[1].sh.rotation.set(-0.5, 0, 1.15 + 0.1 * Math.sin(w)); p.arms[1].el.rotation.set(-0.5 + 0.1 * Math.sin(w * 1.5), 0, 0); }); }
+  named.romiPos = (t) => ({ x: -17.6 + 0.62 * Math.sin(Math.PI / 4), z: 3.7 + 0.62 * Math.cos(Math.PI / 4) });
 
   // the twins in blue dresses stroll together holding hands (inner arms angled toward each other so the hands meet), swinging the outer arms
   { const A = twin(), B = twin(); const SEP = 0.3, LANE = -1.5, CX0 = 1.0, AMP = 4.5;
