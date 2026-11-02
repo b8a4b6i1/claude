@@ -86,6 +86,7 @@ function page(scriptTag) {
 <meta charset="utf-8" />
 <link rel="icon" href="data:," />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
 <meta name="theme-color" content="#9be0f2" />
 <meta name="description" content="Un hangar en pixel art, en 3D y en bucle: personajes con vida propia, magia y música de 8 bits." />
 <meta property="og:title" content="Hangar — un pequeño diorama" />
