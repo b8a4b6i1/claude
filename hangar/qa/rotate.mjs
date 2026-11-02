@@ -1,0 +1,10 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium', headless:true, args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'] });
+const p = await b.newPage({ viewport:{width:390,height:844}, deviceScaleFactor:2, hasTouch:true }); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://127.0.0.1:4180/index.html?t=20'); await p.waitForFunction(()=>window.__dioramaReady,null,{timeout:120000});
+const st=()=>p.evaluate(()=>{const c=window.__diorama.camera;return [c.aspect.toFixed(2),c.view&&c.view.enabled]});
+console.log('portrait',await st());
+await p.setViewportSize({width:844,height:390}); await p.waitForTimeout(4000); console.log('landscape',await st());
+await p.screenshot({path:'qa/shots/land.png'});
+await p.setViewportSize({width:390,height:844}); await p.waitForTimeout(4000); console.log('back',await st());
+console.log(errs); await b.close();
