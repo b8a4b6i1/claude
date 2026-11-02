@@ -4,3 +4,4 @@ refs/video/
 qa/shots/
 audio/
 src/song.js
+src/scene/chars.js

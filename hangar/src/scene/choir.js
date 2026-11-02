@@ -40,11 +40,11 @@ export function createChoir(scene, members) {
       const disp = smooth((t - CHOIR.singEnd) / (CHOIR.gone - CHOIR.singEnd)), spin = (disp > 0 && disp < 1) ? TAU * 2 * disp : 0;
       const hx = base.x, hz = base.z;
       r.position.set(lerp(hx, slot.x, w), (w > 0.8 ? 0.07 * Math.abs(Math.sin(t * 4.0 + i)) : 0) + 0.8 * Math.sin(Math.PI * clamp(disp, 0, 1)), lerp(hz, slot.z, w));
-      r.rotation.y = lerpAngle(m.baseYaw === undefined ? r.rotation.y : r.rotation.y, toC, w) + spin;
+      if (m.o.bb) m.o.bb.rotation.y = Math.PI / 4 + spin; else r.rotation.y = lerpAngle(m.baseYaw === undefined ? r.rotation.y : r.rotation.y, toC, w) + spin;
       if (w > 0.8) {
         const solo = i === act ? Math.sin(Math.PI * clamp(ph / BEAT_P, 0, 1)) : 0; // the one the baton points at jumps and glows
         r.position.y += 0.55 * solo; r.scale.setScalar(1 + 0.1 * solo);
-        r.rotation.y = lerpAngle(r.rotation.y, Math.atan2((SLOTS[(i + 1) % 5].x - slot.x), (SLOTS[(i + 1) % 5].z - slot.z)), 0.25 * (1 - solo)); // neighbours glance at each other
+        if (!m.o.bb) r.rotation.y = lerpAngle(r.rotation.y, Math.atan2((SLOTS[(i + 1) % 5].x - slot.x), (SLOTS[(i + 1) % 5].z - slot.z)), 0.25 * (1 - solo)); // neighbours glance at each other
         r.rotation.z = 0.06 * Math.sin(t * 3 + i * 1.7) + 0.12 * solo * Math.sin(t * 20);
       } else r.scale.setScalar(1);
     });

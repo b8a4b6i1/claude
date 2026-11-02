@@ -27,3 +27,6 @@ Cabina cuadrada de 2,4 m que salta cada 6 s y suelta estrellas; la abertura de l
 ## Sonido
 Todo el sonido del diorama se sintetiza en el navegador con osciladores (estilo 8 bits): un bucle musical de 90 s sincronizado con la historia (arpegio de pulso al 25 %, bajo triangular, melodía de pulso al 50 %, percusión de ruido) y efectos para cada evento (despertar del diablo, hechizos y su impacto, monedas, coro, rugido de la máscara, teclas, nana final). No lleva ninguna canción incrustada. Botón de silencio abajo a la derecha; `?mute` arranca en silencio.
 Las conversiones de canciones a chiptune (`tools/chiptune.py`, modos completo, `--voice`, `--poly`, `--tonic`) son independientes del diorama; sus resultados no se versionan (`audio/` está en `.gitignore`).
+
+## Personajes de recortes (v32)
+Moises, Rael, Boojie Boy, Poly, el hombre ciervo y su roca son recortes planos de las imágenes que aportó el autor (siempre de cara a la cámara fija). Las imágenes están embebidas en `src/scene/chars.js`, que no se versiona (retratos de personas reales): para recompilar hay que regenerarlo con los PNG con transparencia (`CHAR_SRC` = diccionario clave → data URI).

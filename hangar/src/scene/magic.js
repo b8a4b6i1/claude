@@ -111,7 +111,7 @@ export function createMagic(scene, ctx) {
     for (const [oi, who] of [[0, 'devil'], [1, 'woman']]) for (let k = 0; k < 4; k++, i++) {
       const g = oi === 0 ? bell(t, 16, 20, 70, 76) : bell(t, 41, 43, 49, 51);
       if (g < 0.02) { hide(i); continue; }
-      const c = oi === 0 ? ctx.devilPos(t) : { x: -9.6, z: -2.3 }, a = t * (oi ? 2.2 : 1.6) + (k / 4) * TAU, rr = oi ? 0.9 : 1.5;
+      const c = oi === 0 ? ctx.devilPos(t) : ctx.womanPos(t), a = t * (oi ? 2.2 : 1.6) + (k / 4) * TAU, rr = oi ? 0.9 : 1.5;
       p.set(c.x + Math.cos(a) * rr, (oi ? 1.3 : 1.4) + (oi === 0 ? ctx.lev(t) : 0.6 * bell(t, 41, 43, 49, 51)) + 0.35 * Math.sin(a * 2 + k), c.z + Math.sin(a) * rr);
       const sc = 0.3 * g; s.set(sc, sc * 1.3, sc); e.set(a, a * 1.3, 0); q.setFromEuler(e); m4.compose(p, q, s); mesh.setMatrixAt(i, m4);
       mesh.setColorAt(i, cc(['cyan', 'yellow', 'magenta', 'lime'][k]));

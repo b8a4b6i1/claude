@@ -6,6 +6,7 @@ import { HX, HZ, WALL_H, SLAB, LOOP, X0, X1 } from './config.js';
 import { buildHangar } from './scene/hangar.js';
 import { createStage } from './stage.js';
 import { loadFootage } from './scene/footage.js';
+import { loadChars } from './scene/chars.js';
 import { createAudio } from './audio.js';
 
 const canvas = document.getElementById('stage'), frameEl = document.getElementById('frame');
@@ -19,7 +20,7 @@ const camera = createCamera(1.5, FIT);
 const lights = createLighting(renderer, scene);
 const CLIP = [new THREE.Plane(new THREE.Vector3(1, 0, 0), -(X0 - 0.35)), new THREE.Plane(new THREE.Vector3(-1, 0, 0), X1 + 0.35), new THREE.Plane(new THREE.Vector3(0, 0, 1), HZ + 0.35), new THREE.Plane(new THREE.Vector3(0, 0, -1), HZ + 0.35)];
 post.clipPlanes = CLIP;
-loadFootage().then(() => {
+Promise.all([loadFootage(), loadChars()]).then(() => {
 const parts = buildHangar(scene), stage = createStage(scene, parts);
 
 function resize() {

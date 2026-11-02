@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { M, box, cyl, sph, cone, limb, beam, canvasTex, contactShadow } from './common.js';
+import { makeBillboard } from './billboards.js';
 import { makePerson, poseWalk, makeCube, poseCube } from './actors.js';
 import { TAU, clamp, smooth, hash, LOOP, bell, spellHit, bandPresence } from '../config.js';
 import { P } from '../palette.js';
@@ -74,20 +75,27 @@ function roller() {
   return p;
 }
 
+// Moises (the man in red) never stops running: a closed loop through both halls and the passage, 4 laps per loop at constant speed
+const RUN = [[12, -3.8], [-3, -3.8], [-3.4, 3.0], [-7, 3.0], [-14.5, 3.0], [-14.5, -1.5], [-7, 1.2], [-3.4, 1.2], [6, 1.2], [12, -0.5]];
+const RUNLEN = RUN.map((p, i) => Math.hypot(RUN[(i + 1) % RUN.length][0] - p[0], RUN[(i + 1) % RUN.length][1] - p[1])), RUNTOT = RUNLEN.reduce((a, b) => a + b, 0), LAPS = 4;
+const runAt = (t) => { let d = (((t * LAPS / LOOP) % 1) + 1) % 1 * RUNTOT, i = 0; while (d > RUNLEN[i]) { d -= RUNLEN[i]; i++; } const a = RUN[i], b = RUN[(i + 1) % RUN.length], u = d / RUNLEN[i]; return { x: a[0] + (b[0] - a[0]) * u, z: a[1] + (b[1] - a[1]) * u, dx: b[0] - a[0], dz: b[1] - a[1], dist: ((t * LAPS / LOOP) % LAPS) * RUNTOT }; };
+
 /** Everyone the scan shows that the first pass left out. Real people appear as faceless cardboard-style figures. All motion is a pure function of t. */
 export function createExtras(scene) {
   const list = []; const named = {}; const lerpYaw = (a, b, k) => { const d = ((b - a + Math.PI) % TAU + TAU) % TAU - Math.PI; return a + d * k; }; const add = (o, x, z, yaw, upd) => { const r = o.root; r.position.set(x, 0, z); r.rotation.y = yaw; scene.add(r); list.push({ o, upd }); if (o.shadow === undefined && r.children.every((c) => !c.isMesh || c.material.map == null)) {} return o; };
   const noShadow = (p) => { if (!p.shadow) { const s = contactShadow(0.45); p.root.add(s); p.shadow = s; } };
   const FACE = Math.PI / 2; // facing the entry, +X
-  named.woman = add(tankWoman(), -9.6, -2.3, FACE, (p, t) => { p.root.position.y = 0.6 * bell(t, 41, 43, 49, 51) + 0.04 * Math.sin(t * 2) * bell(t, 41, 43, 49, 51); poseWalk(p, 0, 0, 0.2 * Math.sin(0.5 * t), 0); for (const [i, s] of [[0, 1], [1, -1]]) { p.arms[i].sh.rotation.set(0.3, 0, s * 0.65); p.arms[i].el.rotation.set(-1.7, 0, 0); } p.root.rotation.z = 0.015 * Math.sin(0.7 * t); });
-  named.singer = add(singer(), -1.6, -3.6, FACE, (p, t) => { const w = TAU * t / 1.8; poseWalk(p, 0, 0, 0.2 * Math.sin(0.8 * t), 0.05 * Math.sin(w)); p.arms[1].sh.rotation.set(-1.7, 0, -0.1); p.arms[1].el.rotation.set(-1.7, 0, 0); p.arms[0].sh.rotation.set(0.15 * Math.sin(w), 0, -0.3); p.pel.position.y = 0.86 + 0.015 * Math.abs(Math.sin(w)); });
+  const mo = makeBillboard('moises', 1.75); named.woman = add(mo, RUN[0][0], RUN[0][1], 0, (p, t) => { const r = runAt(t), hop = Math.abs(Math.sin(TAU * t * 1.7)), screenRight = r.dx - r.dz > 0 ? 1 : -1;
+    p.root.position.set(r.x, 0.16 * hop, r.z); p.bb.rotation.z = -0.13 * screenRight + 0.05 * Math.sin(TAU * t * 1.7); p.bb.scale.set(screenRight, 1 - 0.05 * hop, 1); p.shadow.position.y = 0.02 - p.root.position.y; });
+  named.womanPos = (t) => { const r = runAt(t); return { x: r.x, z: r.z }; };
+  const bj = makeBillboard('boojie', 1.85); named.singer = add(bj, -1.6, -3.6, 0, (p, t) => { const w = TAU * t / 1.8; p.bb.rotation.z = 0.05 * Math.sin(w) - 0.03; p.bb.scale.set(1, 1 + 0.025 * Math.abs(Math.sin(w * 2)), 1); p.root.position.y = 0.03 * Math.abs(Math.sin(w)); p.shadow.position.y = 0.02 - p.root.position.y; });
   // ---- the deer man digs a hole with the shovel, buries a treasure chest, tamps it down, glances around and walks to the next spot (6 spots x 15 s = the 90 s loop)
-  const SPOTS = [[8.2, -2.8], [3.0, 3.0], [-2.5, -2.8], [-9.0, 2.8], [-1.0, 3.2], [4.5, -1.0]];
-  const VIA = [[[8.2, -2.8], [3.0, 3.0]], [[3.0, 3.0], [-2.5, -2.8]], [[-2.5, -2.8], [-3.8, 2.2], [-6.3, 2.2], [-9.0, 2.8]], [[-9.0, 2.8], [-6.3, 2.2], [-3.8, 2.2], [-1.0, 3.2]], [[-1.0, 3.2], [4.5, -1.0]], [[4.5, -1.0], [8.2, -2.8]]];
+  const SPOTS = [[8.2, -2.8], [5.2, 0.3], [1.5, 2.4], [-1.8, -0.6], [2.0, -3.2], [5.5, -3.3]];
+  const VIA = SPOTS.map((p, i) => [p, SPOTS[(i + 1) % SPOTS.length]]);
   const LEN = VIA.map((pl) => pl.slice(1).reduce((a, q, i) => a + Math.hypot(q[0] - pl[i][0], q[1] - pl[i][1]), 0)); const CUM = LEN.map((_, i) => LEN.slice(0, i).reduce((a, b) => a + b, 0)); const TOTAL = LEN.reduce((a, b) => a + b, 0);
   const STRIDE = TOTAL / Math.round(TOTAL / 1.45);                                   // whole number of strides per loop so the walk cycle closes
   const HOLE = (i) => [SPOTS[i][0] + 0.64, SPOTS[i][1] + 0.64];
-  const DIG_END = 9.5, WALK0 = 8.0, US = DIG_END / WALK0;                       // digging runs on a 9.5-unit clock compressed into the first 8 s so the walk to the next spot gets 7 s
+  const DIG_END = 9.5, WALK0 = 12.0, US = DIG_END / WALK0;                       // digging runs on a 9.5-unit clock compressed into the first 8 s so the walk to the next spot gets 7 s
   const along = (pl, f) => { let d = f * pl.slice(1).reduce((a, q, i) => a + Math.hypot(q[0] - pl[i][0], q[1] - pl[i][1]), 0); for (let k = 1; k < pl.length; k++) { const l = Math.hypot(pl[k][0] - pl[k - 1][0], pl[k][1] - pl[k - 1][1]); if (d <= l || k === pl.length - 1) { const u = Math.min(1, d / l); return [pl[k - 1][0] + (pl[k][0] - pl[k - 1][0]) * u, pl[k - 1][1] + (pl[k][1] - pl[k - 1][1]) * u]; } d -= l; } return pl[pl.length - 1]; };
   const deerAt = (t) => { const tt = ((t % LOOP) + LOOP) % LOOP, i = Math.floor(tt / 15) % 6, u = tt - 15 * i;
     if (u < WALK0) return { x: SPOTS[i][0], z: SPOTS[i][1], dist: CUM[i], i, u: u * US, walking: false };
@@ -114,22 +122,21 @@ export function createExtras(scene) {
       const digging = (u >= 0.3 && u < 4.0), filling = (u >= 5.7 && u < 8.3);
       h.dirt.forEach((m, j) => { const on = digging || filling; m.visible = on; if (!on) return; const s = (u * (filling ? 1.25 : 1.0) + j / 4) % 1, side = filling ? 1 - s : s;
         m.position.set(0.15 + 0.6 * side, 0.3 + 1.1 * Math.sin(Math.PI * s), 0.12 * (j - 1.5)); m.scale.setScalar(1 - 0.3 * s); }); }); };
-  named.deer = add(deerMan(), SPOTS[0][0], SPOTS[0][1], FACE, (p, t) => { const st = deerAt(t), ta = deerAt(t - 0.4), tb = deerAt(t + 0.4), vx = tb.x - ta.x, vz = tb.z - ta.z, sp = Math.hypot(vx, vz) / 0.8, wa = smooth(clamp(sp / 0.35, 0, 1)); updHoles(t);
-    p.root.position.x = st.x; p.root.position.z = st.z; p.root.rotation.y = lerpYaw(Math.PI / 4, Math.atan2(vx, vz), wa);
-    const u = st.u, w = TAU * u / 1.0, a = Math.sin(w), kb = (() => { const sh = spellHit(t), hit = sh && sh.idx === 1 && sh.age < 1.6 ? sh.age : -1; return { hit, k: hit >= 0 ? Math.exp(-hit * 2.6) : 0 }; })();
-    poseWalk(p, st.dist * TAU / STRIDE, wa, 0, 0); p.root.position.y = 0;
-    if (wa > 0.05) { p.arms[1].sh.rotation.set(-0.5, 0, 0.12); p.arms[1].el.rotation.set(-0.9, 0, 0); p.arms[0].sh.rotation.x *= 0.5; }
-    if (!st.walking) { const dig = u >= 0.3 && u < 4.0, put = u >= 4.0 && u < 5.7, fill = u >= 5.7 && u < 8.3, tamp = u >= 8.3;
-      if (dig || fill) { const f = fill ? Math.sin(TAU * u / 0.8) : a; p.arms[1].sh.rotation.set(-0.9 - 0.5 * f, 0, 0.1); p.arms[1].el.rotation.set(-0.9 + 0.4 * f, 0, 0); p.arms[0].sh.rotation.set(-0.9 - 0.5 * f, 0, -0.15); p.arms[0].el.rotation.set(-0.9 + 0.4 * f, 0, 0); p.torso.rotation.x = 0.3 + 0.3 * Math.max(0, f); p.legs[0].hip.rotation.x = -0.3; p.legs[1].hip.rotation.x = 0.1; p.legs[0].kn.rotation.x = 0.3; p.head.rotation.x = 0.35 + 0.1 * f; }
-      else if (put) { const e = smooth((u - 4.0) / 0.4) * (1 - smooth((u - 5.2) / 0.5)); p.arms[1].sh.rotation.set(-1.2, 0, 0.2); p.arms[1].el.rotation.set(-0.5, 0, 0); p.arms[0].sh.rotation.set(-1.2, 0, -0.2); p.arms[0].el.rotation.set(-0.5, 0, 0); p.torso.rotation.x = 0.35 + 0.35 * e; p.legs[0].hip.rotation.x = -0.45; p.legs[1].hip.rotation.x = -0.3; p.legs[0].kn.rotation.x = 0.7; p.legs[1].kn.rotation.x = 0.5; p.head.rotation.x = 0.4; }
-      else if (tamp) { const ts = TAU * (u - 8.3) / 0.4; p.arms[1].sh.rotation.set(-0.5, 0, 0.12); p.arms[1].el.rotation.set(-0.9, 0, 0); p.legs[0].hip.rotation.x = -0.5 * Math.max(0, Math.sin(ts)); p.legs[0].kn.rotation.x = 0.5 * Math.max(0, Math.sin(ts)); p.torso.rotation.x = 0.1; p.head.rotation.y = 0.9 * Math.sin(TAU * (u - 8.3) / 1.2); p.root.rotation.y += 0.5 * Math.sin(TAU * (u - 8.3) / 2.4); }
-      else { p.torso.rotation.x = 0.1; }
-    }
-    p.root.rotation.z = -0.5 * kb.k * Math.cos(kb.hit * 9); p.root.position.y += kb.hit >= 0 && kb.hit < 0.5 ? 0.5 * Math.sin(Math.PI * kb.hit / 0.5) : 0; p.torso.rotation.x += 0.5 * kb.k;
-    p.flames.forEach((f, i) => f.scale.set(1, 1 + 0.35 * Math.sin(t * 17 + i * 1.7), 1)); });
+  const dr = makeBillboard('deer', 2.25);
+  named.deer = add(dr, SPOTS[0][0], SPOTS[0][1], 0, (p, t) => { const st = deerAt(t), ta = deerAt(t - 0.4), tb = deerAt(t + 0.4), vx = tb.x - ta.x, vz = tb.z - ta.z, sp = Math.hypot(vx, vz) / 0.8, wa = smooth(clamp(sp / 0.35, 0, 1)); updHoles(t);
+    p.root.position.x = st.x; p.root.position.z = st.z; const u = st.u, a = Math.sin(TAU * u / 1.0); let rz = 0, sy = 1, py = 0, flip = 1;
+    if (wa > 0.05) { const ph = Math.sin(st.dist * TAU / STRIDE); flip = vx - vz > 0 ? -1 : 1; py = Math.abs(ph) * 0.12 * wa; rz = 0.1 * wa * ph; }
+    else { const dig = u >= 0.3 && u < 4.0, put = u >= 4.0 && u < 5.7, fill = u >= 5.7 && u < 8.3, tamp = u >= 8.3;
+      if (dig || fill) { const f = fill ? Math.sin(TAU * u / 0.8) : a; rz = -0.16 * Math.max(0, f) + 0.04; sy = 1 - 0.05 * Math.max(0, f); py = 0.05 * Math.max(0, -f); }
+      else if (put) { rz = -0.3 * smooth((u - 4.0) / 0.4) * (1 - smooth((u - 5.2) / 0.5)); sy = 0.95; }
+      else if (tamp) { const ts = Math.sin(TAU * (u - 8.3) / 0.4); py = 0.12 * Math.max(0, ts); flip = Math.sin(TAU * (u - 8.3) / 2.4) > 0 ? -1 : 1; rz = 0.03 * ts; } }
+    const sh = spellHit(t), hit = sh && sh.idx === 1 && sh.age < 1.6 ? sh.age : -1, kb = hit >= 0 ? Math.exp(-hit * 2.6) : 0; rz += -0.5 * kb * Math.cos(hit * 9); py += hit >= 0 && hit < 0.5 ? 0.5 * Math.sin(Math.PI * hit / 0.5) : 0;
+    p.bb.rotation.z = rz; p.bb.scale.set(flip, sy, 1); p.root.position.y = py; p.shadow.position.y = 0.02 - py; });
   named.deerPos = (t) => { const d = deerAt(t); return { x: d.x, z: d.z }; };
-  const b = boulder(); b.position.set(7.3, 0, -2.4); scene.add(b); list.push({ o: { root: b }, upd: (o, t) => { b.rotation.z = 0.04 * Math.sin(t * 2.2); b.scale.y = 1 + 0.03 * Math.sin(t * 4.4); } });
-  named.cat = add(catStandee(), 5.8, 1.2, FACE, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1; c.body.rotation.z = 0.06 * Math.sin(t * 1.3); c.body.rotation.y = a >= 0 ? TAU * smooth(a / 0.9) : 0; c.root.position.y = a >= 0 ? 0.6 * Math.sin(Math.PI * a / 0.9) : 0; });
+  const rk = makeBillboard('rock', 0.8); rk.root.position.set(7.3, 0, -2.4); scene.add(rk.root); list.push({ o: rk, upd: (o, t) => { rk.bb.rotation.z = 0.03 * Math.sin(t * 2.2); rk.bb.scale.y = 1 + 0.03 * Math.sin(t * 4.4); } });
+  // Rael: stands with his back to us, hands on his hips, looking at the green gate on the right wall of the mask hall
+  { const ra = makeBillboard('rael', 1.9); add(ra, -7.6, -3.1, 0, (p, t) => { const w = TAU * t / 6; p.bb.rotation.z = 0.015 * Math.sin(w); p.bb.scale.y = 1 + 0.008 * Math.sin(w * 2); }); }
+  const po = makeBillboard('poly', 1.95); named.cat = add(po, 3.8, -1.9, 0, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1; c.bb.rotation.z = 0.06 * Math.sin(t * 1.3); c.bb.rotation.y = Math.PI / 4 + (a >= 0 ? TAU * smooth(a / 0.9) : 0); c.root.position.y = a >= 0 ? 0.6 * Math.sin(Math.PI * a / 0.9) : 0; c.shadow.position.y = 0.02 - c.root.position.y; });
   // pink roller skater with a horse head glides along the right-hand side near the entry
   named.roller = add(roller(), 4.5, -3.5, 0, (p, t) => {
     const u = TAU * t / LOOP, x = 4.5 + 7.0 * Math.sin(u), vx = Math.cos(u), dist = 7.0 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();
