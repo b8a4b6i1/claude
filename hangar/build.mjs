@@ -30,18 +30,19 @@ const css = `
     overflow: hidden;
     background: #9be0f2;
   }
-  body { -webkit-tap-highlight-color: transparent; }
+  body { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
   #frame {
     position: fixed;
     left: 50%;
     top: 50%;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     transform: translate(-50%, -50%);
     background: #9be0f2;
   }
   @media (max-width: 620px) {
-    #frame { width: 100vw; height: 100vh; }
+    #frame { width: 100vw; height: 100vh; height: 100dvh; }
   }
   #stage {
     display: block;
@@ -53,7 +54,7 @@ const css = `
     outline: none;
   }
   #sndwrap { position: fixed; left: 50%; top: 80%; display: flex; flex-direction: column; align-items: center; gap: 9px; z-index: 5; }
-  #snd { width: 42px; height: 42px; border: 3px solid #1a1816; background: #ffffff; padding: 4px; cursor: pointer; box-shadow: 3px 3px 0 #1a1816; image-rendering: pixelated; }
+  #snd { width: 48px; height: 48px; border: 3px solid #1a1816; background: #ffffff; padding: 4px; cursor: pointer; box-shadow: 3px 3px 0 #1a1816; image-rendering: pixelated; }
   #snd:hover, #snd:focus-visible { background: #fff6c8; outline: none; }
   #snd:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #1a1816; }
   #snd.muted { animation: sndhop 0.9s steps(2, end) infinite; }
@@ -81,8 +82,14 @@ function page(scriptTag) {
 <meta charset="utf-8" />
 <link rel="icon" href="data:," />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#ffffff" />
-<title>Hangar — a small diorama</title>
+<meta name="theme-color" content="#9be0f2" />
+<meta name="description" content="Un hangar en pixel art, en 3D y en bucle: personajes con vida propia, magia y música de 8 bits." />
+<meta property="og:title" content="Hangar — un pequeño diorama" />
+<meta property="og:description" content="Un hangar en pixel art, en 3D y en bucle: personajes con vida propia, magia y música de 8 bits." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://b8a4b6i1.github.io/claude/preview.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<title>Hangar — un pequeño diorama</title>
 <style>${css}</style>
 </head>
 <body>

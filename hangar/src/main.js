@@ -24,8 +24,29 @@ const parts = buildHangar(scene), stage = createStage(scene, parts);
 
 function resize() {
   const w = Math.max(2, frameEl.clientWidth), h = Math.max(2, frameEl.clientHeight);
-  if (w < 3 || h < 3) return; post.setSize(w, h); updateCamera(camera, w / h, FIT); if (typeof placeSnd === 'function') placeSnd();
+  if (w < 3 || h < 3) return; post.setSize(w, h); updateCamera(camera, w / h, FIT);
+  const portrait = w / h < 0.9; if (portrait !== view.portrait) { view.portrait = portrait; view.z = portrait ? 2.4 : 1; view.u = portrait ? 0.72 : 0.5; view.v = 0.5; }
+  applyView(); if (typeof placeSnd === 'function') placeSnd();
 }
+// phone framing: portrait starts zoomed on the action; drag to pan, pinch / wheel to zoom, double-tap to toggle the whole hangar
+const view = { z: 1, u: 0.5, v: 0.5, portrait: null };
+function applyView() {
+  const w = Math.max(2, frameEl.clientWidth), h = Math.max(2, frameEl.clientHeight), z = view.z;
+  if (z <= 1.001) { camera.clearViewOffset(); return; }
+  const fw = w * z, fh = h * z; view.u = clamp01(view.u, w / fw / 2); view.v = clamp01(view.v, h / fh / 2);
+  camera.setViewOffset(fw, fh, view.u * fw - w / 2, view.v * fh - h / 2, w, h);
+}
+const clamp01 = (x, half) => Math.min(1 - half, Math.max(half, x));
+function zoomTo(z) { view.z = Math.min(5, Math.max(1, z)); applyView(); placeSnd(); }
+{ const el = canvas, pts = new Map(); let d0 = 0, z0 = 1, lastTap = 0;
+  el.style.touchAction = 'none';
+  el.addEventListener('pointerdown', (e) => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2) { const [a, b] = [...pts.values()]; d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = view.z; }
+    if (pts.size === 1) { const n = performance.now(); if (n - lastTap < 300) { zoomTo(view.z > 1.2 ? 1 : (view.portrait ? 2.4 : 2)); } lastTap = n; } });
+  el.addEventListener('pointermove', (e) => { const p = pts.get(e.pointerId); if (!p) return; const dx = e.clientX - p[0], dy = e.clientY - p[1]; p[0] = e.clientX; p[1] = e.clientY;
+    if (pts.size === 1 && view.z > 1.001) { const w = frameEl.clientWidth, h = frameEl.clientHeight; view.u -= dx / (w * view.z); view.v -= dy / (h * view.z); applyView(); placeSnd(); }
+    else if (pts.size === 2 && d0 > 0) { const [a, b] = [...pts.values()]; zoomTo(z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / d0); } });
+  const up = (e) => { pts.delete(e.pointerId); d0 = 0; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', (e) => { e.preventDefault(); zoomTo(view.z * Math.exp(-e.deltaY * 0.0015)); }, { passive: false }); }
 const params = new URLSearchParams(location.search);
 let frozen = params.has('t') ? parseFloat(params.get('t')) : null; const startAt = params.has('from') ? parseFloat(params.get('from')) : 0;
 if (params.get('dither') === '0') post.uniforms.uDither.value = 0;
@@ -36,11 +57,14 @@ showSnd();
 sndBtn.addEventListener('click', (e) => { e.stopPropagation(); if (audio.enabled && audio.running) audio.setEnabled(false); else { audio.unlock(); audio.setEnabled(true); } setTimeout(showSnd, 60); showSnd(); });
 setInterval(showSnd, 300);
 // the button sits next to the diorama: just below-right of the slab's nearest corner, tracked through the camera
-const placeSnd = () => { const v = new THREE.Vector3(X1, -SLAB.h, HZ).project(camera), r = canvas.getBoundingClientRect(), sx = r.left + (v.x * 0.5 + 0.5) * r.width, sy = r.top + (-v.y * 0.5 + 0.5) * r.height, w = sndWrap.offsetWidth || 46, h = sndWrap.offsetHeight || 46;
+const placeSnd = () => { if (view.z > 1.2) { sndWrap.style.left = (innerWidth - (sndWrap.offsetWidth || 46) - 14) + 'px'; sndWrap.style.top = (innerHeight - (sndWrap.offsetHeight || 46) - 18) + 'px'; return; } const v = new THREE.Vector3(X1, -SLAB.h, HZ).project(camera), r = canvas.getBoundingClientRect(), sx = r.left + (v.x * 0.5 + 0.5) * r.width, sy = r.top + (-v.y * 0.5 + 0.5) * r.height, w = sndWrap.offsetWidth || 46, h = sndWrap.offsetHeight || 46;
   sndWrap.style.left = Math.max(8, Math.min(innerWidth - w - 10, sx + 10)) + 'px'; sndWrap.style.top = Math.max(8, Math.min(innerHeight - h - 10, sy + 12)) + 'px'; };
 const draw = (t) => { stage.update(t); post.uniforms.uTime.value = t; post.uniforms.uLoop.value = LOOP; post.render(scene, camera); };
 let t0 = performance.now(), ready = false;
-function loop(now) { const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
+let qN = 0, qSum = 0, qLast = 0, qScale = 1.5;
+function adapt(now) { if (qLast) { qSum += now - qLast; qN++; } qLast = now; if (qN >= 90) { const ms = qSum / qN; qN = 0; qSum = 0; if (ms > 30 && qScale > 0.75) { qScale = qScale > 1.2 ? 1.0 : 0.75; post.renderScale = qScale; resize(); } } }
+document.addEventListener('visibilitychange', () => { qLast = 0; qN = 0; qSum = 0; });
+function loop(now) { adapt(now); const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
 window.addEventListener('resize', resize); window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 resize(); placeSnd();
 window.__audio = audio;

@@ -1,0 +1,10 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium', headless:true, args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'] });
+const p = await b.newPage({ viewport:{width:390,height:844}, hasTouch:true }); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://127.0.0.1:4180/index.html?t=20'); await p.waitForFunction(()=>window.__dioramaReady,null,{timeout:120000});
+const off=()=>p.evaluate(()=>{const c=window.__diorama.camera;return c.view?[c.view.enabled,c.view.offsetX,c.view.offsetY,c.view.fullWidth]:null});
+console.log('start',await off());
+await p.mouse.move(200,400); await p.mouse.down(); await p.mouse.move(80,300,{steps:5}); await p.mouse.up(); console.log('drag',await off());
+await p.waitForTimeout(600); await p.mouse.click(200,400); await p.waitForTimeout(100); await p.mouse.click(200,400); console.log('dbl',await off());
+await p.waitForTimeout(600); await p.mouse.click(200,400); await p.waitForTimeout(100); await p.mouse.click(200,400); console.log('dbl2',await off());
+console.log(errs); await b.close();
