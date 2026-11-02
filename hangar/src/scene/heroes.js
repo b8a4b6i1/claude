@@ -98,7 +98,7 @@ export function makePoly() {
 // ---------------------------------------------------------------- Proxy: glitchy goat/horse head made of rainbow scan-lines, hot-pink patterned bodysuit, white gloves, black chest badge, a pink keyboard, white roller skates with rainbow laces and candy-coloured wheels
 export function makeProxy() {
   const p = makePerson('magenta', 'magenta', { skin: 'white', hair: 'magenta', shoes: 'white' });
-  p.head.children.forEach((c) => { c.visible = false; });
+  p.head.children.forEach((c) => { c.visible = false; }); p.head.scale.setScalar(1.7);
   const cols = ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2', 'magenta'], head = p.head;
   const snout = J(head, 0, 0.11, 0.07); snout.rotation.x = 0.45;
   for (let i = 0; i < 9; i++) box(snout, 0.17 - 0.007 * i, 0.027, 0.36 - 0.016 * i, M(cols[i % 8]), 0, (i - 4) * 0.026, 0.1 - 0.006 * i);   // muzzle: stacked scan-line slices

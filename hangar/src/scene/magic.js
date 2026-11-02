@@ -34,7 +34,7 @@ export function createMagic(scene, ctx) {
   spec({ n: 36, P: 3.0, life: 3.0, size: 0.3, grav: 0, colors: ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue2', 'purple2'],
     gate: () => 1, origin: (tb) => { const q = ctx.proxyPos(tb); return V(q.x, 0.08, q.z); }, vel: () => V(0, 0, 0) });
   // --- notes drift up from Romi's theremin
-  spec({ n: 5, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['teal', 'pink', 'cyan', 'yellow'], sway: 0.2, gate: () => 1, origin: (tb) => { const q = ctx.romiPos(tb); return V(q.x, 1.7, q.z); }, vel: (r) => V((r[0] - 0.5) * 0.4, 0.7, (r[1] - 0.5) * 0.4) });
+  spec({ n: 5, P: 1.5, life: 1.5, size: 0.3, grav: 0, colors: ['teal', 'pink', 'cyan', 'yellow'], sway: 0.2, gate: () => 1, origin: (tb) => { const q = ctx.romiPos(tb); return V(q.x + 0.5, 1.45, q.z + 0.2); }, vel: (r) => V((r[0] - 0.5) * 0.4, 0.7, (r[1] - 0.5) * 0.4) });
   // --- computer glyphs while the visitor sits
   spec({ n: 14, P: 1.5, life: 1.5, size: 0.28, grav: 0, colors: ['green', 'lime', 'cyan'],
     gate: (t) => bell(t, 39.5, 41, 51, 52.5), origin: () => V(-12.8, 1.15, -3.55), vel: (r) => V((r[0] - 0.5) * 0.5, 0.8, 0.5 + 0.3 * r[1]) });
@@ -104,7 +104,7 @@ export function createMagic(scene, ctx) {
         p.set(o.x + v.x * age, o.y + v.y * age + 0.5 * (sp.grav || 0) * age * age, o.z + v.z * age);
         if (sp.sway) p.x += Math.sin(age * 3 + r3[0] * 6) * sp.sway;
         if (p.y < 0.05) p.y = 0.05;
-        const f = clamp(1 - age / life, 0, 1), sc = sp.size * Math.pow(f, 0.6) * Math.min(1, age * 8) * Math.min(1, g * 2);
+        const f = clamp(1 - age / life, 0, 1), sc = 0.5 * sp.size * Math.pow(f, 0.6) * Math.min(1, age * 8) * Math.min(1, g * 2);
         s.set(sc, sc * 1.3, sc); e.set(age * 2 + r3[1] * 6, age * 3 + r3[2] * 6, 0); q.setFromEuler(e); m4.compose(p, q, s); mesh.setMatrixAt(i, m4);
         mesh.setColorAt(i, cc(sp.colors[((k + batch) % sp.colors.length + sp.colors.length) % sp.colors.length]));
       }

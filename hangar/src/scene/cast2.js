@@ -154,7 +154,7 @@ export function createExtras(scene) {
   named.deerPos = (t) => { const d = deerAt(t); return { x: d.x, z: d.z }; };
   const b = boulder(); b.position.set(7.3, 0, -2.4); scene.add(b); list.push({ o: { root: b }, upd: (o, t) => { b.rotation.z = 0.04 * Math.sin(t * 2.2); b.scale.y = 1 + 0.03 * Math.sin(t * 4.4); } });
   // Rael strolls slowly along the right wall of the mask hall, hands loose, now and then glancing at the screens
-  { const ra = makeRael(); named.rael = add(ra, -9.2, -2.0, 0, (p, t) => { const u = TAU * t / 45, A = 2.6, x = -9.2 + A * Math.sin(u), vx = Math.cos(u), m = Math.floor(u / Math.PI), r = u - m * Math.PI, d = A * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))), wk = smooth(clamp(Math.abs(vx) * 4, 0, 1));
+  { const ra = makeRael(); named.rael = add(ra, -9.2, -2.0, 0, (p, t) => { const u = TAU * t / 18, A = 3.6, x = -9.2 + A * Math.sin(u), vx = Math.cos(u), m = Math.floor(u / Math.PI), r = u - m * Math.PI, d = A * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))), wk = smooth(clamp(Math.abs(vx) * 4, 0, 1));
       p.root.position.set(x, 0, -2.0); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, d * TAU / 1.1, wk, 0.5 * Math.sin(TAU * t / 9), 0); p.arms[1].sh.rotation.z = 0.5 * (1 - wk) + 0.1; p.arms[1].el.rotation.x = -0.3 - 1.0 * (1 - wk); p.torso.rotation.y += 0.12 * (1 - wk) * Math.sin(TAU * t / 9); }); }
   const po = makePoly(), PL_STRIDE = PL_PATH.tot * PL_LAPS / Math.round(PL_PATH.tot * PL_LAPS / 0.85);
   named.cat = add(po, PL_PATH.at(0)[0], PL_PATH.at(0)[1], 0, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1, st = pathState(PL_PATH, PL_LAPS, t), ph = st.dist * TAU / PL_STRIDE, step = Math.sin(ph);
