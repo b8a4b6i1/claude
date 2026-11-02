@@ -20,7 +20,7 @@ export function createMagic(scene, ctx) {
     origin: (tb, r) => ctx.fishAt(tb).add(V((r[0] - 0.5) * 0.5, (r[1] - 0.5) * 0.5, (r[2] - 0.5) * 0.5)), vel: (r) => V((r[0] - 0.5) * 0.6, 0.2 + r[1] * 0.5, (r[2] - 0.5) * 0.6) });
   // --- singer: music notes drift up
   spec({ n: 8, P: 0.9, life: 0.9 * 2.8, lifeMax: 2.6, size: 0.3, grav: 0, colors: ['pink', 'cyan', 'yellow', 'lime'], sway: 0.18,
-    gate: () => 1, origin: () => V(0.5, 1.75, -3.7), vel: (r) => V(0.3 + 0.3 * r[0], 0.7 + 0.2 * r[1], (r[2] - 0.5) * 0.3) });
+    gate: () => 1, origin: (tb) => { const q = ctx.singerPos(tb); return V(q.x, 1.9, q.z); }, vel: (r) => V(0.3 + 0.3 * r[0], 0.7 + 0.2 * r[1], (r[2] - 0.5) * 0.3) });
   // --- boulder coins when the deer man digs
   spec({ n: 10, P: 2.0, off: 0.5, life: 1.5, size: 0.3, grav: -9, colors: ['yellow', 'orange2', 'orange'], mode: 'burst',
     gate: (t) => (t > 6 ? 1 : 0), origin: () => V(7.3, 0.7, -2.4), vel: (r) => V((r[0] - 0.5) * 2.4, 3.6 + r[1] * 1.6, (r[2] - 0.5) * 2.4) });

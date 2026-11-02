@@ -1,6 +1,5 @@
 node_modules/
 dist/
-refs/video/
 qa/shots/
 hangar-diorama.html
 index.html

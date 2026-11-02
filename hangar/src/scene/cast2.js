@@ -83,6 +83,13 @@ const RUN = [[12, -3.8], [-3, -3.8], [-3.4, 3.0], [-7, 3.0], [-14.5, 3.0], [-14.
 const RUNLEN = RUN.map((p, i) => Math.hypot(RUN[(i + 1) % RUN.length][0] - p[0], RUN[(i + 1) % RUN.length][1] - p[1])), RUNTOT = RUNLEN.reduce((a, b) => a + b, 0), LAPS = 4;
 const runAt = (t) => { let d = (((t * LAPS / LOOP) % 1) + 1) % 1 * RUNTOT, i = 0; while (d > RUNLEN[i]) { d -= RUNLEN[i]; i++; } const a = RUN[i], b = RUN[(i + 1) % RUN.length], u = d / RUNLEN[i]; return { x: a[0] + (b[0] - a[0]) * u, z: a[1] + (b[1] - a[1]) * u, dx: b[0] - a[0], dz: b[1] - a[1], dist: ((t * LAPS / LOOP) % LAPS) * RUNTOT }; };
 
+// closed walking loops through both halls and the passage (passage lanes z 0.6-3.8 at x = -5): used by the characters that roam the whole hangar
+const loopPath = (pts) => { const len = pts.map((p, i) => Math.hypot(pts[(i + 1) % pts.length][0] - p[0], pts[(i + 1) % pts.length][1] - p[1])), tot = len.reduce((a, b) => a + b, 0);
+  return { tot, at(f) { f = ((f % 1) + 1) % 1; let d = f * tot, i = 0; while (d > len[i]) { d -= len[i]; i++; } const a = pts[i], b = pts[(i + 1) % pts.length], u = d / len[i]; return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]; } }; };
+const BJ_PATH = loopPath([[-3.6, 2.6], [-7, 2.6], [-12, 2.8], [-15, 0.8], [-12, -1.8], [-8, -1.0], [-7, 1.2], [-3.6, 1.2], [2, 2.4], [7, 0.8], [11, -1.5], [8, -3.6], [0, -3.6], [-3.4, -0.6]]), BJ_LAPS = 3;
+const PL_PATH = loopPath([[-3.4, 3.3], [-7, 3.3], [-10.5, 3.2], [-14, 1.0], [-13, -1.8], [-9.8, -0.2], [-7, 0.9], [-3.4, 0.9], [1.0, 1.6], [4.0, -0.8], [9.5, 0.3], [12.5, -2.0], [6, -3.7], [1, -3.0], [-1.8, -0.6]]), PL_LAPS = 2;
+const pathState = (PATH, laps, t) => { const f = t * laps / LOOP, a = PATH.at(f - 0.004 * 2), b = PATH.at(f + 0.004 * 2), [x, z] = PATH.at(f); return { x, z, yaw: Math.atan2(b[0] - a[0], b[1] - a[1]), dist: f * PATH.tot }; };
+
 /** Everyone the scan shows that the first pass left out. Real people appear as faceless cardboard-style figures. All motion is a pure function of t. */
 export function createExtras(scene) {
   const list = []; const named = {}; const lerpYaw = (a, b, k) => { const d = ((b - a + Math.PI) % TAU + TAU) % TAU - Math.PI; return a + d * k; }; const add = (o, x, z, yaw, upd) => { const r = o.root; r.position.set(x, 0, z); r.rotation.y = yaw; scene.add(r); list.push({ o, upd }); if (o.shadow === undefined && r.children.every((c) => !c.isMesh || c.material.map == null)) {} return o; };
@@ -91,12 +98,12 @@ export function createExtras(scene) {
   const mo = makeMoises(); const STRIDE_R = RUNTOT * LAPS / Math.round(RUNTOT * LAPS / 1.9);
   named.woman = add(mo, RUN[0][0], RUN[0][1], 0, (p, t) => { const r = runAt(t), a = runAt(t - 0.3), b = runAt(t + 0.3); p.root.position.set(r.x, 0, r.z); p.root.rotation.y = Math.atan2(b.x - a.x, b.z - a.z); poseRun(p, r.dist * TAU / STRIDE_R, 1, 0.3); });
   named.womanPos = (t) => { const r = runAt(t); return { x: r.x, z: r.z }; };
-  const bj = makeBoojie(); named.singer = add(bj, -1.6, -3.6, 0, (p, t) => { const u = TAU * t / 45, x = 1.8 + 4.6 * Math.sin(u), vx = Math.cos(u), glide = Math.abs(vx), w = TAU * t / 1.8;
-    p.root.position.set(x, 0, -3.7); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 5); const push = Math.sin(TAU * t / 1.2) * glide;
+  const bj = makeBoojie(); named.singer = add(bj, BJ_PATH.at(0)[0], BJ_PATH.at(0)[1], 0, (p, t) => { const st = pathState(BJ_PATH, BJ_LAPS, t), w = TAU * t / 1.8, push = Math.sin(TAU * t / 1.2);
+    p.root.position.set(st.x, 0, st.z); p.root.rotation.y = st.yaw;
     p.pel.position.y = 0.8 + 0.02 * Math.abs(Math.sin(w)); p.torso.rotation.set(0.12, 0.1 * Math.sin(w * 0.5), 0.05 * Math.sin(w)); p.head.rotation.set(-0.15 + 0.1 * Math.sin(w), 0.25 * Math.sin(w * 0.5), 0.1 * Math.sin(w));
     p.legs[0].hip.rotation.set(0.5 * push - 0.2, 0, 0.12); p.legs[1].hip.rotation.set(-0.5 * push - 0.2, 0, -0.12); p.legs[0].kn.rotation.set(0.5 + 0.25 * Math.max(0, push), 0, 0); p.legs[1].kn.rotation.set(0.5 + 0.25 * Math.max(0, -push), 0, 0); p.legs[0].an.rotation.set(-0.3, 0, 0); p.legs[1].an.rotation.set(-0.3, 0, 0);
     p.arms[1].sh.rotation.set(-1.9, 0, -0.1); p.arms[1].el.rotation.set(-1.7, 0, 0); p.arms[0].sh.rotation.set(-0.5 + 0.9 * Math.sin(w), 0, -0.6 - 0.3 * Math.sin(w * 0.5)); p.arms[0].el.rotation.set(-0.7, 0, 0); });
-  named.singerPos = (t) => ({ x: 1.8 + 4.6 * Math.sin(TAU * t / 45), z: -3.7 });
+  named.singerPos = (t) => { const st = pathState(BJ_PATH, BJ_LAPS, t); return { x: st.x, z: st.z }; };
   // ---- the deer man digs a hole with the shovel, buries a treasure chest, tamps it down, glances around and walks to the next spot (6 spots x 15 s = the 90 s loop)
   const SPOTS = [[8.2, -2.8], [5.2, 0.3], [1.5, 2.4], [-1.8, -0.6], [2.0, -3.2], [5.5, -3.3]];
   const VIA = SPOTS.map((p, i) => [p, SPOTS[(i + 1) % SPOTS.length]]);
@@ -148,12 +155,13 @@ export function createExtras(scene) {
   // Rael strolls slowly along the right wall of the mask hall, hands loose, now and then glancing at the screens
   { const ra = makeRael(); named.rael = add(ra, -9.2, -2.0, 0, (p, t) => { const u = TAU * t / 45, A = 2.6, x = -9.2 + A * Math.sin(u), vx = Math.cos(u), m = Math.floor(u / Math.PI), r = u - m * Math.PI, d = A * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))), wk = smooth(clamp(Math.abs(vx) * 4, 0, 1));
       p.root.position.set(x, 0, -2.0); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, d * TAU / 1.1, wk, 0.5 * Math.sin(TAU * t / 9), 0); p.arms[1].sh.rotation.z = 0.5 * (1 - wk) + 0.1; p.arms[1].el.rotation.x = -0.3 - 1.0 * (1 - wk); p.torso.rotation.y += 0.12 * (1 - wk) * Math.sin(TAU * t / 9); }); }
-  const po = makePoly(); named.cat = add(po, 3.8, -1.9, 0, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1, u = TAU * t / 30, x = 3.8 + 1.8 * Math.cos(u), z = -1.9 + 0.9 * Math.sin(u), dx = -1.8 * Math.sin(u), dz = 0.9 * Math.cos(u), hop = Math.abs(Math.sin(TAU * t * 1.3));
-    c.root.position.set(x, 0.1 * hop + (a >= 0 ? 0.6 * Math.sin(Math.PI * a / 0.9) : 0), z); c.root.rotation.y = Math.atan2(dx, dz) + (a >= 0 ? TAU * smooth(a / 0.9) : 0); c.shadow.position.y = (0.02 - c.root.position.y) / 0.88;
-    c.body.rotation.z = 0.07 * Math.sin(TAU * t * 1.3); c.head.rotation.z = 0.1 * Math.sin(TAU * t * 0.65); c.head.rotation.y = 0.3 * Math.sin(TAU * t / 6);
-    c.armR.rotation.z = 2.4 + 0.35 * Math.sin(TAU * t * 1.3); c.stick.rotation.z = -1.0 + 0.3 * Math.sin(TAU * t * 1.3 + 1); c.armL.rotation.z = -0.15 - 0.2 * Math.sin(TAU * t * 1.3);
-    c.legs[0].rotation.x = 0.5 * Math.sin(TAU * t * 1.3); c.legs[1].rotation.x = -0.5 * Math.sin(TAU * t * 1.3); });
-  // pink roller skater with a horse head glides along the right-hand side near the entry
+  const po = makePoly(), PL_STRIDE = PL_PATH.tot * PL_LAPS / Math.round(PL_PATH.tot * PL_LAPS / 0.85);
+  named.cat = add(po, PL_PATH.at(0)[0], PL_PATH.at(0)[1], 0, (c, t) => { const sh = spellHit(t), a = sh && sh.idx === 0 && sh.age < 0.9 ? sh.age : -1, st = pathState(PL_PATH, PL_LAPS, t), ph = st.dist * TAU / PL_STRIDE, step = Math.sin(ph);
+    c.root.position.set(st.x, 0.05 * Math.abs(step) + (a >= 0 ? 0.6 * Math.sin(Math.PI * a / 0.9) : 0), st.z); c.root.rotation.y = st.yaw + (a >= 0 ? TAU * smooth(a / 0.9) : 0); c.shadow.position.y = (0.02 - c.root.position.y) / 0.88;
+    c.body.rotation.z = 0.06 * step; c.body.rotation.x = 0.05 * Math.abs(step); c.head.rotation.z = 0.1 * Math.sin(TAU * t * 0.65); c.head.rotation.y = 0.35 * Math.sin(TAU * t / 6);
+    c.armR.rotation.z = 2.4 + 0.3 * Math.sin(TAU * t * 1.3); c.stick.rotation.z = -1.0 + 0.3 * Math.sin(TAU * t * 1.3 + 1); c.armL.rotation.z = -0.15 - 0.25 * step;
+    c.legs[0].rotation.x = 0.6 * step; c.legs[1].rotation.x = -0.6 * step; });
+  named.catPos = (t) => { const st = pathState(PL_PATH, PL_LAPS, t); return { x: st.x, z: st.z }; };
   named.roller = add(roller(), 4.5, -3.5, 0, (p, t) => {
     const u = TAU * t / LOOP, x = 4.5 + 7.0 * Math.sin(u), vx = Math.cos(u), dist = 7.0 * (() => { const m = Math.floor(u / Math.PI), r = u - m * Math.PI; return 2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r)); })();
     p.root.position.set(x, 0, -3.5); p.root.rotation.y = (Math.PI / 2) * Math.tanh(vx * 6); poseWalk(p, dist * TAU / 2.2, 0.35, 0, 0.0); p.torso.rotation.x = 0.18; p.root.rotation.z = 0.05 * Math.sin(u * 2);

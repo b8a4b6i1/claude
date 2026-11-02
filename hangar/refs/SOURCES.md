@@ -7,3 +7,6 @@
 | .blend of the same hangar | user said it exists in Downloads on their Mac; not reachable from this cloud session | none | rebuilt from video; geometry is approximate and unseen walls are invented |
 | assets | CC0 libraries not searched (outbound hosts untested; every actor hand-built) | none | hand-built, say so in CREDITS.md |
 | not built | real people, photos and footage shown on the screens; third-party characters | n/a | screens show abstract colour fields only |
+
+
+Nota: los archivos de video y audio que aportó el autor (MP4 y MP3) y los fotogramas extraídos de ellos (refs/video, refs/rec) fueron borrados a petición del autor. Los recortes de pantallas de `src/scene/footage.js` provienen de ese video y siguen embebidos en el diorama.
