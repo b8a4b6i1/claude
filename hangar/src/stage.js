@@ -5,6 +5,7 @@ import { HX, HZ, X0, X1, MARK, BEAT, LOOP, TAU, clamp, lerp, smooth, win, bell, 
 import { makeDevil, charDevil, makeDiablo, makeVisitor, poseDevil, makeFish, poseFish, makeSentinel, poseSentinel, makeCube, poseCube, makePerson, poseWalk, poseLookUp } from './scene/actors.js';
 import { createExtras } from './scene/cast2.js';
 import { createMagic } from './scene/magic.js';
+import { createCollider } from './scene/collide.js';
 import { createChoir, choirW, choirActive, SLOTS, CHOIR } from './scene/choir.js';
 import { drawScreen, drawMonitor } from './scene/screens.js';
 import { makeBurst, mouthGlow, makeMotes } from './scene/fx.js';
@@ -53,6 +54,16 @@ export function createStage(scene, parts) {
   ctx.spellTarget = (i, tb) => { const j = ((i % 3) + 3) % 3; if (j === 0 && tb !== undefined) { const d = extras.named.catPos(tb); return new THREE.Vector3(d.x, 1.4, d.z); } if (j === 1 && tb !== undefined) { const d = extras.named.deerPos(tb); return new THREE.Vector3(d.x, 1.2, d.z); } const p = SPELL_TARGETS[j]; return new THREE.Vector3(p[0], p[1], p[2]); };
   const magic = createMagic(scene, ctx);
   const nm = extras.named; const choir = createChoir(scene, [{ o: nm.cat, moving: true }, { o: nm.woman, moving: true }, { o: nm.singer, moving: true }, { o: nm.roller, moving: true }, { o: { root: cubes[0].root }, moving: true }]);
+  // ---- solid bodies: nobody walks through anybody (radius r, mass, fixed = never moves). Booth and desk are rectangles nobody enters.
+  const named = extras.named, namedRoots = new Map(Object.entries(named).filter(([, v]) => v && v.root).map(([k, v]) => [v.root, k]));
+  const SIZE = { deer: [0.4, 1.5], cat: [0.42, 1.2], woman: [0.3, 1], singer: [0.3, 1], rael: [0.3, 1], roller: [0.3, 1] };
+  const bodies = [{ root: devil.root, r: 0.6, mass: 3, name: 'diablo' }, { root: vis.root, r: 0.3, mass: 1, name: 'visitante' }, { root: cubes[0].root, r: 0.36, mass: 1, name: 'cubo' }, { root: choir.root, r: 0.3, mass: 1, name: 'director' },
+    ...sent.map((s, i) => ({ root: s.root, r: 0.45, mass: 1, fixed: true, name: 'centinela' + i }))];
+  extras.list.forEach((e, i) => { const o = e.o, nmk = namedRoots.get(o.root), z = SIZE[nmk]; if (!o.root) return;
+    if (!o.arms && !o.legs) bodies.push({ root: o.root, r: 0.5, mass: 9, fixed: true, name: 'roca' });                                 // the rock
+    else if (o.root.position.x < -17.4) bodies.push({ root: o.root, r: 0.3, mass: 1, fixed: true, name: 'musico' + i });                 // the band keeps its place
+    else bodies.push({ root: o.root, r: z ? z[0] : 0.24, mass: z ? z[1] : 1, name: nmk || 'figura' + i }); });
+  const collider = createCollider(bodies, [{ x0: 7.1, x1: 9.5, z0: 2.55, z1: 4.95 }, { x0: -13.4, x1: -11.6, z0: -4.5, z1: -3.4 }]);
   const fishPos = new THREE.Vector3(); const stool = parts.stool;
   const FISH = (() => { const k = [[0, X1 + 8, 4.0, 1.0], [30, X1 + 8, 4.0, 1.0], [38, 4, 3.9, 0.5], [46, -8, 3.7, 2.5], [52, -3, 4.0, -2.0], [58, -12, 3.6, 0.0], [62.8, -16, 3.3, 0.5]];
     BAND.forEach((b) => { k.push([b.tk - 1.5, b.x, 3.2, b.z]); k.push([b.tk, b.x + 0.15, 1.75, b.z]); k.push([b.tk + 0.9, b.x, 3.2, b.z]); });
@@ -61,6 +72,7 @@ export function createStage(scene, parts) {
 
   function update(t) {
     t = ((t % LOOP) + LOOP) % LOOP;
+    collider.restore();
     extras.update(t);
     // screens, monitor, floor, mouth
     parts.screens.forEach((s) => drawScreen(s, t)); drawMonitor(parts.monitor, t);
@@ -115,10 +127,10 @@ export function createStage(scene, parts) {
     else if (vp.moving) { poseWalk(vis, phase, 1, 0, 0); vis.root.position.y = 0; }
     else { poseWalk(vis, 0, 0, 0, 0); vis.root.position.y = 0; }
     vis.shadow.position.y = 0.02 - vis.root.position.y;
-    choir.update(t); magic.update(t);
+    choir.update(t); magic.update(t); collider.resolve();
     { const pk = ashPile(t); pile.visible = pk > 0.01; pile.scale.set(pk, pk, pk); pile.children.forEach((c) => { if (c.userData.i !== undefined) { c.visible = Math.sin(t * 9 + c.userData.i * 2.3) > -0.2; c.scale.setScalar(0.6 + 0.4 * Math.sin(t * 13 + c.userData.i)); } }); }
     devil.shadow.position.y = (0.02 - devil.root.position.y) / Math.max(0.05, devil.root.scale.y); devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
   }
-  return { update, actors: { named: extras.named, deer: extras.named.deer, devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
+  return { update, collider, actors: { named: extras.named, deer: extras.named.deer, devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
 }
 const pacerPhase = (c, t) => { const u = TAU * t / LOOP + c.ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; const s = c.a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))); return s * TAU / 1.3; };
