@@ -119,6 +119,6 @@ export function createStage(scene, parts) {
     { const pk = ashPile(t); pile.visible = pk > 0.01; pile.scale.set(pk, pk, pk); pile.children.forEach((c) => { if (c.userData.i !== undefined) { c.visible = Math.sin(t * 9 + c.userData.i * 2.3) > -0.2; c.scale.setScalar(0.6 + 0.4 * Math.sin(t * 13 + c.userData.i)); } }); }
     devil.shadow.position.y = (0.02 - devil.root.position.y) / Math.max(0.05, devil.root.scale.y); devil.shadow.material.opacity = 0.85 * (1 - 0.6 * clamp(levAt(t), 0, 1));
   }
-  return { update, actors: { deer: extras.named.deer, devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
+  return { update, actors: { named: extras.named, deer: extras.named.deer, devil, fish, sent, cubes, vis, extras: extras.list.map((e) => e.o) }, burst };
 }
 const pacerPhase = (c, t) => { const u = TAU * t / LOOP + c.ph, m = Math.floor(u / Math.PI), r = u - m * Math.PI; const s = c.a * (2 * m + (r < Math.PI / 2 ? Math.sin(r) : 2 - Math.sin(r))); return s * TAU / 1.3; };
