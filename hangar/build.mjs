@@ -87,7 +87,7 @@ function page(scriptTag) {
 <meta property="og:title" content="Hangar — un pequeño diorama" />
 <meta property="og:description" content="Un hangar en pixel art, en 3D y en bucle: personajes con vida propia, magia y música de 8 bits." />
 <meta property="og:type" content="website" />
-<meta property="og:image" content="https://b8a4b6i1.github.io/claude/preview.png" />
+${process.env.SITE_URL ? `<meta property="og:image" content="${process.env.SITE_URL}/preview.png" />` : ''}
 <meta name="twitter:card" content="summary_large_image" />
 <title>Hangar — un pequeño diorama</title>
 <style>${css}</style>
