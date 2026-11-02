@@ -25,11 +25,19 @@ const parts = buildHangar(scene), stage = createStage(scene, parts);
 function resize() {
   const w = Math.max(2, frameEl.clientWidth), h = Math.max(2, frameEl.clientHeight);
   if (w < 3 || h < 3) return; post.setSize(w, h); updateCamera(camera, w / h, FIT);
-  const portrait = w / h < 0.9; if (portrait !== view.portrait) { view.portrait = portrait; view.z = portrait ? 2.4 : 1; view.u = portrait ? 0.72 : 0.5; view.v = 0.5; }
+  const portrait = w / h < 0.9; if (portrait !== view.portrait) { view.portrait = portrait; view.z = portrait ? 2.4 : 1; view.u = portrait ? 0.72 : 0.5; view.v = 0.5; if (portrait && !view.introDone && !params.has('t') && !matchMedia('(prefers-reduced-motion: reduce)').matches) view.intro = { t0: null }; else if (!portrait) view.intro = null; showHint(portrait && !view.hintDone); }
   applyView(); if (typeof placeSnd === 'function') placeSnd();
 }
 // phone framing: portrait starts zoomed on the action; drag to pan, pinch / wheel to zoom, double-tap to toggle the whole hangar
-const view = { z: 1, u: 0.5, v: 0.5, portrait: null };
+const view = { z: 1, u: 0.5, v: 0.5, portrait: null, intro: null, introDone: false, hintDone: false };
+const hintEl = document.getElementById('hint'); let hintTimer = 0;
+function showHint(on) { if (!hintEl) return; hintEl.classList.toggle('on', !!on); clearTimeout(hintTimer); if (on) hintTimer = setTimeout(() => dismissHint(), 11000); }
+function dismissHint() { view.hintDone = true; showHint(false); }
+function userTouch() { view.intro = null; view.introDone = true; if (!view.hintDone) dismissHint(); }
+// first visit on a phone: slow sweep along the hangar from the band end to the action, then the hint fades
+function stepIntro(now) { const I = view.intro; if (!I) return; if (I.t0 === null) I.t0 = now; const e = (now - I.t0) / 1000 - 0.6, D = 7;
+  if (e < 0) { view.u = 0.0; applyView(); placeSnd(); return; }
+  const k = Math.min(1, e / D), s = k * k * (3 - 2 * k); view.u = 0.0 + 0.72 * s; applyView(); placeSnd(); if (k >= 1) { view.intro = null; view.introDone = true; } }
 function applyView() {
   const w = Math.max(2, frameEl.clientWidth), h = Math.max(2, frameEl.clientHeight), z = view.z;
   if (z <= 1.001) { camera.clearViewOffset(); return; }
@@ -40,13 +48,13 @@ const clamp01 = (x, half) => Math.min(1 - half, Math.max(half, x));
 function zoomTo(z) { view.z = Math.min(5, Math.max(1, z)); applyView(); placeSnd(); }
 { const el = canvas, pts = new Map(); let d0 = 0, z0 = 1, lastTap = 0;
   el.style.touchAction = 'none';
-  el.addEventListener('pointerdown', (e) => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2) { const [a, b] = [...pts.values()]; d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = view.z; }
+  el.addEventListener('pointerdown', (e) => { userTouch(); el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); if (pts.size === 2) { const [a, b] = [...pts.values()]; d0 = Math.hypot(a[0] - b[0], a[1] - b[1]); z0 = view.z; }
     if (pts.size === 1) { const n = performance.now(); if (n - lastTap < 300) { zoomTo(view.z > 1.2 ? 1 : (view.portrait ? 2.4 : 2)); } lastTap = n; } });
   el.addEventListener('pointermove', (e) => { const p = pts.get(e.pointerId); if (!p) return; const dx = e.clientX - p[0], dy = e.clientY - p[1]; p[0] = e.clientX; p[1] = e.clientY;
     if (pts.size === 1 && view.z > 1.001) { const w = frameEl.clientWidth, h = frameEl.clientHeight; view.u -= dx / (w * view.z); view.v -= dy / (h * view.z); applyView(); placeSnd(); }
     else if (pts.size === 2 && d0 > 0) { const [a, b] = [...pts.values()]; zoomTo(z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / d0); } });
   const up = (e) => { pts.delete(e.pointerId); d0 = 0; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-  el.addEventListener('wheel', (e) => { e.preventDefault(); zoomTo(view.z * Math.exp(-e.deltaY * 0.0015)); }, { passive: false }); }
+  el.addEventListener('wheel', (e) => { userTouch(); e.preventDefault(); zoomTo(view.z * Math.exp(-e.deltaY * 0.0015)); }, { passive: false }); }
 const params = new URLSearchParams(location.search);
 let frozen = params.has('t') ? parseFloat(params.get('t')) : null; const startAt = params.has('from') ? parseFloat(params.get('from')) : 0;
 if (params.get('dither') === '0') post.uniforms.uDither.value = 0;
@@ -64,7 +72,7 @@ let t0 = performance.now(), ready = false;
 let qN = 0, qSum = 0, qLast = 0, qScale = 1.5;
 function adapt(now) { if (qLast) { qSum += now - qLast; qN++; } qLast = now; if (qN >= 90) { const ms = qSum / qN; qN = 0; qSum = 0; if (ms > 30 && qScale > 0.75) { qScale = qScale > 1.2 ? 1.0 : 0.75; post.renderScale = qScale; resize(); } } }
 document.addEventListener('visibilitychange', () => { qLast = 0; qN = 0; qSum = 0; });
-function loop(now) { adapt(now); const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
+function loop(now) { adapt(now); stepIntro(now); const t = frozen !== null ? frozen : (startAt + (now - t0) / 1000) % LOOP; draw(t); if (frozen === null) audio.update(t); if (!ready) { ready = true; window.__dioramaReady = true; } requestAnimationFrame(loop); }
 window.addEventListener('resize', resize); window.addEventListener('orientationchange', () => setTimeout(resize, 200));
 resize(); placeSnd();
 window.__audio = audio;

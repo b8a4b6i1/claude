@@ -60,6 +60,10 @@ const css = `
   #snd.muted { animation: sndhop 0.9s steps(2, end) infinite; }
   @keyframes sndhop { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
   #snd svg { width: 100%; height: 100%; display: block; }
+  #hint { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #fff; border: 3px solid #1a1816; box-shadow: 3px 3px 0 #1a1816; font: 700 12px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.06em; color: #1a1816; z-index: 4; pointer-events: none; opacity: 0; transition: opacity 0.4s steps(4, end); white-space: nowrap; }
+  #hint.on { opacity: 1; animation: hinthop 1s steps(2, end) infinite; }
+  #hint svg { width: 22px; height: 22px; }
+  @keyframes hinthop { 0% { transform: translateX(-50%); } 50% { transform: translateX(calc(-50% + 4px)); } 100% { transform: translateX(-50%); } }
   #fallback {
     position: fixed;
     inset: 0;
@@ -95,6 +99,7 @@ ${process.env.SITE_URL ? `<meta property="og:image" content="${process.env.SITE_
 <body>
 <div id="frame"><canvas id="stage" aria-label="A real-time rendered miniature hangar diorama" tabindex="-1"></canvas></div>
 <div id="sndwrap"><button id="snd" type="button" aria-label="Activar sonido" title="Sonido"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="#1a1816" d="M2 6h3V5h1V4h1V3h1v10H7v-1H6v-1H5v-1H2z"/><g id="snd-on"><path fill="#1a1816" d="M10 6h1v4h-1zM12 4h1v8h-1zM14 3h1v10h-1z"/></g><g id="snd-off"><path fill="#d93a2b" d="M10 5h1v1h-1zM11 6h1v1h-1zM12 7h1v2h-1zM13 9h1v1h-1zM14 10h1v1h-1zM14 5h1v1h-1zM13 6h1v1h-1zM11 8h1v1h-1zM10 10h1v1h-1zM10 11h1v1h-1zM14 4h1v1h-1zM10 4h1v1h-1zM14 11h1v1h-1zM10 12h1v1h-1zM14 12h1v1h-1z"/></g></svg></button></div>
+<div id="hint" aria-hidden="true"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><path fill="#1a1816" d="M6 1h2v6h1V5h2v2h1V6h2v6h-1v2H6v-1H5v-1H4V9H3V8h2V7H6z"/><path fill="#fff" d="M7 2v7H6V8H5v1h1v1h1v1h1v1h4v-1h1V8h-1V7h-1V6h-1v2H9V2z"/></svg><span>ARRASTRA · PELLIZCA</span></div>
 <div id="fallback" hidden>This diorama needs a browser with WebGL2 enabled.</div>
 ${scriptTag}
 </body>
